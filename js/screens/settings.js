@@ -53,7 +53,7 @@ export function renderSettings(container) {
         <button type="button" class="btn primary" id="do-export">${ICONS.download} Exportar</button>
         <button type="button" class="btn outline" id="do-import">${ICONS.upload} Importar</button>
       </div>
-      <input type="file" id="import-file" accept=".json,application/json" hidden>
+      <input type="file" id="import-file" accept=".json,.txt,application/json,text/plain" hidden>
       <div class="lines">
         <span>${lastBackupText()}</span>
         <span>Importar sustituye los datos que hay ahora en el móvil</span>

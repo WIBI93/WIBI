@@ -51,9 +51,12 @@ export async function exportBackup() {
   const file = new File([text], name, { type: 'application/json' });
 
   // 1) Menú de compartir del móvil (ahí aparece "Guardar en Drive").
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  // Chrome no deja compartir archivos .json, pero sí .txt. El contenido es el
+  // mismo, así que para compartir se usa la extensión .txt.
+  const shareFile = new File([text], name.replace(/\.json$/, '.txt'), { type: 'text/plain' });
+  if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
     try {
-      await navigator.share({ files: [file], title: 'Copia de seguridad de WIBI' });
+      await navigator.share({ files: [shareFile], title: 'Copia de seguridad de WIBI' });
       setSettings({ lastBackupAt: now.toISOString() });
       return 'shared';
     } catch (err) {
