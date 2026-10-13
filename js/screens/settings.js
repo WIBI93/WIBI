@@ -4,9 +4,9 @@
 import { ICONS } from '../core/icons.js';
 import { MODULES } from '../core/modules.js';
 import { getSettings, setSettings, applyTheme, sectionColor } from '../core/settings.js';
-import { exportBackup, readBackupFile, applyBackup, backupDateText, lastBackupText, downloadedMessage, APP_VERSION } from '../core/backup.js';
+import { lastBackupText, APP_VERSION } from '../core/backup.js';
+import { runExport, runImport } from '../core/backup-ui.js';
 import { navigate, back, refresh } from '../core/router.js';
-import { toast, confirmDialog } from '../core/ui.js';
 
 const THEME_OPTIONS = [
   { value: 'light', label: 'Claro' },
@@ -78,13 +78,7 @@ export function renderSettings(container) {
   const exportBtn = container.querySelector('#do-export');
   exportBtn.addEventListener('click', async () => {
     exportBtn.disabled = true;
-    try {
-      const result = await exportBackup();
-      if (result === 'shared') toast('Copia guardada');
-      if (result === 'downloaded') toast(downloadedMessage());
-    } catch {
-      toast('No se ha podido crear la copia. Inténtalo de nuevo.');
-    }
+    await runExport();
     refresh();
   });
 
@@ -93,24 +87,6 @@ export function renderSettings(container) {
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files && fileInput.files[0];
     fileInput.value = '';
-    if (!file) return;
-    let payload;
-    try {
-      payload = await readBackupFile(file);
-    } catch (err) {
-      toast(err.message);
-      return;
-    }
-    const ok = await confirmDialog({
-      title: 'Importar copia',
-      text: `Se sustituirán los datos actuales de este móvil por los de la copia del ${backupDateText(payload)}. Esto no se puede deshacer.`,
-      confirmLabel: 'Importar',
-      danger: true,
-    });
-    if (!ok) return;
-    applyBackup(payload);
-    applyTheme();
-    toast('Copia importada');
-    refresh();
+    if (await runImport(file)) refresh();
   });
 }

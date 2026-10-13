@@ -221,3 +221,11 @@ svg.icon { width: 1em; height: 1em; display: block; }
 .construction .tile-icon { font-size: 64px; line-height: 0; color: var(--c); }
 .construction .tile-icon svg { stroke-width: 1.7; }
 .construction h2 { font-size: 18px; font-weight: 800; }
+
+/* ---------- Campos dentro de diálogos ---------- */
+
+.modal .field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.modal .field input {
+  height: 48px; border: 1px solid var(--field, #8AA09A); border-radius: 12px; padding: 0 12px;
+  font: inherit; font-size: 16px; font-weight: 600; color: var(--text); background: var(--card);
+}

@@ -4,9 +4,9 @@ import { ICONS, LOGO } from '../core/icons.js';
 import { MODULES } from '../core/modules.js';
 import { sectionColor } from '../core/settings.js';
 import { readableOn } from '../core/palette.js';
-import { needsBackupReminder, exportBackup, downloadedMessage } from '../core/backup.js';
+import { needsBackupReminder } from '../core/backup.js';
+import { runExport } from '../core/backup-ui.js';
 import { navigate, refresh } from '../core/router.js';
-import { toast } from '../core/ui.js';
 
 function todayText() {
   const t = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '');
@@ -61,10 +61,7 @@ export function renderHome(container) {
   const bannerBtn = container.querySelector('#banner-backup');
   if (bannerBtn) {
     bannerBtn.addEventListener('click', async () => {
-      const result = await exportBackup();
-      if (result === 'cancelled') return;
-      toast(result === 'shared' ? 'Copia guardada' : downloadedMessage());
-      refresh();
+      if (await runExport()) refresh();
     });
   }
 }
