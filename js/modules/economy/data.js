@@ -39,7 +39,7 @@ function defaults() {
     version: 1,
     setupDone: false,
     categories: [...DEFAULT_CATS.map(([id, name, color]) => ({ id, name, color })), { id: OTROS, name: 'Otros', color: '#B9C7C1' }],
-    fixed: DEFAULT_FIXED.map(([name, cat, freq]) => ({ id: uid() + name.length + cat.length, name, cat, freq })),
+    fixed: DEFAULT_FIXED.map(([name, cat, freq], i) => ({ id: 'fx' + i, name, cat, freq })), // ids fijos: así no cambian entre lecturas
     incomeTypes: ['Sueldo', 'Otros ingresos'],
     expenses: [], incomes: [], accounts: [], movements: [], cushion: 0,
     sim: {},
