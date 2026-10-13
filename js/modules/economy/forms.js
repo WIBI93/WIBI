@@ -111,8 +111,13 @@ export function renderIncome(el, { id }) {
     d = getData();
     const mk = monthKeyOf(draft.date);
     const others = d.incomes.filter((i) => i.id !== id && i.date.startsWith(mk));
-    const now = parseMoney(draft.amount);
-    const total = sum(others, (i) => i.amount) + (Number.isFinite(now) && now > 0 ? now : 0);
+    const info = () => {
+      const now = parseMoney(el.querySelector('#amount') ? el.querySelector('#amount').value : draft.amount);
+      const total = sum(others, (i) => i.amount) + (Number.isFinite(now) && now > 0 ? now : 0);
+      return `<span class="eco-section" style="padding:0">INGRESOS DE ${esc(monthTitle(mk).toUpperCase())}</span>
+          ${others.length ? others.map((i) => `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;width:100%"><span>${esc(i.type)} · ${Number(i.date.slice(8))} ${monthTitle(mk).slice(0, 3).toLowerCase()}</span><b>${money(i.amount)}</b></div>`).join('') : '<span class="eco-note">Todavía no hay otros ingresos este mes.</span>'}
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;width:100%"><span>Con este ingreso</span><b>${money(total)}</b></div>`;
+    };
     const types = [...new Set([...d.incomeTypes, draft.type])];
     el.innerHTML = `
       <div class="eco"><div class="eco-body">
@@ -122,16 +127,14 @@ export function renderIncome(el, { id }) {
           <div class="eco-chips">${types.map((t) => `<button type="button" class="eco-chip" data-type="${esc(t)}" aria-pressed="${draft.type === t}">${esc(t)}</button>`).join('')}
             <button type="button" class="eco-chip new" id="newtype">+ Nuevo</button></div></div>
         <div class="eco-rows">${dateRow(draft.date)}${noteRow(draft.note)}</div>
-        <div class="eco-info" style="flex-direction:column;gap:8px"><span class="eco-section" style="padding:0">INGRESOS DE ${esc(monthTitle(mk).toUpperCase())}</span>
-          ${others.length ? others.map((i) => `<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;width:100%"><span>${esc(i.type)} · ${Number(i.date.slice(8))} ${monthTitle(mk).slice(0, 3).toLowerCase()}</span><b>${money(i.amount)}</b></div>`).join('') : '<span class="eco-note">Todavía no hay otros ingresos este mes.</span>'}
-          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;width:100%"><span>Con este ingreso</span><b>${money(total)}</b></div></div>
+        <div class="eco-info" id="info" style="flex-direction:column;gap:8px">${info()}</div>
         <div class="eco-foot">
           ${isNew ? '' : '<button type="button" class="eco-btn text" id="del">Eliminar ingreso</button>'}
           <button type="button" class="eco-btn" id="save">${isNew ? 'Guardar ingreso' : 'Guardar cambios'}</button></div>
       </div></div>`;
     const grab = () => { draft.amount = el.querySelector('#amount').value; draft.note = el.querySelector('#note').value; };
     el.querySelector('#go-back').addEventListener('click', () => back('/economia'));
-    el.querySelector('#amount').addEventListener('change', () => { grab(); draw(); });
+    el.querySelector('#amount').addEventListener('input', () => { el.querySelector('#info').innerHTML = info(); });
     el.querySelectorAll('[data-type]').forEach((b) => b.addEventListener('click', () => { grab(); draft.type = b.dataset.type; draw(); }));
     el.querySelector('#date').addEventListener('change', (e) => { grab(); if (e.target.value) draft.date = e.target.value; draw(); });
     el.querySelector('#newtype').addEventListener('click', async () => {

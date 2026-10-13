@@ -75,8 +75,16 @@ export function renderMediumMove(el) {
     const v = parseMoney(draft.amount);
     const val = Number.isFinite(v) ? v : 0;
     const after = draft.kind === 'contrib' ? acc.balance + val : draft.kind === 'withdraw' ? acc.balance - val : val;
-    const others = d.accounts.filter((a) => a.term === 'medio' && a.id !== acc.id).reduce((t, a) => t + a.balance, 0);
-    const totalAfter = others + after;
+    const info = () => {
+      const v2 = parseMoney(el.querySelector('#amount') ? el.querySelector('#amount').value : draft.amount);
+      const val2 = Number.isFinite(v2) ? v2 : 0;
+      const after = draft.kind === 'contrib' ? acc.balance + val2 : draft.kind === 'withdraw' ? acc.balance - val2 : val2;
+      const others = d.accounts.filter((a) => a.term === 'medio' && a.id !== acc.id).reduce((t, a) => t + a.balance, 0);
+      const totalAfter = others + after;
+      return `<div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Saldo ahora</span><b>${money(acc.balance)}</b></div>
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Saldo después</span><b>${money(after)}</b></div>
+          ${d.cushion > 0 ? `<span class="eco-note" style="font-weight:700;color:${totalAfter >= d.cushion ? 'var(--accent-text)' : 'var(--danger)'}">${totalAfter >= d.cushion ? `Colchón de ${moneyAuto(d.cushion)} cubierto` : `Por debajo de tu colchón de ${moneyAuto(d.cushion)}`}</span>` : ''}`;
+    };
     el.innerHTML = `
       <div class="eco"><div class="eco-body">
         <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow"><span class="eco-sub">Ahorro</span><span class="eco-h1">Medio plazo</span></div></header>
@@ -85,14 +93,11 @@ export function renderMediumMove(el) {
         ${accs.length > 1 ? `<div class="eco-chips">${accs.map((a) => `<button type="button" class="eco-chip" data-acc="${a.id}" aria-pressed="${draft.accId === a.id}">${esc(a.name)}</button>`).join('')}</div>` : ''}
         ${amountCard(draft.kind === 'adjust' ? 'Saldo que ves en tu banco' : 'Importe', draft.amount)}
         <div class="eco-rows">${dateRow(draft.date)}${noteRow(draft.note)}</div>
-        <div class="eco-info" style="flex-direction:column;gap:6px;width:100%">
-          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Saldo ahora</span><b>${money(acc.balance)}</b></div>
-          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Saldo después</span><b>${money(after)}</b></div>
-          ${d.cushion > 0 ? `<span class="eco-note" style="font-weight:700;color:${totalAfter >= d.cushion ? 'var(--accent-text)' : 'var(--danger)'}">${totalAfter >= d.cushion ? `Colchón de ${moneyAuto(d.cushion)} cubierto` : `Por debajo de tu colchón de ${moneyAuto(d.cushion)}`}</span>` : ''}</div>
+        <div class="eco-info" id="info" style="flex-direction:column;gap:6px;width:100%">${info()}</div>
         <div class="eco-foot"><button type="button" class="eco-btn" id="save">Guardar ${draft.kind === 'contrib' ? 'aportación' : draft.kind === 'withdraw' ? 'retirada' : 'ajuste'}</button></div>
       </div></div>`;
     const grab = () => { draft.amount = el.querySelector('#amount').value; draft.note = el.querySelector('#note').value; };
-    el.querySelector('#amount').addEventListener('change', () => { grab(); draw(); });
+    el.querySelector('#amount').addEventListener('input', () => { el.querySelector('#info').innerHTML = info(); });
     el.querySelector('#go-back').addEventListener('click', () => back('/economia/ahorro'));
     el.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => { grab(); draft.kind = b.dataset.kind; draw(); }));
     el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => { grab(); draft.accId = b.dataset.acc; draw(); }));
@@ -119,9 +124,16 @@ export function renderLongMove(el) {
     const acc = d.accounts.find((a) => a.id === draft.accId);
     const v = parseMoney(draft.amount);
     const val = Number.isFinite(v) ? v : 0;
-    const newBal = draft.kind === 'value' ? val : acc.balance + val;
-    const newContrib = draft.kind === 'value' ? acc.contributed : acc.contributed + val;
-    const gain = newBal - newContrib;
+    const info = () => {
+      const v2 = parseMoney(el.querySelector('#amount') ? el.querySelector('#amount').value : draft.amount);
+      const val2 = Number.isFinite(v2) ? v2 : 0;
+      const newBal = draft.kind === 'value' ? val2 : acc.balance + val2;
+      const newContrib = draft.kind === 'value' ? acc.contributed : acc.contributed + val2;
+      const gain = newBal - newContrib;
+      return `<div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Aportado</span><b>${money(newContrib)}</b></div>
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Vale hoy</span><b>${money(newBal)}</b></div>
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Rentabilidad</span><b>${gain >= 0 ? '+' : '−'}${money(Math.abs(gain))}${newContrib > 0 ? ` · ${gain >= 0 ? '+' : '−'}${pct(Math.abs(gain / newContrib) * 100, 1)}` : ''}</b></div>`;
+    };
     el.innerHTML = `
       <div class="eco"><div class="eco-body">
         <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow"><span class="eco-sub">Ahorro</span><span class="eco-h1">Largo plazo</span></div></header>
@@ -130,14 +142,11 @@ export function renderLongMove(el) {
         ${amountCard(draft.kind === 'value' ? 'Valor actual' : 'Importe', draft.amount)}
         ${draft.kind === 'value' ? '<span class="eco-note" style="padding:0 4px">Pon el valor que ves en tu banco o bróker. La app guarda por separado lo que has aportado y lo que vale hoy, y la diferencia es tu rentabilidad.</span>' : ''}
         <div class="eco-rows">${dateRow(draft.date)}</div>
-        <div class="eco-info" style="flex-direction:column;gap:6px;width:100%">
-          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Aportado</span><b>${money(newContrib)}</b></div>
-          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Vale hoy</span><b>${money(newBal)}</b></div>
-          <div style="display:flex;justify-content:space-between;width:100%;font-size:14px;font-weight:600"><span>Rentabilidad</span><b>${gain >= 0 ? '+' : '−'}${money(Math.abs(gain))}${newContrib > 0 ? ` · ${gain >= 0 ? '+' : '−'}${pct(Math.abs(gain / newContrib) * 100, 1)}` : ''}</b></div></div>
+        <div class="eco-info" id="info" style="flex-direction:column;gap:6px;width:100%">${info()}</div>
         <div class="eco-foot"><button type="button" class="eco-btn" id="save">${draft.kind === 'value' ? 'Guardar valor' : 'Guardar aportación'}</button></div>
       </div></div>`;
     const grab = () => { draft.amount = el.querySelector('#amount').value; };
-    el.querySelector('#amount').addEventListener('change', () => { grab(); draw(); });
+    el.querySelector('#amount').addEventListener('input', () => { el.querySelector('#info').innerHTML = info(); });
     el.querySelector('#go-back').addEventListener('click', () => back('/economia/ahorro'));
     el.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => { grab(); draft.kind = b.dataset.kind; draw(); }));
     el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => { grab(); draft.accId = b.dataset.acc; draw(); }));
