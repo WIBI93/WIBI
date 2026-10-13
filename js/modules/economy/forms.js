@@ -47,7 +47,7 @@ export function renderExpense(el, { id }) {
   let d = getData();
   const ex = d.expenses.find((e) => e.id === id);
   if (!isNew && !ex) { back('/economia/gastos'); return; }
-  const fixed = ex && ex.fixedId ? d.fixed.find((f) => f.id === ex.fixedId) : null;
+  const fixed = ex && (ex.fixedId || ex.fixedName) ? { name: (d.fixed.find((f) => f.id === ex.fixedId) || {}).name || ex.fixedName } : null;
   const draft = ex ? { amount: toInput(ex.amount), cat: ex.cat, date: ex.date, note: ex.note } : { amount: '', cat: '', date: dateKey(), note: '' };
 
   const draw = () => {
@@ -83,7 +83,7 @@ export function renderExpense(el, { id }) {
       if (!Number.isFinite(amount)) return toast('Escribe un importe mayor que 0');
       if (!draft.cat) return toast('Elige una categoría');
       update((data) => {
-        if (isNew) data.expenses.push({ id: uid(), date: draft.date, amount, cat: draft.cat, note: draft.note.trim(), fixedId: null });
+        if (isNew) data.expenses.push({ id: uid(), date: draft.date, amount, cat: draft.cat, note: draft.note.trim(), fixedId: null, fixedName: '' });
         else { const e = data.expenses.find((x) => x.id === id); if (e) Object.assign(e, { date: draft.date, amount, cat: draft.cat, note: draft.note.trim() }); }
       });
       back('/economia');

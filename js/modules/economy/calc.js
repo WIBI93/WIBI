@@ -1,6 +1,6 @@
 // Cálculos de economía: resúmenes del mes, totales de ahorro, proyecciones e hipoteca.
 
-import { OTROS, catOf } from './data.js';
+import { OTROS, catOf, isFixedExp } from './data.js';
 
 export const sum = (list, f = (x) => x) => Math.round(list.reduce((t, x) => t + f(x), 0) * 100) / 100;
 export const inMonth = (item, mk) => item.date.startsWith(mk);
@@ -14,7 +14,7 @@ export function monthSummary(d, mk) {
   movs.filter((m) => m.kind === 'contrib').forEach((m) => { const t = termOf(m); if (t) contrib[t] += m.amount; });
   const income = sum(incs, (e) => e.amount);
   const spent = sum(exps, (e) => e.amount);
-  const fixedSum = sum(exps.filter((e) => e.fixedId), (e) => e.amount);
+  const fixedSum = sum(exps.filter(isFixedExp), (e) => e.amount);
   const byCat = {};
   exps.forEach((e) => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
   return {

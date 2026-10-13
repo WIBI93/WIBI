@@ -14,8 +14,9 @@ export const ACCOUNT_TYPES = { remunerada: 'Cuenta remunerada', fondo: 'Fondo', 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 const DEFAULT_CATS = [
-  ['vivienda', 'Vivienda'], ['coche', 'Coche'], ['supermercado', 'Supermercado'], ['ocio', 'Ocio'], ['ropa', 'Ropa'],
-  ['otras-compras', 'Otras compras'], ['seguros', 'Seguros'], ['suscripciones', 'Suscripciones'], ['salud', 'Salud'], ['viajes', 'Viajes'],
+  ['vivienda', 'Vivienda', '#17594A'], ['coche', 'Coche', '#2F5D78'], ['supermercado', 'Supermercado', '#7A6AA8'], ['ocio', 'Ocio', '#C76B8A'],
+  ['ropa', 'Ropa', '#E0A33A'], ['otras-compras', 'Otras compras', '#4A9DB5'], ['seguros', 'Seguros', '#3F5650'],
+  ['suscripciones', 'Suscripciones', '#9A5A45'], ['salud', 'Salud', '#8A6A1F'], ['viajes', 'Viajes', '#5E557F'],
 ];
 const DEFAULT_FIXED = [
   ['Alquiler', 'vivienda', 'monthly'], ['Agua', 'vivienda', 'monthly'], ['Luz', 'vivienda', 'monthly'], ['Gas', 'vivienda', 'monthly'],
@@ -37,7 +38,7 @@ function defaults() {
   return {
     version: 1,
     setupDone: false,
-    categories: [...DEFAULT_CATS.map(([id, name], i) => ({ id, name, color: CAT_COLORS[i % CAT_COLORS.length] })), { id: OTROS, name: 'Otros', color: '#B9C7C1' }],
+    categories: [...DEFAULT_CATS.map(([id, name, color]) => ({ id, name, color })), { id: OTROS, name: 'Otros', color: '#B9C7C1' }],
     fixed: DEFAULT_FIXED.map(([name, cat, freq]) => ({ id: uid() + name.length + cat.length, name, cat, freq })),
     incomeTypes: ['Sueldo', 'Otros ingresos'],
     expenses: [], incomes: [], accounts: [], movements: [], cushion: 0,
@@ -46,8 +47,10 @@ function defaults() {
 }
 
 export function normalize(raw) {
-  const r = raw && typeof raw === 'object' ? raw : null;
-  if (!r) return defaults();
+  if (!raw || typeof raw !== 'object') return defaults();
+  const base = defaults();
+  // Si en lo guardado faltan las categorías o los fijos (nunca se tocaron), se usan los de ejemplo.
+  const r = { ...raw, categories: raw.categories === undefined ? base.categories : raw.categories, fixed: raw.fixed === undefined ? base.fixed : raw.fixed };
   const seen = new Set();
   let categories = arr(r.categories).map((c) => {
     if (!c || typeof c !== 'object') return null;
@@ -73,7 +76,7 @@ export function normalize(raw) {
   const expenses = arr(r.expenses).map((e) => {
     const id = e && uniq(e.id);
     if (!id || !DATE_RE.test(e.date)) return null;
-    return { id, date: e.date, amount: pos(e.amount), cat: catId(e.cat), note: str(e.note, 80), fixedId: fixedIds.has(e.fixedId) ? e.fixedId : null };
+    return { id, date: e.date, amount: pos(e.amount), cat: catId(e.cat), note: str(e.note, 80), fixedId: fixedIds.has(e.fixedId) ? e.fixedId : null, fixedName: str(e.fixedName, 40) };
   }).filter(Boolean);
 
   const incomes = arr(r.incomes).map((e) => {
@@ -121,6 +124,14 @@ export function update(fn) {
   fn(d);
   saveData(d);
   return d;
+}
+// ¿Es un gasto fijo? (aunque el fijo ya se haya quitado de la lista)
+export const isFixedExp = (e) => !!(e.fixedId || e.fixedName);
+export function removeFixed(d, id) {
+  const f = d.fixed.find((x) => x.id === id);
+  if (!f) return;
+  d.expenses.forEach((e) => { if (e.fixedId === id) { e.fixedName = f.name; e.fixedId = null; } });
+  d.fixed = d.fixed.filter((x) => x.id !== id);
 }
 export const catOf = (d, id) => d.categories.find((c) => c.id === id) || d.categories.find((c) => c.id === OTROS);
 

@@ -16,9 +16,10 @@
 .eco-head { display: flex; align-items: center; gap: 10px; min-height: 44px; }
 .eco-head .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .eco-sub { font-size: 12px; font-weight: 600; color: var(--muted); }
-.eco-h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.15; }
+.eco-h1 { white-space: nowrap; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.15; }
 .eco-round { width: 44px; height: 44px; border-radius: 22px; background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center; flex: none; }
-.eco-round.ghost { background: transparent; color: var(--muted); }
+.eco-round.ghost { background: transparent; color: var(--muted); width: 36px; }
+.eco-head { gap: 6px; }
 .eco-round:disabled { opacity: 0.35; }
 .eco-pill-btn { height: 44px; padding: 0 18px; border-radius: 22px; background: var(--card); color: var(--accent-text); font-size: 14px; font-weight: 800; flex: none; }
 .ei { display: block; flex: none; }
