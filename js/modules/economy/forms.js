@@ -28,15 +28,15 @@ export function renderChoose(el) {
   el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
 }
 
-const amountCard = (label, value, green = false) =>
+export const amountCard = (label, value, green = false) =>
   `<div class="eco-amount"><label for="amount">${label}</label><div class="line"><input id="amount" inputmode="decimal" autocomplete="off" value="${esc(value)}" placeholder="0" class="${green ? 'green' : ''}"><span class="eur">€</span></div></div>`;
 
-const dateRow = (date) =>
+export const dateRow = (date) =>
   `<label class="eco-formrow">${ei('cal', 22)}<span class="l">${dayLabel(date)}</span><span class="r">Cambiar</span><input type="date" id="date" value="${date}" aria-label="Cambiar la fecha"></label>`;
-const noteRow = (note) =>
+export const noteRow = (note) =>
   `<div class="eco-formrow">${ei('chat', 22)}<input type="text" id="note" maxlength="80" aria-label="Nota (opcional)" placeholder="Nota (opcional)" value="${esc(note)}"></div>`;
 
-function readAmount(el) {
+export function readAmount(el) {
   const v = parseMoney(el.querySelector('#amount').value);
   return Number.isFinite(v) && v > 0 ? v : NaN;
 }
