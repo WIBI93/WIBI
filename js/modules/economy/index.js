@@ -1,9 +1,12 @@
-// Sección W economy. Aquí irá todo lo de gastos, ahorro y simuladores.
-// Sus datos se guardarán bajo la clave "economy" (ver js/core/store.js).
+// W economy: registra todas las pantallas de la sección.
 
-import { MODULES } from '../../core/modules.js';
-import { renderUnderConstruction } from '../../screens/placeholder.js';
+import { renderSummary } from './summary.js';
+import { renderChoose, renderExpense, renderIncome } from './forms.js';
 
-export function render(container) {
-  renderUnderConstruction(container, MODULES.find((m) => m.id === 'economy'));
+export function registerEconomy(route) {
+  const o = { full: true };
+  route('/economia', renderSummary, o);
+  route('/economia/anadir', renderChoose, o);
+  route('/economia/gasto/:id', renderExpense, o);
+  route('/economia/ingreso/:id', renderIncome, o);
 }

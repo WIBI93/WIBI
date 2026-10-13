@@ -8,6 +8,7 @@ let container = null;
 const split = (p) => p.split('/').filter(Boolean);
 
 // opts.cal = true -> la pantalla usa el aspecto propio del calendario.
+// opts.full = true -> la pantalla ocupa todo el ancho (barra inferior propia).
 export function route(path, render, opts = {}) {
   routes.push({ parts: split(path), render, opts });
 }
@@ -61,7 +62,7 @@ function show() {
   const hit = find(currentPath()) || find('/');
   const cal = !!hit.r.opts.cal;
   document.documentElement.classList.toggle('in-cal', cal);
-  container.classList.toggle('full', cal);
+  container.classList.toggle('full', cal || !!hit.r.opts.full);
   container.innerHTML = '';
   hit.r.render(container, hit.params);
   window.scrollTo(0, 0);
