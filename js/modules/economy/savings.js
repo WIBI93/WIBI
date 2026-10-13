@@ -40,6 +40,8 @@ export function renderSavings(el) {
           <button type="button" class="eco-chip" id="move" style="flex:1;background:var(--primary);color:#fff">+ Movimiento</button></div>
         <button type="button" class="eco-chip" id="proj" style="width:100%">Proyección</button></div>
 
+      <button type="button" class="eco-dashbtn" id="sim">Simular inversiones e hipoteca</button>
+
       <div class="eco-card pad"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3>Largo plazo</h3><span class="v">${money(tot.largo)}</span></div>
         ${largo.length ? `<div>${largo.map((a) => accRow(a, `Aportado ${moneyAuto(a.contributed)} · ${rentab(a) >= 0 ? '+' : '−'}${pct(Math.abs(rentab(a)), 1)}`)).join('')}</div>`
           : '<span class="eco-note">Aún no tienes inversiones a largo plazo (plan de pensiones, fondos…).</span>'}
@@ -50,6 +52,7 @@ export function renderSavings(el) {
   el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => navigate('/economia/ahorro/cuenta/' + b.dataset.acc)));
   el.querySelector('#move').addEventListener('click', () => (medio.length ? navigate('/economia/ahorro/medio') : toast('Primero añade una cuenta de medio plazo')));
   el.querySelector('#long').addEventListener('click', () => (largo.length ? navigate('/economia/ahorro/largo') : toast('Primero añade una cuenta de largo plazo')));
+  el.querySelector('#sim').addEventListener('click', () => navigate('/economia/simular'));
   el.querySelector('#proj').addEventListener('click', () => (medio.length ? navigate('/economia/ahorro/proyeccion') : toast('Primero añade una cuenta de medio plazo')));
   el.querySelector('#cushion').addEventListener('click', async () => {
     const r = await formDialog({ title: 'Colchón', confirmLabel: 'Guardar', fields: [{ key: 'v', label: 'Dinero de medio plazo que no piensas tocar (€)', value: toInput(d.cushion), placeholder: '0' }] });
