@@ -4,7 +4,7 @@ import { ICONS, LOGO } from '../core/icons.js';
 import { MODULES } from '../core/modules.js';
 import { sectionColor } from '../core/settings.js';
 import { readableOn } from '../core/palette.js';
-import { needsBackupReminder, exportBackup } from '../core/backup.js';
+import { needsBackupReminder, exportBackup, downloadedMessage } from '../core/backup.js';
 import { navigate, refresh } from '../core/router.js';
 import { toast } from '../core/ui.js';
 
@@ -63,7 +63,7 @@ export function renderHome(container) {
     bannerBtn.addEventListener('click', async () => {
       const result = await exportBackup();
       if (result === 'cancelled') return;
-      toast(result === 'shared' ? 'Copia guardada' : 'Copia descargada. Súbela a tu Drive para tenerla a salvo.');
+      toast(result === 'shared' ? 'Copia guardada' : downloadedMessage());
       refresh();
     });
   }

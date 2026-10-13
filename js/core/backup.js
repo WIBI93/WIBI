@@ -6,7 +6,7 @@
 import { exportAll, replaceAll, hasSectionData } from './store.js';
 import { getSettings, setSettings } from './settings.js';
 
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.1.1';
 const FORMAT = 1; // sube si algún día cambia la forma del archivo
 const REMINDER_DAYS = 30;
 
@@ -39,6 +39,15 @@ export function lastBackupText() {
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
+// Si el menú de compartir no se puede abrir, aquí queda el motivo (por ejemplo
+// "archivo-no-admitido"). Se enseña en el aviso para poder saber qué pasa en cada móvil.
+let shareProblem = null;
+
+export function downloadedMessage() {
+  const base = 'Copia descargada en tu móvil. Súbela a tu Drive para tenerla a salvo.';
+  return shareProblem ? `${base} (Compartir no disponible: ${shareProblem})` : base;
+}
+
 // Devuelve 'shared', 'downloaded' o 'cancelled'.
 export async function exportBackup() {
   const now = new Date();
@@ -54,14 +63,20 @@ export async function exportBackup() {
   // Chrome no deja compartir archivos .json, pero sí .txt. El contenido es el
   // mismo, así que para compartir se usa la extensión .txt.
   const shareFile = new File([text], name.replace(/\.json$/, '.txt'), { type: 'text/plain' });
-  if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+  shareProblem = null;
+  if (!navigator.share || !navigator.canShare) {
+    shareProblem = 'sin-compartir';
+  } else if (!navigator.canShare({ files: [shareFile] })) {
+    shareProblem = 'archivo-no-admitido';
+  } else {
     try {
       await navigator.share({ files: [shareFile], title: 'Copia de seguridad de WIBI' });
       setSettings({ lastBackupAt: now.toISOString() });
       return 'shared';
     } catch (err) {
       if (err && err.name === 'AbortError') return 'cancelled';
-      // Si falla por otra causa, se descarga el archivo.
+      // Si falla por otra causa, se descarga el archivo y se apunta el motivo.
+      shareProblem = (err && err.name) || 'error';
     }
   }
 

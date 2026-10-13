@@ -4,7 +4,7 @@
 import { ICONS } from '../core/icons.js';
 import { MODULES } from '../core/modules.js';
 import { getSettings, setSettings, applyTheme, sectionColor } from '../core/settings.js';
-import { exportBackup, readBackupFile, applyBackup, backupDateText, lastBackupText, APP_VERSION } from '../core/backup.js';
+import { exportBackup, readBackupFile, applyBackup, backupDateText, lastBackupText, downloadedMessage, APP_VERSION } from '../core/backup.js';
 import { navigate, back, refresh } from '../core/router.js';
 import { toast, confirmDialog } from '../core/ui.js';
 
@@ -81,7 +81,7 @@ export function renderSettings(container) {
     try {
       const result = await exportBackup();
       if (result === 'shared') toast('Copia guardada');
-      if (result === 'downloaded') toast('Copia descargada en tu móvil. Súbela a tu Drive para tenerla a salvo.');
+      if (result === 'downloaded') toast(downloadedMessage());
     } catch {
       toast('No se ha podido crear la copia. Inténtalo de nuevo.');
     }
