@@ -6,7 +6,7 @@ import { renderHome } from './screens/home.js';
 import { renderSettings } from './screens/settings.js';
 import { renderColors } from './screens/colors.js';
 import { render as renderEconomy } from './modules/economy/index.js';
-import { render as renderCalendar } from './modules/calendar/index.js';
+import { registerCalendar } from './modules/calendar/index.js';
 
 ensureInstalledAt();
 applyTheme();
@@ -15,7 +15,7 @@ route('/', renderHome);
 route('/ajustes', renderSettings);
 route('/ajustes/colores', renderColors);
 route('/economia', renderEconomy);
-route('/calendario', renderCalendar);
+registerCalendar(route);
 
 start(document.getElementById('app'));
 

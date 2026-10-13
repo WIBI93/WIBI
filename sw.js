@@ -2,13 +2,14 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v2';
+const CACHE = 'wibi-v3';
 
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
   'css/styles.css',
+  'css/calendar.css',
   'js/main.js',
   'js/core/icons.js',
   'js/core/palette.js',
@@ -18,12 +19,26 @@ const ASSETS = [
   'js/core/router.js',
   'js/core/ui.js',
   'js/core/backup.js',
+  'js/core/backup-ui.js',
   'js/screens/home.js',
   'js/screens/settings.js',
   'js/screens/colors.js',
   'js/screens/placeholder.js',
   'js/modules/economy/index.js',
   'js/modules/calendar/index.js',
+  'js/modules/calendar/calc.js',
+  'js/modules/calendar/data.js',
+  'js/modules/calendar/state.js',
+  'js/modules/calendar/shell.js',
+  'js/modules/calendar/month.js',
+  'js/modules/calendar/brush.js',
+  'js/modules/calendar/day.js',
+  'js/modules/calendar/summary.js',
+  'js/modules/calendar/shifts.js',
+  'js/modules/calendar/zones.js',
+  'js/modules/calendar/settings.js',
+  'js/modules/calendar/holidays.js',
+  'js/modules/calendar/newcal.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
