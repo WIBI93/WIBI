@@ -50,7 +50,13 @@ export function renderZoneEdit(el, { id }) {
   const input = el.querySelector('#name');
   el.querySelector('#save').addEventListener('click', () => {
     if (isNew) {
-      const names = [...new Set(input.value.split(',').map((s) => s.trim().slice(0, 30)).filter(Boolean))].filter((n) => !taken(n, null));
+      const seen = new Set();
+      const names = input.value.split(',').map((s) => s.trim().slice(0, 30)).filter((n) => {
+        const k = n.toLowerCase();
+        if (!n || seen.has(k) || taken(n, null)) return false;
+        seen.add(k);
+        return true;
+      });
       if (!names.length) return toast('Escribe al menos un nombre nuevo');
       update((d, c) => names.forEach((name) => c.zones.push({ id: uid(), name })));
     } else {

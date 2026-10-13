@@ -18,7 +18,7 @@ export function cellParts(cal, holidays, key, shMap, { notes = true } = {}) {
   const chips = (fest ? `<span class="cal-chip" role="img" aria-label="Festivo">${flagIco()}</span>` : '') +
     (swap && notes ? `<span class="cal-chip" role="img" aria-label="Cambio de turno">${swapIco()}</span>` : '');
   const d = Number(key.slice(8));
-  const html = `<span class="top"><span class="dn">${d}</span><span class="code">${sh ? esc(sh.letter) : ''}</span></span>` +
+  const html = `<span class="tp"><span class="dn">${d}</span><span class="code">${sh ? esc(sh.letter) : ''}</span></span>` +
     (chips ? `<span class="chips">${chips}</span>` : '') +
     (notes && day && day.note ? `<span class="txt">${esc(day.note)}</span>` : '');
   const label = `${WEEKDAYS[weekdayOf(key)]} ${d}: ${sh ? sh.name : 'sin turno'}${fest ? ', festivo' : ''}${swap ? ', cambio de turno' : ''}`;
