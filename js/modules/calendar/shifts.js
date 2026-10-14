@@ -3,7 +3,7 @@
 import { navigate, back, go } from '../../core/router.js';
 import { readableOn } from '../../core/palette.js';
 import { esc, confirmDialog, toast } from '../../core/ui.js';
-import { getData, activeCal, update, uid, countDaysWith, removeShift, SHIFT_COLORS } from './data.js';
+import { getData, activeCal, update, uid, countDaysWith, removeShift, MY_COLORS } from './data.js';
 import { INK, shiftDescription, shiftHours, fmtHours, endsNextDay } from './calc.js';
 import { ico, navHtml, bindGo } from './shell.js';
 
@@ -49,10 +49,10 @@ export function renderShiftEdit(el, { id }) {
   };
 
   const draw = () => {
-    const isPreset = SHIFT_COLORS.some(([, hex]) => hex.toUpperCase() === draft.color.toUpperCase());
-    const colors = SHIFT_COLORS.map(([name, hex]) => {
+    const mine = getData().myColors;
+    const colors = mine.map((hex) => {
       const sel = hex.toUpperCase() === draft.color.toUpperCase();
-      return `<button type="button" class="cal-color" data-color="${hex}" aria-label="${name}" aria-pressed="${sel}" style="background:${hex};color:${readableOn(hex, INK)}">${sel ? ico('check', 18, 3) : ''}</button>`;
+      return `<button type="button" class="cal-color" data-color="${hex}" aria-label="Color guardado ${hex}" aria-pressed="${sel}" style="background:${hex};color:${readableOn(hex, INK)}">${sel ? ico('check', 18, 3) : ''}</button>`;
     }).join('');
     el.innerHTML = `
       <div class="cal">
@@ -71,7 +71,7 @@ export function renderShiftEdit(el, { id }) {
             <label class="cal-field"><span>Hora de fin</span><input class="cal-input" id="end" type="time" value="${draft.end}"></label>
           </div>` : ''}
           <div class="cal-info"><span>Duración (sale sola)</span><b id="dur">${duration()}</b></div>
-          <div class="cal-field"><span>Color</span><div class="cal-colors">${colors}</div></div>
+          <div class="cal-field"><span>Mis colores</span><div class="cal-colors">${colors}</div><span class="cal-note">Al crear un color personalizado se guarda aquí, y el más antiguo se sustituye.</span></div>
           <label class="cal-colorpick" for="custom">Color personalizado<input id="custom" type="color" value="${draft.color.toLowerCase()}"></label>
         </main>
         <div class="cal-foot"><button type="button" class="cal-btn" id="save">Guardar turno</button>
@@ -88,7 +88,9 @@ export function renderShiftEdit(el, { id }) {
     el.querySelector('#go-back').addEventListener('click', () => back('/calendario/turnos'));
     el.querySelectorAll('[data-color]').forEach((b) => b.addEventListener('click', () => { grab(); draft.color = b.dataset.color; draw(); }));
     el.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => { grab(); draft.kind = b.dataset.kind; draw(); }));
-    el.querySelector('#custom').addEventListener('change', (e) => { grab(); draft.color = e.target.value.toUpperCase(); draw(); });
+    el.querySelector('#custom').addEventListener('change', (e) => { grab(); draft.color = e.target.value.toUpperCase();
+      update((d) => { if (!d.myColors.includes(draft.color)) d.myColors = [draft.color, ...d.myColors].slice(0, MY_COLORS); });
+      draw(); });
     ['#start', '#end'].forEach((q) => { const i = el.querySelector(q); if (i) i.addEventListener('input', () => { grab(); el.querySelector('#dur').textContent = duration(); }); });
 
     el.querySelector('#save').addEventListener('click', () => {

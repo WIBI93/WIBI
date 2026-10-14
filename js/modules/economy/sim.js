@@ -1,11 +1,11 @@
 // Simuladores: interés compuesto e hipoteca. Los números son estimaciones; no se guardan en el historial.
 
-import { back } from '../../core/router.js';
+import { go } from '../../core/router.js';
 import { esc } from '../../core/ui.js';
 import { getData, update } from './data.js';
 import { money, moneyAuto, pct, parseMoney } from './fmt.js';
 import { growth, mortgage } from './calc.js';
-import { round, ei } from './shell.js';
+import { round, ei, navHtml, bindNav } from './shell.js';
 
 let tab = 'interes';
 
@@ -72,8 +72,9 @@ export function renderSim(el) {
         <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow"><span class="eco-sub">Economía</span><span class="eco-h1">Simular</span></div></header>
         <div class="eco-seg" role="group"><button type="button" data-t="interes" aria-pressed="${tab === 'interes'}">Interés compuesto</button><button type="button" data-t="hipoteca" aria-pressed="${tab === 'hipoteca'}">Hipoteca</button></div>
         <div id="sim">${tab === 'interes' ? interestHtml(s) : mortgageHtml(s)}</div>
-      </div></div>`;
-    el.querySelector('#go-back').addEventListener('click', () => back('/economia'));
+      </div>${navHtml('simular')}</div>`;
+    bindNav(el);
+    el.querySelector('#go-back').addEventListener('click', () => go('/economia'));
     el.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.t; draw(); }));
     // Al escribir, solo se rehace el resultado para no perder el teclado.
     const keys = tab === 'interes' ? { monthly: 'monthly', years: 'years', start: 'start', r1: 'r1', r2: 'r2', r3: 'r3' } : { price: 'price', down: 'down', costs: 'costs', mYears: 'mYears', tin: 'tin' };

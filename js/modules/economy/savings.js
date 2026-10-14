@@ -25,7 +25,7 @@ export function renderSavings(el) {
   el.innerHTML = `
     <div class="eco"><div class="eco-body">
       <header class="eco-head"><div class="grow"><span class="eco-sub">Economía</span><span class="eco-h1">Ahorro</span></div>
-        <button type="button" class="eco-pill-btn" id="newacc">${ei('plus', 16, 2.4)} Cuenta</button></header>
+        <button type="button" class="eco-pill-btn" id="newacc">${ei('plus', 16, 2.4)}<span>Cuenta</span></button></header>
       <div class="eco-hero"><span class="k">Ahorro total</span><span class="big">${money(tot.total)}</span>
         <div class="foot"><span>Medio plazo ${moneyAuto(tot.medio)}</span><span>Largo plazo ${moneyAuto(tot.largo)}</span></div></div>
       ${d.cushion > 0 && tot.medio < d.cushion ? `<div class="eco-info warn">${ei('info', 18)}<span>El saldo de medio plazo está por debajo de tu colchón de ${money(d.cushion)}.</span></div>` : ''}

@@ -98,6 +98,18 @@ export function renderMonth(el) {
   el.querySelector('#pill').addEventListener('click', (e) => openSelector(e.currentTarget, d));
   el.querySelector('#prev').addEventListener('click', () => { shiftMonth(-1); refresh(); });
   el.querySelector('#next').addEventListener('click', () => { shiftMonth(1); refresh(); });
+  // Deslizar el dedo a izquierda o derecha cambia de mes.
+  const main = el.querySelector('.cal-main');
+  let sx = 0, sy = 0, tracking = false;
+  main.addEventListener('touchstart', (e) => { const t0 = e.touches[0]; sx = t0.clientX; sy = t0.clientY; tracking = e.touches.length === 1; }, { passive: true });
+  main.addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const t1 = e.changedTouches[0], dx = t1.clientX - sx, dy = t1.clientY - sy;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    shiftMonth(dx < 0 ? 1 : -1);
+    refresh();
+  }, { passive: true });
   const t = el.querySelector('#today');
   if (t) t.addEventListener('click', () => { toToday(); refresh(); });
   el.querySelector('#brush').addEventListener('click', () => navigate('/calendario/pincel'));

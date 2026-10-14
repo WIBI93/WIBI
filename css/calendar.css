@@ -68,7 +68,8 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 }
 .cal-cell.blank { background: transparent; box-shadow: none; }
 .cal-cell.painted { box-shadow: none; }
-.cal-cell.today { box-shadow: 0 0 0 2px var(--text); }
+.cal-cell.today { box-shadow: 0 0 0 2.5px #E5383B; }
+.cal-cell.today .dn { background: #E5383B; color: #fff; border-radius: 9px; padding: 3px 6px; margin: -3px 0 0 -3px; }
 .cal-cell .tp { display: flex; justify-content: space-between; align-items: flex-start; line-height: 1; }
 .cal-cell .dn { font-size: 13px; font-weight: 700; }
 .cal-cell .code { font-size: 14px; font-weight: 800; }
