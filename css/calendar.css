@@ -71,9 +71,9 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 }
 .cal-cell.blank { background: transparent; box-shadow: none; }
 .cal-cell.painted { box-shadow: none; }
-:root { --frame: #14202B; }
-:root[data-theme="dark"] { --frame: #E8EEF3; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --frame: #E8EEF3; } }
+:root { --frame: #8B98A4; }
+:root[data-theme="dark"] { --frame: #9AA9B6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --frame: #9AA9B6; } }
 .cal-cell.today { outline: 2.5px solid #E5383B; outline-offset: -2.5px; z-index: 1; }
 .cal-cell.today .dn { background: #E5383B; color: #fff; border-radius: 8px; padding: 2px 4px; margin: -2px 0 0 -2px; }
 /* Vista del mes: casillas pegadas y más altas */
@@ -83,12 +83,13 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-grid.month .cal-cell.today { box-shadow: none; }
 .cal-grid.month .cal-cell .txt { flex: 0 1 auto; border-radius: 4px; padding: 2px 3px; align-self: stretch; }
 .cal-week.month { gap: 0; padding: 0; margin: 0 6px; }
-.cal-cell .tp { display: flex; justify-content: space-between; align-items: flex-start; line-height: 1; }
+.cal-cell .tp { display: flex; justify-content: space-between; align-items: flex-start; line-height: 1; gap: 2px; }
+.cal-cell .tp .chips { gap: 2px; margin-top: -1px; }
 .cal-cell .dn { font-size: 13px; font-weight: 700; }
 .cal-cell .code { font-size: 14px; font-weight: 800; }
 .cal-cell .chips { display: flex; gap: 3px; }
 .cal-cell .txt { flex: 1 1 0; min-height: 0; font-size: 10px; font-weight: 500; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
-.cal-chip { width: 14px; height: 14px; border-radius: 4px; background: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(20, 32, 43, 0.25); display: flex; align-items: center; justify-content: center; }
+.cal-chip { width: 12px; height: 12px; border-radius: 3px; background: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(20, 32, 43, 0.25); display: flex; align-items: center; justify-content: center; }
 .cal-grid.brush { gap: 6px; padding: 0 16px; touch-action: none; user-select: none; -webkit-user-select: none; }
 .cal-grid.brush .cal-cell { height: 58px; padding: 6px 6px 4px; cursor: pointer; background: transparent; }
 .cal-grid.brush .cal-cell.painted { background: unset; }

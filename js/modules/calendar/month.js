@@ -21,8 +21,8 @@ export function softColor(hex) {
     h = mx === r ? ((g - b) / dd + (g < b ? 6 : 0)) : mx === g ? (b - r) / dd + 2 : (r - g) / dd + 4;
     h /= 6;
   }
-  s *= 0.78;
-  const l2 = l + (1 - l) * 0.3;
+  s *= 0.89;
+  const l2 = l + (1 - l) * 0.15;
   const f = (p0, q0, tt) => { if (tt < 0) tt += 1; if (tt > 1) tt -= 1; return tt < 1 / 6 ? p0 + (q0 - p0) * 6 * tt : tt < 1 / 2 ? q0 : tt < 2 / 3 ? p0 + (q0 - p0) * (2 / 3 - tt) * 6 : p0; };
   const q = l2 < 0.5 ? l2 * (1 + s) : l2 + s - l2 * s, p1 = 2 * l2 - q;
   const to = (v) => Math.round(v * 255).toString(16).padStart(2, '0');
@@ -44,16 +44,15 @@ export function cellParts(cal, holidays, key, shMap, { notes = true } = {}) {
   const bg = sh ? softColor(sh.color) : '';
   const ink = sh ? readableOn(bg, INK) : '';
   const style = sh ? `background:${bg};color:${ink}` : '';
-  const chips = (fest ? `<span class="cal-chip" role="img" aria-label="Festivo">${flagIco()}</span>` : '') +
-    (swap && notes ? `<span class="cal-chip" role="img" aria-label="Cambio de turno">${swapIco()}</span>` : '');
+  const chips = (fest ? `<span class="cal-chip" role="img" aria-label="Festivo">${flagIco(8)}</span>` : '') +
+    (swap && notes ? `<span class="cal-chip" role="img" aria-label="Cambio de turno">${swapIco(8)}</span>` : '');
   const d = Number(key.slice(8));
   let note = '';
   if (notes && day && day.note) {
     const nb = sh ? lighten(bg, 0.45) : '';
     note = `<span class="txt" style="${nb ? `background:${nb};color:${readableOn(nb, INK)}` : ''}">${esc(day.note)}</span>`;
   }
-  const html = `<span class="tp"><span class="dn">${d}</span><span class="code">${sh ? esc(sh.letter) : ''}</span></span>` +
-    (chips ? `<span class="chips">${chips}</span>` : '') + note;
+  const html = `<span class="tp"><span class="dn">${d}</span>${chips ? `<span class="chips">${chips}</span>` : ''}<span class="code">${sh ? esc(sh.letter) : ''}</span></span>` + note;
   const label = `${WEEKDAYS[weekdayOf(key)]} ${d}: ${sh ? sh.name : 'sin turno'}${fest ? ', festivo' : ''}${swap ? ', cambio de turno' : ''}`;
   return { style, html, painted: !!sh, label };
 }
