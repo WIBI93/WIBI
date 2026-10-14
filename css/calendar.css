@@ -41,7 +41,10 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-head-col { display: flex; flex-direction: column; gap: 8px; padding: calc(12px + env(safe-area-inset-top)) 16px 8px; }
 .cal-head-col .row { display: flex; align-items: center; gap: 8px; }
 .cal-head-col .row.between { justify-content: space-between; padding-left: 4px; }
-.cal-today-btn { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 13px; font-weight: 700; color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--outline); }
+.cal-head-col .month-row { padding-left: 4px; }
+.cal-head-col .month-row .cal-title { flex: 1; min-width: 0; white-space: nowrap; }
+.cal-head-col .month-row .cal-round { width: 36px; height: 36px; }
+.cal-today-btn { flex: none; height: 36px; padding: 0 12px; border-radius: 18px; font-size: 13px; font-weight: 700; color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--outline); }
 
 .cal-main { display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 0; }
 .cal-main.tight { gap: 10px; }
@@ -51,9 +54,9 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 
 /* Tarjetas */
 .cal-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 10px; }
-.cal-card { background: var(--card); border-radius: 12px; padding: 10px 12px; box-shadow: inset 0 0 0 1px var(--line); }
-.cal-card b { display: block; font-size: 22px; font-weight: 700; line-height: 1.1; }
-.cal-card span { font-size: 12px; font-weight: 500; color: var(--muted); }
+.cal-card { background: var(--card); border-radius: 10px; padding: 6px 10px; box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: baseline; gap: 5px; white-space: nowrap; min-width: 0; }
+.cal-card b { font-size: 16px; font-weight: 700; line-height: 1.1; }
+.cal-card span { font-size: 11px; font-weight: 500; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 .cal-section { background: var(--card); border-radius: 16px; padding: 14px 16px; box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 10px; }
 .cal-section h3 { margin: 0; font-size: 14px; font-weight: 700; }
 .cal-section .opt { font-size: 12px; color: var(--muted); }
@@ -68,8 +71,18 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 }
 .cal-cell.blank { background: transparent; box-shadow: none; }
 .cal-cell.painted { box-shadow: none; }
-.cal-cell.today { box-shadow: 0 0 0 2.5px #E5383B; }
-.cal-cell.today .dn { background: #E5383B; color: #fff; border-radius: 9px; padding: 3px 6px; margin: -3px 0 0 -3px; }
+:root { --frame: #14202B; }
+:root[data-theme="dark"] { --frame: #E8EEF3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --frame: #E8EEF3; } }
+.cal-cell.today { outline: 2.5px solid #E5383B; outline-offset: -2.5px; z-index: 1; }
+.cal-cell.today .dn { background: #E5383B; color: #fff; border-radius: 8px; padding: 2px 4px; margin: -2px 0 0 -2px; }
+/* Vista del mes: casillas pegadas y más altas */
+.cal-grid.month { gap: 0; padding: 0; margin: 0 6px; border-top: 1px solid var(--field); border-left: 1px solid var(--field); }
+.cal-grid.month .cal-cell { height: 96px; border-radius: 0; padding: 4px 4px 3px; box-shadow: none; border-right: 1px solid var(--field); border-bottom: 1px solid var(--field); }
+.cal-grid.month .cal-cell.blank { background: transparent; color: var(--muted); opacity: 0.45; }
+.cal-grid.month .cal-cell.today { box-shadow: none; }
+.cal-grid.month .cal-cell .txt { flex: 0 1 auto; border-radius: 4px; padding: 2px 3px; align-self: stretch; }
+.cal-week.month { gap: 0; padding: 0; margin: 0 6px; }
 .cal-cell .tp { display: flex; justify-content: space-between; align-items: flex-start; line-height: 1; }
 .cal-cell .dn { font-size: 13px; font-weight: 700; }
 .cal-cell .code { font-size: 14px; font-weight: 800; }
