@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v8';
+const CACHE = 'wibi-v9';
 
 const ASSETS = [
   './',
@@ -61,7 +61,10 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      // 'reload' salta la copia temporal del navegador (GitHub guarda 10 min) para tener siempre lo último.
+      .then((cache) => Promise.all(ASSETS.map((a) => cache.add(new Request(a, { cache: 'reload' })))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -79,7 +82,7 @@ self.addEventListener('fetch', (event) => {
   if (new URL(req.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-cache' })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
