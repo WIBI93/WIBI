@@ -3,7 +3,7 @@
 import { navigate, back, go } from '../../core/router.js';
 import { readableOn } from '../../core/palette.js';
 import { esc, confirmDialog, toast } from '../../core/ui.js';
-import { getData, activeCal, update, uid, countDaysWith, removeShift, MY_COLORS } from './data.js';
+import { getData, activeCal, update, uid, countDaysWith, removeShift, MY_COLORS, SHIFT_COLORS } from './data.js';
 import { INK, shiftDescription, shiftHours, fmtHours, endsNextDay } from './calc.js';
 import { ico, navHtml, bindGo } from './shell.js';
 
@@ -50,10 +50,12 @@ export function renderShiftEdit(el, { id }) {
 
   const draw = () => {
     const mine = getData().myColors;
-    const colors = mine.map((hex) => {
+    const btn = (hex, label) => {
       const sel = hex.toUpperCase() === draft.color.toUpperCase();
-      return `<button type="button" class="cal-color" data-color="${hex}" aria-label="Color guardado ${hex}" aria-pressed="${sel}" style="background:${hex};color:${readableOn(hex, INK)}">${sel ? ico('check', 18, 3) : ''}</button>`;
-    }).join('');
+      return `<button type="button" class="cal-color" data-color="${hex}" aria-label="${label}" aria-pressed="${sel}" style="background:${hex};color:${readableOn(hex, INK)}">${sel ? ico('check', 18, 3) : ''}</button>`;
+    };
+    const colors = SHIFT_COLORS.map(([name, hex]) => btn(hex, name)).join('');
+    const saved = Array.from({ length: MY_COLORS }, (_, i) => (mine[i] ? btn(mine[i], 'Color propio ' + (i + 1)) : '<span class="cal-color empty" aria-hidden="true"></span>')).join('');
     el.innerHTML = `
       <div class="cal">
         <header class="cal-head"><button type="button" class="cal-round" id="go-back" aria-label="Volver a los tipos de turno">${ico('back')}</button>
@@ -71,7 +73,8 @@ export function renderShiftEdit(el, { id }) {
             <label class="cal-field"><span>Hora de fin</span><input class="cal-input" id="end" type="time" value="${draft.end}"></label>
           </div>` : ''}
           <div class="cal-info"><span>Duración (sale sola)</span><b id="dur">${duration()}</b></div>
-          <div class="cal-field"><span>Mis colores</span><div class="cal-colors">${colors}</div><span class="cal-note">Al crear un color personalizado se guarda aquí, y el más antiguo se sustituye.</span></div>
+          <div class="cal-field"><span>Color</span><div class="cal-colors">${colors}</div></div>
+          <div class="cal-field"><span>Mis colores personalizados</span><div class="cal-colors">${saved}</div><span class="cal-note">Los colores que crees abajo se guardan aquí (hasta ${MY_COLORS}; el más antiguo se sustituye).</span></div>
           <label class="cal-colorpick" for="custom">Color personalizado<input id="custom" type="color" value="${draft.color.toLowerCase()}"></label>
         </main>
         <div class="cal-foot"><button type="button" class="cal-btn" id="save">Guardar turno</button>

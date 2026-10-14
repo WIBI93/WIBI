@@ -21,7 +21,7 @@ export const SHIFT_COLORS = [
   ['Lila claro', '#C9CBEE'], ['Salvia', '#D9E4DF'], ['Arena', '#F3D9B1'], ['Rosa pálido', '#F7C6C6'], ['Gris', '#6B7785'], ['Azul noche', '#14202B'],
 ];
 
-export const MY_COLORS = 12;
+export const MY_COLORS = 6;
 export const DEFAULT_MY_COLORS = ['#F6CF6B', '#EE8B4F', '#D94F4F', '#C2456B', '#7A5AA6', '#3B3F8F', '#2D7FB8', '#5BB5D9', '#3AAFA9', '#2F7F63', '#A3B83A', '#6B7785'];
 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -105,10 +105,11 @@ export function normalize(raw) {
     for (const [k, v] of Object.entries(r.holidays)) if (DATE_RE.test(k)) holidays[k] = str(v, 60) || 'Festivo';
   }
   const hex = (x) => typeof x === 'string' && /^#[0-9a-fA-F]{6}$/.test(x);
-  const mine = Array.isArray(r.myColors) ? r.myColors.filter(hex).map((x) => x.toUpperCase()).slice(0, MY_COLORS) : null;
+  // Versión anterior guardaba 12 colores de ejemplo mezclados con los propios: se quitan los de ejemplo.
+  const mine = Array.isArray(r.myColors) ? r.myColors.filter(hex).map((x) => x.toUpperCase()).filter((x) => !DEFAULT_MY_COLORS.includes(x)).slice(0, MY_COLORS) : [];
   return {
     version: 1,
-    myColors: mine && mine.length ? mine : DEFAULT_MY_COLORS.slice(),
+    myColors: mine,
     activeId: calendars.some((c) => c.id === r.activeId) ? r.activeId : calendars[0].id,
     firstDay: r.firstDay === 0 ? 0 : 1,
     holidays,

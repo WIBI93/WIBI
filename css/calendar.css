@@ -149,6 +149,7 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-info b { font-size: 16px; font-weight: 700; text-align: right; }
 .cal-colors { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .cal-color { height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(20, 32, 43, 0.18); }
+.cal-color.empty { box-shadow: none; border: 1.5px dashed var(--field); }
 .cal-color.big { height: 44px; border-radius: 12px; }
 .cal-color[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
 .cal-colorpick { background: var(--card); border-radius: 12px; padding: 6px 14px; box-shadow: inset 0 0 0 1px var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 600; }
