@@ -28,6 +28,11 @@ export function softColor(hex) {
   const to = (v) => Math.round(v * 255).toString(16).padStart(2, '0');
   return '#' + to(f(p1, q, h + 1 / 3)) + to(f(p1, q, h)) + to(f(p1, q, h - 1 / 3));
 }
+function relLum(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
 // Mezcla un color con blanco (para el fondo de la nota).
 const lighten = (hex, k) => {
   const n = parseInt(hex.slice(1), 16);
@@ -42,7 +47,8 @@ export function cellParts(cal, holidays, key, shMap, { notes = true } = {}) {
   const fest = !!holidays[key];
   const swap = !!(day && day.swap);
   const bg = sh ? softColor(sh.color) : '';
-  const ink = sh ? readableOn(bg, INK) : '';
+  // Letra fina: gris oscuro sobre colores claros y blanco sobre los medios u oscuros.
+  const ink = sh ? (relLum(bg) > 0.45 ? '#46535F' : '#FFFFFF') : '';
   const style = sh ? `background:${bg};color:${ink}` : '';
   const chips = (fest ? `<span class="cal-chip" role="img" aria-label="Festivo">${flagIco(8)}</span>` : '') +
     (swap && notes ? `<span class="cal-chip" role="img" aria-label="Cambio de turno">${swapIco(8)}</span>` : '');
@@ -79,6 +85,10 @@ function openSelector(pill, d) {
   document.addEventListener('keydown', onKey);
   root.appendChild(back);
 }
+
+// Dirección del último cambio de mes, para animar la cuadrícula que entra (-1, 0 o 1).
+let pendingDir = null;
+let moving = false;
 
 export function renderMonth(el) {
   const d = getData();
@@ -139,8 +149,23 @@ export function renderMonth(el) {
   bindGo(el);
   el.querySelector('#go-back').addEventListener('click', () => back('/'));
   el.querySelector('#pill').addEventListener('click', (e) => openSelector(e.currentTarget, d));
-  el.querySelector('#prev').addEventListener('click', () => { shiftMonth(-1); refresh(); });
-  el.querySelector('#next').addEventListener('click', () => { shiftMonth(1); refresh(); });
+  // Cambio de mes con una pequeña animación: sale la cuadrícula, entra la nueva.
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const move = (dir) => {
+    if (moving) return;
+    const apply = () => { shiftMonth(dir); pendingDir = dir; moving = false; refresh(); };
+    moving = true;
+    if (reduce) { apply(); return; }
+    el.querySelectorAll('.cal-grid.month, .month-row .cal-title').forEach((n) => n.classList.add(dir > 0 ? 'out-l' : 'out-r'));
+    setTimeout(apply, 110);
+  };
+  el.querySelector('#prev').addEventListener('click', () => move(-1));
+  el.querySelector('#next').addEventListener('click', () => move(1));
+  if (pendingDir !== null && !reduce) {
+    const cls = pendingDir > 0 ? 'in-r' : pendingDir < 0 ? 'in-l' : 'in-f';
+    el.querySelectorAll('.cal-grid.month, .month-row .cal-title').forEach((n) => n.classList.add(cls));
+  }
+  pendingDir = null;
   // Deslizar el dedo a izquierda o derecha cambia de mes.
   const main = el.querySelector('.cal-main');
   let sx = 0, sy = 0, tracking = false;
@@ -150,11 +175,10 @@ export function renderMonth(el) {
     tracking = false;
     const t1 = e.changedTouches[0], dx = t1.clientX - sx, dy = t1.clientY - sy;
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    shiftMonth(dx < 0 ? 1 : -1);
-    refresh();
+    move(dx < 0 ? 1 : -1);
   }, { passive: true });
   const t = el.querySelector('#today');
-  if (t) t.addEventListener('click', () => { toToday(); refresh(); });
+  if (t) t.addEventListener('click', () => { toToday(); pendingDir = 0; refresh(); });
   el.querySelector('#edit').addEventListener('click', () => navigate('/calendario/pincel'));
   el.querySelectorAll('[data-key]').forEach((c) => c.addEventListener('click', () => navigate('/calendario/dia/' + c.dataset.key)));
 }
