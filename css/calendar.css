@@ -249,3 +249,17 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .in-l { animation: calInL 220ms cubic-bezier(.2, .7, .2, 1) both; }
 .in-f { animation: calInF 200ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .out-l, .out-r, .in-r, .in-l, .in-f { animation: none; } }
+
+/* Estrés del día */
+.cal-scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.cal-scale button { height: 46px; border-radius: 12px; background: var(--track); color: var(--text); font-size: 16px; font-weight: 600; box-shadow: inset 0 -3px 0 var(--sc), inset 0 0 0 1px var(--line); }
+.cal-scale button[aria-pressed="true"] { background: var(--sc); color: #fff; font-weight: 700; box-shadow: none; outline: 2.5px solid var(--text); outline-offset: 2px; }
+.cal-scale-hint { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: -4px; }
+.cal-causes { display: flex; flex-wrap: wrap; gap: 8px; }
+.cal-cause { min-height: 40px; padding: 0 14px; border-radius: 20px; background: var(--track); color: var(--text); font-size: 14px; font-weight: 600; box-shadow: inset 0 0 0 1px var(--line); }
+.cal-cause[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); box-shadow: none; }
+.cal-cause-row { min-height: 52px; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; }
+.cal-cause-row + .cal-cause-row { border-top: 1px solid var(--line2); }
+.cal-cause-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-cause-row button { min-height: 44px; padding: 0 6px; font-size: 14px; font-weight: 700; color: var(--accent-text); }
+.cal-cause-row button.del { color: var(--danger); }

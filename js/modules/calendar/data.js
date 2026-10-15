@@ -24,6 +24,13 @@ export const SHIFT_COLORS = [
 export const MY_COLORS = 6;
 export const DEFAULT_MY_COLORS = ['#F6CF6B', '#EE8B4F', '#D94F4F', '#C2456B', '#7A5AA6', '#3B3F8F', '#2D7FB8', '#5BB5D9', '#3AAFA9', '#2F7F63', '#A3B83A', '#6B7785'];
 
+// Causas de estrés que se ofrecen al puntuar un día con 7 o más (se pueden cambiar en Ajustes).
+export const STRESS_MIN_CAUSE = 7;
+export function defaultCauses() {
+  return [['medicos', 'Médicos'], ['pacientes', 'Pacientes'], ['companeros', 'Compañeros'], ['organizacion', 'Organización'], ['supervisores', 'Supervisores'], ['dificultad', 'Dificultad de las tareas'], ['carga', 'Carga de trabajo']]
+    .map(([id, name]) => ({ id, name, hidden: false }));
+}
+
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 export function defaultShifts() {
@@ -56,7 +63,7 @@ function normShift(s, i, seen) {
   };
 }
 
-function normCalendar(c, i, seen) {
+function normCalendar(c, i, seen, causeIds = new Set()) {
   if (!c || typeof c !== 'object') return null;
   const id = str(c.id, 40) || 'c' + i;
   if (seen.has(id)) return null;
@@ -82,7 +89,10 @@ function normCalendar(c, i, seen) {
       const zone = shift && kindOf.get(shift) === 'work' && zoneIds.has(v.zone) ? v.zone : null;
       const swap = v.swap === true;
       const note = typeof v.note === 'string' ? v.note.slice(0, 500) : '';
-      if (shift || swap || note.trim()) days[key] = { shift, zone, swap, note };
+      const st = Number(v.stress);
+      const stress = shift && kindOf.get(shift) === 'work' && Number.isInteger(st) && st >= 1 && st <= 10 ? st : null;
+      const causes = stress && stress >= STRESS_MIN_CAUSE && Array.isArray(v.causes) ? [...new Set(v.causes.filter((x) => causeIds.has(x)))] : [];
+      if (shift || swap || note.trim()) days[key] = { shift, zone, swap, note, stress, causes };
     }
   }
   return {
@@ -96,7 +106,17 @@ function normCalendar(c, i, seen) {
 export function normalize(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   const seen = new Set();
-  let calendars = (Array.isArray(r.calendars) ? r.calendars : []).map((c, i) => normCalendar(c, i, seen)).filter(Boolean);
+  const causeSeen = new Set();
+  let stressCauses = (Array.isArray(r.stressCauses) ? r.stressCauses : []).map((x) => {
+    const id = x && typeof x.id === 'string' ? x.id.slice(0, 40) : '';
+    const name = x && typeof x.name === 'string' ? x.name.trim().slice(0, 30) : '';
+    if (!id || !name || causeSeen.has(id)) return null;
+    causeSeen.add(id);
+    return { id, name, hidden: x.hidden === true };
+  }).filter(Boolean);
+  if (!Array.isArray(r.stressCauses)) stressCauses = defaultCauses();
+  const causeIds = new Set(stressCauses.map((x) => x.id));
+  let calendars = (Array.isArray(r.calendars) ? r.calendars : []).map((c, i) => normCalendar(c, i, seen, causeIds)).filter(Boolean);
   if (!calendars.length) {
     calendars = [{ id: 'main', name: 'Calendario de trabajo', color: CAL_COLORS[0].hex, shifts: defaultShifts(), zones: [], days: {} }];
   }
@@ -110,6 +130,7 @@ export function normalize(raw) {
   return {
     version: 1,
     myColors: mine,
+    stressCauses,
     activeId: calendars.some((c) => c.id === r.activeId) ? r.activeId : calendars[0].id,
     firstDay: r.firstDay === 0 ? 0 : 1,
     holidays,
@@ -132,23 +153,27 @@ export function update(fn) {
 // ---- Cambios sobre días (trabajan sobre el calendario en memoria; luego se guarda) ----
 
 function put(cal, key, day) {
-  if (day.shift || day.swap || (day.note && day.note.trim())) cal.days[key] = day;
+  if (day.shift || day.swap || (day.note && day.note.trim()) || day.stress) cal.days[key] = day;
   else delete cal.days[key];
 }
-const blank = () => ({ shift: null, zone: null, swap: false, note: '' });
+const blank = () => ({ shift: null, zone: null, swap: false, note: '', stress: null, causes: [] });
 
 // shiftId vacío o null = dejar el día sin rellenar.
 export function setShiftOnDay(cal, key, shiftId) {
   const day = { ...blank(), ...(cal.days[key] || {}) };
   const sh = cal.shifts.find((s) => s.id === shiftId);
   day.shift = sh ? sh.id : null;
-  if (!sh || sh.kind !== 'work') day.zone = null;
+  if (!sh || sh.kind !== 'work') { day.zone = null; day.stress = null; day.causes = []; }
   put(cal, key, day);
 }
 
-export function saveDay(cal, key, { shift, zone, swap, note }) {
+export function saveDay(cal, key, { shift, zone, swap, note, stress, causes }) {
   const sh = cal.shifts.find((s) => s.id === shift);
+  const work = !!sh && sh.kind === 'work';
+  const st = work && Number.isInteger(stress) && stress >= 1 && stress <= 10 ? stress : null;
   put(cal, key, {
+    stress: st,
+    causes: st && st >= STRESS_MIN_CAUSE && Array.isArray(causes) ? [...new Set(causes)] : [],
     shift: sh ? sh.id : null,
     zone: sh && sh.kind === 'work' && cal.zones.some((z) => z.id === zone) ? zone : null,
     swap: !!swap,
@@ -168,4 +193,20 @@ export function removeShift(cal, id) {
 export function removeZone(cal, id) {
   cal.zones = cal.zones.filter((z) => z.id !== id);
   for (const day of Object.values(cal.days)) if (day.zone === id) day.zone = null;
+}
+
+// ---- Causas de estrés (comunes a todos los calendarios) ----
+export function addCause(d, name) {
+  const clean = String(name || '').trim().slice(0, 30);
+  if (!clean) return null;
+  const hit = d.stressCauses.find((c) => c.name.toLowerCase() === clean.toLowerCase());
+  if (hit) { hit.hidden = false; return hit; }
+  const c = { id: uid(), name: clean, hidden: false };
+  d.stressCauses.push(c);
+  return c;
+}
+// Quitar solo la oculta de la lista: los días ya puntuados conservan su historial.
+export function hideCause(d, id) {
+  const c = d.stressCauses.find((x) => x.id === id);
+  if (c) c.hidden = true;
 }
