@@ -4,6 +4,7 @@ export const state = {
   y: now.getFullYear(),
   m: now.getMonth(),
   zoneScope: 'mes', // 'mes' | 'anio'
+  stressScope: 'mes', // 'mes' | 'anio'
   holidayYear: now.getFullYear(),
   brush: null, // id de turno, '' = borrar, null = aún sin elegir
 };

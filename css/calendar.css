@@ -263,3 +263,19 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-cause-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-cause-row button { min-height: 44px; padding: 0 6px; font-size: 14px; font-weight: 700; color: var(--accent-text); }
 .cal-cause-row button.del { color: var(--danger); }
+
+/* Barra de estrés medio del mes (bajo la cuadrícula) */
+.cal-stressbar { display: flex; align-items: center; gap: 10px; margin: 0 14px; min-height: 28px; }
+.cal-stressbar .l { font-size: 12px; font-weight: 600; color: var(--muted); }
+.cal-stressbar .tr { position: relative; flex: 1; height: 8px; border-radius: 4px; background: var(--track); }
+.cal-stressbar .fl { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+.cal-stressbar .tk { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--field); opacity: 0.5; }
+.cal-stressbar b { font-size: 15px; font-weight: 700; min-width: 30px; text-align: right; }
+/* Resumen de estrés */
+.cal-bandbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--track); }
+.cal-bandbar i { display: block; }
+.cal-ybars { display: flex; align-items: flex-end; gap: 5px; height: 110px; }
+.cal-ybars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.cal-ybars i { display: block; border-radius: 4px 4px 0 0; min-height: 2px; }
+.cal-ylabels { display: flex; gap: 5px; font-size: 10px; color: var(--muted); }
+.cal-ylabels span { flex: 1; text-align: center; }

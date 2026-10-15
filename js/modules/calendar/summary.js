@@ -5,7 +5,7 @@ import { readableOn } from '../../core/palette.js';
 import { esc } from '../../core/ui.js';
 import { getData, activeCal, update } from './data.js';
 import { state, shiftMonth } from './state.js';
-import { MONTHS, INK, WEEKDAYS, monthStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap } from './calc.js';
+import { MONTHS, INK, WEEKDAYS, monthStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap, stressStats, stressColor, fmtAvg, STRESS_HEX } from './calc.js';
 import { ico, flagIco, roundBtn, navHtml, bindGo } from './shell.js';
 
 function header(sub) {
@@ -15,7 +15,7 @@ function header(sub) {
   </header>`;
 }
 function tabs(active) {
-  return `<div class="cal-tabs" role="tablist"><button type="button" role="tab" data-go="/calendario/resumen" aria-selected="${active === 'h'}">Horas</button><button type="button" role="tab" data-go="/calendario/resumen/zonas" aria-selected="${active === 'z'}">Zonas</button></div>`;
+  return `<div class="cal-tabs" role="tablist"><button type="button" role="tab" data-go="/calendario/resumen" aria-selected="${active === 'h'}">Horas</button><button type="button" role="tab" data-go="/calendario/resumen/estres" aria-selected="${active === 'e'}">Estrés</button><button type="button" role="tab" data-go="/calendario/resumen/zonas" aria-selected="${active === 'z'}">Zonas</button></div>`;
 }
 function bindMonthNav(el) {
   el.querySelector('#prev').addEventListener('click', () => { shiftMonth(-1); refresh(); });
@@ -125,4 +125,55 @@ export function renderPending(el, { scope }) {
     row.style.opacity = '0.5';
     sel.disabled = true;
   }));
+}
+
+
+export function renderStress(el) {
+  const d = getData();
+  const cal = activeCal(d);
+  const yearly = state.stressScope === 'anio';
+  const st = stressStats(cal, state.y, yearly ? null : state.m);
+  const names = new Map(d.stressCauses.map((c) => [c.id, c.name]));
+  const rows = Object.entries(st.causes).map(([id, n]) => ({ name: names.get(id) || 'Causa eliminada', n })).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'es'));
+  const max = Math.max(1, ...rows.map((r) => r.n));
+  const causes = rows.length
+    ? rows.map((r) => `<div class="cal-zrow"><span class="zn" style="width:132px">${esc(r.name)}</span><span class="zb"><i style="width:${Math.round((r.n / max) * 100)}%"></i></span><span class="zc">${r.n} ${r.n === 1 ? 'día' : 'días'}</span></div>`).join('')
+    : '<div class="cal-empty">Aún no hay días de 7 o más con causas marcadas.</div>';
+  const bandNames = ['tranquilos', 'normales', 'altos', 'muy altos'];
+  const bandCols = [STRESS_HEX.g, STRESS_HEX.y, STRESS_HEX.o, STRESS_HEX.r];
+  const bands = st.count
+    ? `<section class="cal-section"><h3>Reparto de los días</h3><div class="cal-bandbar">${st.bands.map((n, i) => (n ? `<i style="flex:${n};background:${bandCols[i]}"></i>` : '')).join('')}</div>
+        <div class="cal-note small">${st.bands.map((n, i) => `${n} ${bandNames[i]}`).join(' · ')}</div></section>` : '';
+  const monthChart = yearly && st.count
+    ? `<section class="cal-section"><h3>Media de cada mes</h3><div class="cal-ybars">${st.byMonth.map((b, i) => {
+        const avg = b.n ? b.sum / b.n : 0;
+        return `<div title="${MONTHS[i]}${b.n ? ': ' + fmtAvg(avg) : ''}"><i style="height:${avg * 10}%;background:${b.n ? stressColor(avg) : 'transparent'}"></i></div>`;
+      }).join('')}</div><div class="cal-ylabels">${'EFMAMJJASOND'.split('').map((l) => `<span>${l}</span>`).join('')}</div></section>` : '';
+  const topMonth = yearly && st.count ? st.byMonth.map((b, i) => ({ i, a: b.n ? b.sum / b.n : -1 })).sort((a, b) => b.a - a.a)[0] : null;
+
+  el.innerHTML = `
+    <div class="cal">
+      <header class="cal-head">
+        <div class="grow" style="padding-left:4px"><div class="cal-sub">${yearly ? 'Resumen del año' : 'Resumen del mes'}</div><div class="cal-title">${yearly ? state.y : MONTHS[state.m] + ' ' + state.y}</div></div>
+        ${roundBtn('prev', 'back', yearly ? 'Año anterior' : 'Mes anterior')}${roundBtn('next', 'next', yearly ? 'Año siguiente' : 'Mes siguiente')}
+      </header>
+      <main class="cal-main">
+        ${tabs('e')}
+        <div class="cal-tabs small" role="tablist" style="align-self:stretch"><button type="button" data-scope="mes" role="tab" aria-selected="${!yearly}" style="flex:1">Mes</button><button type="button" data-scope="anio" role="tab" aria-selected="${yearly}" style="flex:1">Año</button></div>
+        <section class="cal-hero"><div><div class="k">${yearly ? 'Estrés medio del año' : 'Estrés medio'}</div><div class="big" style="color:${st.count ? stressColor(st.avg) : 'var(--hero-text)'}">${st.count ? fmtAvg(st.avg) : '–'}</div></div>
+          <div class="rt"><div>${st.count} ${st.count === 1 ? 'día puntuado' : 'días puntuados'}</div>${st.count ? `<div class="m">Día más alto: ${st.max}<br>Días de 7 o más: ${st.high}${topMonth ? `<br>Mes más alto: ${MONTHS[topMonth.i].toLowerCase()}` : ''}</div>` : ''}</div></section>
+        ${st.count ? '' : '<div class="cal-note small" style="padding:0 4px">Puntúa el estrés de tus días de trabajo desde el detalle de cada día y aquí verás las estadísticas.</div>'}
+        ${monthChart}
+        <section class="cal-section"><h3>Qué te ha causado más estrés${yearly ? ' · ' + state.y : ''}</h3>${causes}
+          <div class="cal-note small">Cuenta los días de 7 o más en los que marcaste cada causa.</div></section>
+        ${bands}
+      </main>
+      <div class="cal-spacer"></div>
+      ${navHtml('resumen')}
+    </div>`;
+  const shift = (n) => { if (yearly) state.y += n; else shiftMonth(n); refresh(); };
+  el.querySelector('#prev').addEventListener('click', () => shift(-1));
+  el.querySelector('#next').addEventListener('click', () => shift(1));
+  bindGo(el);
+  el.querySelectorAll('[data-scope]').forEach((b) => b.addEventListener('click', () => { state.stressScope = b.dataset.scope; refresh(); }));
 }

@@ -5,7 +5,7 @@ import { readableOn } from '../../core/palette.js';
 import { esc } from '../../core/ui.js';
 import { getData, activeCal, update } from './data.js';
 import { state, shiftMonth, toToday, isCurrentMonth } from './state.js';
-import { MONTHS, WEEKDAYS, INK, dateKey, daysInMonth, firstOffset, weekdayLetters, weekdayOf, todayKey, monthStats, shiftMap, fmtHours } from './calc.js';
+import { MONTHS, WEEKDAYS, INK, dateKey, daysInMonth, firstOffset, weekdayLetters, weekdayOf, todayKey, monthStats, shiftMap, fmtHours, stressStats, stressColor, fmtAvg } from './calc.js';
 import { ico, flagIco, swapIco, roundBtn, navHtml, bindGo } from './shell.js';
 
 // Color de relleno suavizado (más claro y mate) para la vista del mes y el pincel.
@@ -97,6 +97,8 @@ export function renderMonth(el) {
   const st = monthStats(cal, d.holidays, y, m);
   const map = shiftMap(cal);
   const today = todayKey();
+  const ss = stressStats(cal, y, m);
+  const stressBar = ss.count ? `<div class="cal-stressbar" role="img" aria-label="Estrés medio del mes: ${fmtAvg(ss.avg)}"><span class="l">Estrés</span><span class="tr"><i class="fl" style="width:${ss.avg * 10}%;background:${stressColor(ss.avg)}"></i><i class="tk" style="left:50%"></i><i class="tk" style="left:70%"></i><i class="tk" style="left:80%"></i></span><b style="color:${stressColor(ss.avg)}">${fmtAvg(ss.avg)}</b></div>` : '';
 
   let cells = '';
   const off = firstOffset(y, m, d.firstDay), dim = daysInMonth(y, m);
@@ -141,6 +143,7 @@ export function renderMonth(el) {
         </div>
         <div class="cal-week month">${weekdayLetters(d.firstDay).map((l) => `<span>${l}</span>`).join('')}</div>
         <div class="cal-grid month">${cells}</div>
+        ${stressBar}
         <div class="cal-spacer"></div>
       </main>
       ${navHtml('mes')}
@@ -156,14 +159,14 @@ export function renderMonth(el) {
     const apply = () => { shiftMonth(dir); pendingDir = dir; moving = false; refresh(); };
     moving = true;
     if (reduce) { apply(); return; }
-    el.querySelectorAll('.cal-grid.month, .month-row .cal-title').forEach((n) => n.classList.add(dir > 0 ? 'out-l' : 'out-r'));
+    el.querySelectorAll('.cal-grid.month, .month-row .cal-title, .cal-stressbar').forEach((n) => n.classList.add(dir > 0 ? 'out-l' : 'out-r'));
     setTimeout(apply, 110);
   };
   el.querySelector('#prev').addEventListener('click', () => move(-1));
   el.querySelector('#next').addEventListener('click', () => move(1));
   if (pendingDir !== null && !reduce) {
     const cls = pendingDir > 0 ? 'in-r' : pendingDir < 0 ? 'in-l' : 'in-f';
-    el.querySelectorAll('.cal-grid.month, .month-row .cal-title').forEach((n) => n.classList.add(cls));
+    el.querySelectorAll('.cal-grid.month, .month-row .cal-title, .cal-stressbar').forEach((n) => n.classList.add(cls));
   }
   pendingDir = null;
   // Deslizar el dedo a izquierda o derecha cambia de mes.

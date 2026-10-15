@@ -3,7 +3,7 @@
 import { renderMonth } from './month.js';
 import { renderBrush } from './brush.js';
 import { renderDay } from './day.js';
-import { renderHours, renderZones, renderPending } from './summary.js';
+import { renderHours, renderStress, renderZones, renderPending } from './summary.js';
 import { renderShifts, renderShiftEdit } from './shifts.js';
 import { renderZoneList, renderZoneEdit } from './zones.js';
 import { renderSettings } from './settings.js';
@@ -16,6 +16,7 @@ export function registerCalendar(route) {
   route('/calendario/pincel', renderBrush, o);
   route('/calendario/dia/:key', renderDay, o);
   route('/calendario/resumen', renderHours, o);
+  route('/calendario/resumen/estres', renderStress, o);
   route('/calendario/resumen/zonas', renderZones, o);
   route('/calendario/zonas-pendientes/:scope', renderPending, o);
   route('/calendario/turnos', renderShifts, o);

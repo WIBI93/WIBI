@@ -102,3 +102,25 @@ export function pendingDays(cal, y, m) {
     })
     .sort();
 }
+
+// ---- Estrés ----
+// Verde por debajo de 5, amarillo de 5 a menos de 7, naranja de 7 a menos de 8 y rojo desde 8.
+export const STRESS_HEX = { g: '#4CAF7A', y: '#E8B63A', o: '#EE8B4F', r: '#D9483B' };
+export function stressColor(v) { return v < 5 ? STRESS_HEX.g : v < 7 ? STRESS_HEX.y : v < 8 ? STRESS_HEX.o : STRESS_HEX.r; }
+export const fmtAvg = (v) => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+
+// Estadísticas de estrés de un mes (m = 0..11) o de un año entero (m = null).
+export function stressStats(cal, y, m) {
+  const p = prefix(y, m);
+  const st = { count: 0, sum: 0, avg: 0, max: 0, high: 0, bands: [0, 0, 0, 0], causes: {}, byMonth: Array(12).fill(null).map(() => ({ n: 0, sum: 0 })) };
+  for (const [key, day] of Object.entries(cal.days)) {
+    if (!key.startsWith(p) || !day.stress) continue;
+    st.count++; st.sum += day.stress; st.max = Math.max(st.max, day.stress);
+    st.bands[day.stress < 5 ? 0 : day.stress < 7 ? 1 : day.stress < 8 ? 2 : 3]++;
+    const mi = Number(key.slice(5, 7)) - 1;
+    st.byMonth[mi].n++; st.byMonth[mi].sum += day.stress;
+    if (day.stress >= 7) { st.high++; (day.causes || []).forEach((c) => { st.causes[c] = (st.causes[c] || 0) + 1; }); }
+  }
+  st.avg = st.count ? st.sum / st.count : 0;
+  return st;
+}
