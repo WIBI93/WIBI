@@ -124,3 +124,15 @@ export function stressStats(cal, y, m) {
   st.avg = st.count ? st.sum / st.count : 0;
   return st;
 }
+
+// Horas programadas en un año entero (los turnos de noche cuentan el día que empiezan).
+export function yearHours(cal, y) {
+  const map = shiftMap(cal);
+  let hours = 0; let days = 0;
+  for (const [key, day] of Object.entries(cal.days)) {
+    if (!key.startsWith(`${y}-`)) continue;
+    const sh = day.shift ? map.get(day.shift) : null;
+    if (sh && sh.kind === 'work') { hours += shiftHours(sh); days++; }
+  }
+  return { hours: Math.round(hours * 100) / 100, days };
+}

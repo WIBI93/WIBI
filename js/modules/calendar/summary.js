@@ -5,7 +5,7 @@ import { readableOn } from '../../core/palette.js';
 import { esc } from '../../core/ui.js';
 import { getData, activeCal, update } from './data.js';
 import { state, shiftMonth } from './state.js';
-import { MONTHS, INK, WEEKDAYS, monthStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap, stressStats, stressColor, fmtAvg, STRESS_HEX } from './calc.js';
+import { MONTHS, INK, WEEKDAYS, monthStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap, stressStats, yearHours, stressColor, fmtAvg, STRESS_HEX } from './calc.js';
 import { ico, flagIco, roundBtn, navHtml, bindGo } from './shell.js';
 
 function header(sub) {
@@ -27,6 +27,7 @@ export function renderHours(el) {
   const d = getData();
   const cal = activeCal(d);
   const st = monthStats(cal, d.holidays, state.y, state.m);
+  const yh = yearHours(cal, state.hoursYear);
   const work = cal.shifts.filter((s) => s.kind === 'work');
   const others = cal.shifts.filter((s) => s.kind !== 'work' && st.byShift[s.id].days > 0);
   const sw = (s, cls = '') => `<span class="sw" style="background:${s.color};color:${readableOn(s.color, INK)}">${esc(s.letter)}</span>`;
@@ -51,12 +52,18 @@ export function renderHours(el) {
         <section class="cal-section"><h3>Por tipo de turno</h3>${bars}${rest}</section>
         <section class="cal-section" style="flex-direction:row;align-items:center;justify-content:space-between;padding:12px 16px">
           <span style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600">${flagIco(18)}Festivos trabajados</span><b style="font-size:18px">${st.fest}</b></section>
+        <section class="cal-section" style="gap:10px"><div class="rowh" style="align-items:center"><h3>Horas del año</h3>
+          <div style="display:flex;gap:8px"><button type="button" class="cal-round" id="yprev" aria-label="Año anterior" style="width:36px;height:36px">${ico('back', 18, 2)}</button><button type="button" class="cal-round" id="ynext" aria-label="Año siguiente" style="width:36px;height:36px">${ico('next', 18, 2)}</button></div></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:15px;font-weight:600">${state.hoursYear}</span><b style="font-size:26px">${fmtHours(yh.hours)}</b></div>
+          <div class="cal-note small">${yh.days} ${yh.days === 1 ? 'día trabajado' : 'días trabajados'} · horas programadas en los turnos.</div></section>
         ${st.unpainted ? `<div class="cal-note small" style="padding:0 4px">${st.unpainted} ${st.unpainted === 1 ? 'día' : 'días'} sin rellenar este mes (no cuentan).</div>` : ''}
       </main>
       <div class="cal-spacer"></div>
       ${navHtml('resumen')}
     </div>`;
   bindMonthNav(el);
+  el.querySelector('#yprev').addEventListener('click', () => { state.hoursYear--; refresh(); });
+  el.querySelector('#ynext').addEventListener('click', () => { state.hoursYear++; refresh(); });
 }
 
 export function renderZones(el) {

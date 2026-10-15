@@ -30,6 +30,11 @@ export function renderSettings(el) {
           <button type="button" class="ln" id="fest"><span>Festivos</span><span class="r">${year} · ${n} ${n === 1 ? 'añadido' : 'añadidos'}${ico('next', 20)}</span></button>
         </section>
         <section class="cal-section" style="padding:14px 16px;gap:4px">
+          <h3 style="font-size:16px">Calendarios</h3>
+          ${d.calendars.map((c) => `<div class="cal-cause-row"><span class="nm">${esc(c.name)}</span><button type="button" data-rencal="${esc(c.id)}">Renombrar</button>${d.calendars.length > 1 ? `<button type="button" class="del" data-delcal="${esc(c.id)}">Borrar</button>` : ''}</div>`).join('')}
+          ${d.calendars.length === 1 ? '<div class="cal-note small">No se puede borrar el único calendario.</div>' : ''}
+        </section>
+        <section class="cal-section" style="padding:14px 16px;gap:4px">
           <h3 style="font-size:16px">Causas de estrés</h3>
           <div class="cal-note small">Aparecen al puntuar un día con 7 o más.</div>
           ${d.stressCauses.filter((c) => !c.hidden).map((c) => `<div class="cal-cause-row"><span class="nm">${esc(c.name)}</span><button type="button" data-ren="${esc(c.id)}">Renombrar</button><button type="button" class="del" data-del="${esc(c.id)}">Quitar</button></div>`).join('')}
@@ -65,6 +70,25 @@ export function renderSettings(el) {
     if (!name) return;
     if (d.stressCauses.some((x) => x.id !== c.id && !x.hidden && x.name.toLowerCase() === name.toLowerCase())) { toast('Ya existe esa causa'); return; }
     update((data) => { const k = data.stressCauses.find((x) => x.id === c.id); if (k) k.name = name.slice(0, 30); });
+    refresh();
+  }));
+  el.querySelectorAll('[data-rencal]').forEach((b) => b.addEventListener('click', async () => {
+    const c = d.calendars.find((x) => x.id === b.dataset.rencal);
+    const r = await formDialog({ title: 'Renombrar calendario', fields: [{ key: 'name', label: 'Nombre', type: 'text', value: c.name, maxLength: 40 }], confirmLabel: 'Guardar' });
+    const name = r && String(r.name).trim();
+    if (!name) return;
+    update((data) => { const k = data.calendars.find((x) => x.id === c.id); if (k) k.name = name.slice(0, 40); });
+    refresh();
+  }));
+  el.querySelectorAll('[data-delcal]').forEach((b) => b.addEventListener('click', async () => {
+    const c = d.calendars.find((x) => x.id === b.dataset.delcal);
+    const ok = await confirmDialog({ title: `Borrar «${c.name}»`, text: 'Se borrarán todos sus días, notas y estrés. No se puede deshacer. Si dudas, exporta antes una copia en este mismo Ajustes.', confirmLabel: 'Borrar', danger: true });
+    if (!ok) return;
+    update((data) => {
+      if (data.calendars.length < 2) return;
+      data.calendars = data.calendars.filter((x) => x.id !== c.id);
+      if (data.activeId === c.id) data.activeId = data.calendars[0].id;
+    });
     refresh();
   }));
   el.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', async () => {
