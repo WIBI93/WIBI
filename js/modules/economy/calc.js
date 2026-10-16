@@ -11,7 +11,7 @@ export function monthSummary(d, mk) {
   const movs = d.movements.filter((m) => inMonth(m, mk));
   const termOf = (m) => (d.accounts.find((a) => a.id === m.accId) || {}).term;
   const contrib = { medio: 0, largo: 0 };
-  movs.filter((m) => m.kind === 'contrib').forEach((m) => { const t = termOf(m); if (t) contrib[t] += m.amount; });
+  movs.filter((m) => m.kind === 'contrib' && m.fromSalary).forEach((m) => { const t = termOf(m); if (t) contrib[t] += m.amount; });
   const income = sum(incs, (e) => e.amount);
   const spent = sum(exps, (e) => e.amount);
   const fixedSum = sum(exps.filter(isFixedExp), (e) => e.amount);
@@ -19,8 +19,9 @@ export function monthSummary(d, mk) {
   exps.forEach((e) => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
   return {
     income, spent, fixedSum, puntualSum: Math.round((spent - fixedSum) * 100) / 100,
-    left: Math.round((income - spent) * 100) / 100,
+    left: Math.round((income - spent - contrib.medio - contrib.largo) * 100) / 100,
     pctSpent: income > 0 ? Math.round((spent / income) * 100) : 0,
+    pctUsed: income > 0 ? Math.round(((spent + contrib.medio + contrib.largo) / income) * 100) : 0,
     contrib: { medio: Math.round(contrib.medio * 100) / 100, largo: Math.round(contrib.largo * 100) / 100 },
     byCat, hasData: exps.length + incs.length + movs.length > 0,
   };

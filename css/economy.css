@@ -5,10 +5,12 @@
 :root {
   --soft: #F2F5F2; --soft2: #E8EEEA; --green-soft: #E3F1EC; --blue-soft: #DCEBF1; --amber-soft: #F6E8CC;
   --blue: #2E7F96; --line-soft: #EEF2EF; --dash: #A9BDB5;
+  --med: #DDF0E6; --med-strong: #2F8F6B; --med-text: #14503C; --lar: #DCE3EA; --lar-strong: #4F6678; --lar-text: #2A3B4A; --gain: #8FD17A; --pos: #1E7A55; --neg: #B5483B;
 }
 :root[data-theme="dark"] {
   --soft: #0F1A17; --soft2: #223530; --green-soft: #1F3A32; --blue-soft: #1B3540; --amber-soft: #3A3018;
   --blue: #6EC0D8; --line-soft: #223530; --dash: #4A6158;
+  --med: #1C3A30; --med-strong: #5CCB9D; --med-text: #BDEBD6; --lar: #222E3A; --lar-strong: #8FA7BC; --lar-text: #D3DEE8; --gain: #A6E08F; --pos: #6FD0A8; --neg: #E58A7C;
 }
 
 .eco { flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--text); }
@@ -109,3 +111,52 @@
 .eco-item .am.sv { color: var(--blue); }
 .eco-tag { font-size: 11px; font-weight: 700; color: var(--muted); background: var(--line-soft); border-radius: 10px; padding: 2px 7px; margin-left: 6px; }
 .eco-dashbtn { height: 52px; border-radius: 20px; border: 2px dashed var(--dash); color: var(--accent-text); font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+
+/* ---- Ahorro: bloques de medio y largo plazo ---- */
+.sv-zone { border-radius: 26px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sv-zone.med { background: var(--med); color: var(--med-text); }
+.sv-zone.lar { background: var(--lar); color: var(--lar-text); }
+.sv-zone .t { font-size: 13px; font-weight: 700; opacity: 0.85; }
+.sv-zone .big { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.sv-zone .zsub { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; font-weight: 600; }
+.sv-cush { display: flex; flex-direction: column; gap: 6px; }
+.sv-cush .bar { height: 10px; border-radius: 5px; background: var(--card); display: flex; overflow: hidden; gap: 2px; }
+.sv-cush .bar i { display: block; height: 100%; }
+.sv-cush .lg { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+.sv-acc { background: var(--card); color: var(--text); border-radius: 18px; padding: 13px 14px; display: flex; flex-direction: column; gap: 9px; width: 100%; text-align: left; }
+.sv-zone.med .sv-acc { box-shadow: inset 0 0 0 1px #C9E6D8; }
+.sv-zone.lar .sv-acc { box-shadow: inset 0 0 0 1px #C6D1DB; }
+:root[data-theme="dark"] .sv-zone.med .sv-acc { box-shadow: inset 0 0 0 1px #274A3D; }
+:root[data-theme="dark"] .sv-zone.lar .sv-acc { box-shadow: inset 0 0 0 1px #2E3D4C; }
+.sv-acc .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sv-acc .nm { display: block; font-weight: 800; font-size: 15px; }
+.sv-acc .ty { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.sv-acc .val { white-space: nowrap; font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.sv-acc .trio { display: grid; grid-template-columns: 0.8fr 0.9fr 1.6fr; gap: 6px; }
+.sv-acc .trio > span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sv-acc .trio .k { font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); }
+.sv-acc .trio b { white-space: nowrap; font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sv-acc .pos { color: var(--pos); } .sv-acc .neg { color: var(--neg); }
+.sv-acc .mini { height: 6px; border-radius: 3px; background: var(--soft); display: flex; overflow: hidden; }
+.sv-acc .mini i { display: block; height: 100%; }
+.sv-zone.med .mini i.a { background: var(--med-strong); } .sv-zone.lar .mini i.a { background: var(--lar-strong); }
+.sv-acc .mini i.g { background: var(--gain); }
+.sv-big { height: 52px; border-radius: 26px; font-size: 16px; font-weight: 800; color: #fff; width: 100%; }
+.sv-zone.med .sv-big { background: var(--med-strong); } .sv-zone.lar .sv-big { background: var(--lar-strong); }
+:root[data-theme="dark"] .sv-big { color: #0B1311; }
+.sv-link { height: 32px; font-size: 12.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; opacity: 0.8; color: inherit; background: none; }
+.sv-out { height: 52px; border-radius: 26px; background: var(--card); color: var(--text); font-size: 15px; font-weight: 800; width: 100%; }
+.sv-tag { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+.sv-tag.med { background: var(--med); color: var(--med-text); } .sv-tag.lar { background: var(--lar); color: var(--lar-text); }
+.sv-sw { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); border-radius: 18px; padding: 14px 16px; }
+.sv-sw .tx { display: flex; flex-direction: column; gap: 2px; } .sv-sw b { font-size: 14px; } .sv-sw .tx span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.sv-tg { width: 48px; height: 28px; border-radius: 14px; background: var(--dash); position: relative; flex: none; }
+.sv-tg i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 11px; background: #fff; transition: transform 0.15s; }
+.sv-tg[aria-checked="true"] { background: var(--primary); } .sv-tg[aria-checked="true"] i { transform: translateX(20px); }
+.sv-pick { display: flex; flex-direction: column; gap: 8px; }
+.sv-pick .grp { font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.4px; margin-top: 4px; }
+.sv-pick button { display: flex; align-items: center; gap: 12px; background: var(--soft); border-radius: 16px; padding: 12px 14px; text-align: left; width: 100%; box-shadow: inset 0 0 0 2px transparent; color: var(--text); }
+.sv-pick button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--primary); }
+.sv-pick .ck { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--dash); flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
+.sv-pick button[aria-pressed="true"] .ck { background: var(--primary); border-color: var(--primary); }
+.sv-pick .g { flex: 1; min-width: 0; } .sv-pick .nm { display: block; font-weight: 800; font-size: 14px; } .sv-pick .sb { display: block; font-size: 12px; color: var(--muted); }

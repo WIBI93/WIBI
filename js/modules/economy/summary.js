@@ -17,7 +17,8 @@ export function renderSummary(el) {
   const isNow = mk === currentMonthKey();
   const s = monthSummary(d, mk);
   const tot = accountTotals(d);
-  const cats = chartCategories(d, s.byCat);
+  const savingRows = [['Ahorro a medio plazo', '#2F8F6B', s.contrib.medio], ['Ahorro a largo plazo', '#4F6678', s.contrib.largo]].filter((r) => r[2] > 0).map(([name, color, amount]) => ({ name, color, amount }));
+  const cats = [...chartCategories(d, s.byCat), ...savingRows];
   const catTotal = cats.reduce((t, c) => t + c.amount, 0);
   const medio = d.accounts.filter((a) => a.term === 'medio');
   const cushion = Math.min(d.cushion, tot.medio);
@@ -28,8 +29,8 @@ export function renderSummary(el) {
     <div class="eco-hero">
       <span class="k">Te sobran este mes</span>
       <span class="big">${money(s.left)}</span>
-      <div class="meter"><i style="width:${Math.min(100, s.pctSpent)}%"></i></div>
-      <div class="foot"><span>Ingresos ${money(s.income)}</span><span>Gastado el ${s.income > 0 ? s.pctSpent : 0} %</span></div>
+      <div class="meter"><i style="width:${Math.min(100, s.pctUsed)}%"></i></div>
+      <div class="foot"><span>Ingresos ${money(s.income)}</span><span>Gastado y ahorrado el ${s.income > 0 ? s.pctUsed : 0} %</span></div>
     </div>`;
   const cards = `
     <div class="eco-grid2">
@@ -38,9 +39,9 @@ export function renderSummary(el) {
         <div class="eco-leg"><span class="dot" style="background:#3F5650"></span><span class="grow">Fijos</span><span>${money(s.fixedSum)}</span></div>
         <div class="eco-leg"><span class="dot" style="background:#B9C7C1"></span><span class="grow">Puntuales</span><span>${money(s.puntualSum)}</span></div></div>
       <div class="eco-card"><span class="k">Aportado a ahorro</span><span class="v" style="color:var(--accent-text)">${money(s.contrib.medio + s.contrib.largo)}</span>
-        <div class="eco-bar"><i style="width:${share(s.contrib.medio, s.contrib.medio + s.contrib.largo)}%;background:#17594A"></i><i style="width:${share(s.contrib.largo, s.contrib.medio + s.contrib.largo)}%;background:#4A9DB5"></i></div>
-        <div class="eco-leg"><span class="dot" style="background:#17594A"></span><span class="grow">Medio plazo</span><span>${moneyAuto(s.contrib.medio)}</span></div>
-        <div class="eco-leg"><span class="dot" style="background:#4A9DB5"></span><span class="grow">Largo plazo</span><span>${moneyAuto(s.contrib.largo)}</span></div></div>
+        <div class="eco-bar"><i style="width:${share(s.contrib.medio, s.contrib.medio + s.contrib.largo)}%;background:#2F8F6B"></i><i style="width:${share(s.contrib.largo, s.contrib.medio + s.contrib.largo)}%;background:#4F6678"></i></div>
+        <div class="eco-leg"><span class="dot" style="background:#2F8F6B"></span><span class="grow">Medio plazo</span><span>${moneyAuto(s.contrib.medio)}</span></div>
+        <div class="eco-leg"><span class="dot" style="background:#4F6678"></span><span class="grow">Largo plazo</span><span>${moneyAuto(s.contrib.largo)}</span></div></div>
     </div>`;
   const where = cats.length ? `
     <div class="eco-card pad"><h3>En qué se va el dinero</h3>

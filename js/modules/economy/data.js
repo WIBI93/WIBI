@@ -101,10 +101,12 @@ export function normalize(raw) {
   const movements = arr(r.movements).map((m) => {
     const id = m && uniq(m.id);
     if (!id || !DATE_RE.test(m.date) || !accIds.has(m.accId)) return null;
+    const kind = ['contrib', 'withdraw', 'adjust', 'value'].includes(m.kind) ? m.kind : 'contrib';
     return {
       id, date: m.date, accId: m.accId,
-      kind: ['contrib', 'withdraw', 'adjust', 'value'].includes(m.kind) ? m.kind : 'contrib',
+      kind,
       amount: num(m.amount), delta: num(m.delta), dContrib: num(m.dContrib), note: str(m.note, 80),
+      fromSalary: m.fromSalary === true && kind === 'contrib',
     };
   }).filter(Boolean);
 
@@ -157,12 +159,12 @@ function apply(acc, m) { acc.balance = num(acc.balance + m.delta); acc.contribut
 function revert(acc, m) { acc.balance = num(acc.balance - m.delta); acc.contributed = num(acc.contributed - m.dContrib); }
 
 // kind: contrib | withdraw | adjust (medio: amount = saldo nuevo) | value (largo: amount = valor nuevo)
-export function addMovement(d, { accId, kind, amount, date, note }) {
+export function addMovement(d, { accId, kind, amount, date, note, fromSalary }) {
   const acc = d.accounts.find((a) => a.id === accId);
   if (!acc) return null;
-  const m = { id: uid(), date, accId, kind, amount: num(amount), delta: 0, dContrib: 0, note: str(note, 80) };
+  const m = { id: uid(), date, accId, kind, amount: num(amount), delta: 0, dContrib: 0, note: str(note, 80), fromSalary: kind === 'contrib' && fromSalary === true };
   if (kind === 'contrib') { m.delta = m.amount; m.dContrib = m.amount; }
-  else if (kind === 'withdraw') { m.delta = -m.amount; }
+  else if (kind === 'withdraw') { m.delta = -m.amount; m.dContrib = -Math.min(m.amount, Math.max(0, acc.contributed)); }
   else { m.delta = num(m.amount - acc.balance); }
   apply(acc, m);
   d.movements.push(m);
@@ -176,7 +178,7 @@ export function removeMovement(d, id) {
   d.movements = d.movements.filter((x) => x.id !== id);
 }
 // Solo aportaciones y retiradas pueden cambiar de importe; de los ajustes solo la fecha y la nota.
-export function editMovement(d, id, { amount, date, note }) {
+export function editMovement(d, id, { amount, date, note, fromSalary }) {
   const m = d.movements.find((x) => x.id === id);
   if (!m) return;
   const acc = d.accounts.find((a) => a.id === m.accId);
@@ -184,9 +186,10 @@ export function editMovement(d, id, { amount, date, note }) {
     if (acc) revert(acc, m);
     m.amount = num(amount);
     m.delta = m.kind === 'contrib' ? m.amount : -m.amount;
-    m.dContrib = m.kind === 'contrib' ? m.amount : 0;
+    m.dContrib = m.kind === 'contrib' ? m.amount : -Math.min(m.amount, Math.max(0, acc ? acc.contributed : 0));
     if (acc) apply(acc, m);
   }
+  if (m.kind === 'contrib' && typeof fromSalary === 'boolean') m.fromSalary = fromSalary;
   m.date = date;
   m.note = str(note, 80);
 }
