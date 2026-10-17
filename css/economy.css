@@ -251,3 +251,14 @@ svg circle.d-s1[r="4.5"] { fill: var(--s1); } svg circle.d-s2[r="4.5"] { fill: v
 svg .b-mid { fill: var(--primary); opacity: 0.85; } svg .b-hi { fill: var(--neg); } svg .b-lo { fill: var(--pos); }
 svg .b-avg { stroke: #E0A33A; } svg .tx.avg { fill: #E0A33A; font-weight: 800; }
 svg .p-cur { stroke: var(--primary); } svg .p-prev { stroke: #B9C7C1; } svg circle.p-dot { fill: var(--primary); stroke: var(--card); }
+
+/* Metas */
+.gl-card { gap: 12px; }
+.gl-top { display: flex; align-items: center; gap: 14px; }
+.gl-ring { flex: none; color: var(--text); }
+.gl-tx { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.gl-tx b { font-size: 16px; } .gl-tx span { font-size: 13px; color: var(--muted); }
+.gl-tx .gl-left { color: var(--accent-text); font-weight: 700; }
+.gl-mo { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 700; }
+.gl-mo .eco-unit { width: 130px; }
+.gl-eta { font-size: 13px; font-weight: 700; color: var(--accent-text); }

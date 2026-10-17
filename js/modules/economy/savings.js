@@ -89,7 +89,7 @@ function renderMove(el, term) {
     withdraw: 'Dinero que sacas. Baja el saldo real y lo aportado a la vez.',
     [adj]: 'Escribes lo que ves hoy en el banco o bróker. Lo aportado no cambia; la diferencia es lo que has ganado.',
   };
-  const draft = { kind: 'contrib', accId: accs[0].id, amount: '', date: dateKey(), note: '', sal: true };
+  const draft = { kind: 'contrib', accId: accs[0].id, amount: '', date: dateKey(), note: '', sal: true, goal: '' };
   const draw = () => {
     const d = getData();
     const acc = d.accounts.find((a) => a.id === draft.accId);
@@ -118,6 +118,7 @@ function renderMove(el, term) {
         ${amountCard(draft.kind === adj ? 'Saldo real hoy' : 'Importe', draft.amount)}
         ${draft.kind === 'contrib' ? `<div class="sv-sw"><span class="tx"><b>Restar de mi sueldo de este mes</b><span>${draft.sal ? `Cuenta como ahorro del mes («${SAL}») y baja lo que te sobra.` : 'No toca tu sueldo (por ejemplo, dinero que ya tenías aparte).'}</span></span>
           <button type="button" class="sv-tg" id="sal" role="switch" aria-checked="${draft.sal}" aria-label="Restar de mi sueldo"><i></i></button></div>` : ''}
+        ${draft.kind === 'contrib' && d.goals.length ? `<div class="eco-fields"><span class="eco-label">¿Para una meta?</span><div class="eco-chips"><button type="button" class="eco-chip" data-goal="" aria-pressed="${!draft.goal}">Ninguna</button>${d.goals.map((g) => `<button type="button" class="eco-chip" data-goal="${g.id}" aria-pressed="${draft.goal === g.id}">${esc(g.name)}</button>`).join('')}</div></div>` : ''}
         <div class="eco-rows">${dateRow(draft.date)}${noteRow(draft.note)}</div>
         <div class="eco-info" id="info" style="flex-direction:column;gap:6px;width:100%">${info()}</div>
         <div class="eco-foot"><button type="button" class="eco-btn" id="save">Guardar</button></div>
@@ -127,6 +128,7 @@ function renderMove(el, term) {
     el.querySelector('#go-back').addEventListener('click', () => back('/economia/ahorro'));
     el.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => { grab(); draft.kind = b.dataset.kind; draw(); }));
     el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => { grab(); draft.accId = b.dataset.acc; draw(); }));
+    el.querySelectorAll('[data-goal]').forEach((b) => b.addEventListener('click', () => { grab(); draft.goal = b.dataset.goal; draw(); }));
     const sal = el.querySelector('#sal');
     if (sal) sal.addEventListener('click', () => { grab(); draft.sal = !draft.sal; draw(); });
     el.querySelector('#date').addEventListener('change', (e) => { grab(); if (e.target.value) draft.date = e.target.value; draw(); });
@@ -135,7 +137,7 @@ function renderMove(el, term) {
       const n = parseMoney(draft.amount);
       if (!Number.isFinite(n) || n < 0 || (draft.kind !== adj && n === 0)) return toast('Escribe un importe válido');
       if (draft.kind === 'withdraw' && n > acc.balance) return toast('No puedes retirar más de lo que hay en la cuenta');
-      update((data) => addMovement(data, { accId: draft.accId, kind: draft.kind, amount: n, date: draft.date, note: draft.note, fromSalary: draft.kind === 'contrib' && draft.sal }));
+      update((data) => addMovement(data, { accId: draft.accId, kind: draft.kind, amount: n, date: draft.date, note: draft.note, fromSalary: draft.kind === 'contrib' && draft.sal, goalId: draft.kind === 'contrib' ? draft.goal : '' }));
       toast(draft.kind === 'contrib' && draft.sal ? 'Guardado y restado de tu sueldo' : 'Guardado');
       back('/economia/ahorro');
     });

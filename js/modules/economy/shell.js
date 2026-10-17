@@ -13,6 +13,7 @@ const P = {
   gastos: '<path d="M4 6h16M4 12h16M4 18h10"/>',
   ahorro: '<path d="M4.5 12.8c0-3.6 3-6.3 7-6.3h3c1.1 0 2.1.3 3 .9L19.6 6v3.3c.8.8 1.4 1.8 1.4 3.1 0 1.6-.8 3-2.1 3.8V19h-3v-1.6h-5V19h-3v-3.1c-1.5-.9-2.4-2.2-2.4-3.1z"/><circle cx="16.3" cy="11.4" r=".6" fill="currentColor"/><path d="M9.5 6.5V5.2M12.5 6.5V4.6"/><path d="M3 11.5h1.5"/>',
   estadisticas: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  metas: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
   trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
   simular: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',
   bag: '<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
@@ -34,7 +35,7 @@ export function navHtml(active) {
   return `<nav class="eco-nav" aria-label="Secciones de economía">
     ${tab('resumen', 'Resumen', '/economia')}${tab('gastos', 'Gastos', '/economia/gastos')}
     <button type="button" class="eco-plus" data-add aria-label="Añadir movimiento">${ei('plus', 24, 2.4)}</button>
-    ${tab('ahorro', 'Ahorro', '/economia/ahorro')}${tab('estadisticas', 'Estadíst.', '/economia/estadisticas')}</nav>`;
+    ${tab('ahorro', 'Ahorro', '/economia/ahorro')}${tab('metas', 'Metas', '/economia/metas')}${tab('estadisticas', 'Estadíst.', '/economia/estadisticas')}</nav>`;
 }
 export function bindNav(el) {
   el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));

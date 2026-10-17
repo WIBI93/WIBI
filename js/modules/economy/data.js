@@ -42,7 +42,7 @@ function defaults() {
     fixed: DEFAULT_FIXED.map(([name, cat, freq], i) => ({ id: 'fx' + i, name, cat, freq })), // ids fijos: así no cambian entre lecturas
     incomeTypes: ['Sueldo', 'Otros ingresos'],
     expenses: [], incomes: [], accounts: [], movements: [], cushion: 0,
-    sim: {},
+    goals: [], sim: {},
   };
 }
 
@@ -107,13 +107,21 @@ export function normalize(raw) {
       kind,
       amount: num(m.amount), delta: num(m.delta), dContrib: num(m.dContrib), note: str(m.note, 80),
       fromSalary: m.fromSalary === true && kind === 'contrib',
+      goalId: kind === 'contrib' ? str(m.goalId, 40) : '',
     };
+  }).filter(Boolean);
+
+  const goals = arr(r.goals).map((g) => {
+    const id = g && uniq(g.id);
+    const name = g && str(g.name, 40);
+    if (!id || !name) return null;
+    return { id, name, target: pos(g.target), base: pos(g.base), monthly: pos(g.monthly), icon: str(g.icon, 4) || '🎯' };
   }).filter(Boolean);
 
   const incomeTypes = [...new Set(arr(r.incomeTypes).map((t) => str(t, 30)).filter(Boolean))];
   const sim = r.sim && typeof r.sim === 'object' ? r.sim : {};
   return {
-    version: 1, setupDone: r.setupDone === true, categories, fixed, expenses, incomes, accounts, movements,
+    version: 1, setupDone: r.setupDone === true, categories, fixed, expenses, incomes, accounts, movements, goals,
     incomeTypes: incomeTypes.length ? incomeTypes : ['Sueldo', 'Otros ingresos'],
     cushion: pos(r.cushion), sim,
   };
@@ -159,10 +167,10 @@ function apply(acc, m) { acc.balance = num(acc.balance + m.delta); acc.contribut
 function revert(acc, m) { acc.balance = num(acc.balance - m.delta); acc.contributed = num(acc.contributed - m.dContrib); }
 
 // kind: contrib | withdraw | adjust (medio: amount = saldo nuevo) | value (largo: amount = valor nuevo)
-export function addMovement(d, { accId, kind, amount, date, note, fromSalary }) {
+export function addMovement(d, { accId, kind, amount, date, note, fromSalary, goalId }) {
   const acc = d.accounts.find((a) => a.id === accId);
   if (!acc) return null;
-  const m = { id: uid(), date, accId, kind, amount: num(amount), delta: 0, dContrib: 0, note: str(note, 80), fromSalary: kind === 'contrib' && fromSalary === true };
+  const m = { id: uid(), date, accId, kind, amount: num(amount), delta: 0, dContrib: 0, note: str(note, 80), fromSalary: kind === 'contrib' && fromSalary === true, goalId: kind === 'contrib' && goalId ? String(goalId) : '' };
   if (kind === 'contrib') { m.delta = m.amount; m.dContrib = m.amount; }
   else if (kind === 'withdraw') { m.delta = -m.amount; m.dContrib = -Math.min(m.amount, Math.max(0, acc.contributed)); }
   else { m.delta = num(m.amount - acc.balance); }
@@ -199,4 +207,13 @@ export function removeAccount(d, id) {
 }
 export function resetAll() {
   save(KEY, defaults());
+}
+
+// Metas: lo ahorrado = aportes directos (base) + aportaciones de cuenta marcadas para esa meta.
+export function goalSaved(d, g) {
+  return Math.max(0, g.base + d.movements.filter((m) => m.kind === 'contrib' && m.goalId === g.id).reduce((t, m) => t + m.amount, 0));
+}
+export function removeGoal(d, id) {
+  d.goals = d.goals.filter((g) => g.id !== id);
+  d.movements.forEach((m) => { if (m.goalId === id) m.goalId = ''; });
 }
