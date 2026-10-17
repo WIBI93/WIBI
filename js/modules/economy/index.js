@@ -7,6 +7,7 @@ import { renderSavings, renderMediumMove, renderLongMove, renderSavingMove, rend
 import { renderProjection } from './projection.js';
 import { renderSim } from './sim.js';
 import { renderGoals, renderGoalForm } from './goals.js';
+import { renderPagos } from './pagos.js';
 import { renderStats } from './stats.js';
 import { renderEcoSettings } from './settings.js';
 import { renderSetup, renderSetupEdit } from './setup.js';
@@ -26,6 +27,7 @@ export function registerEconomy(route) {
   route('/economia/ahorro/cuenta/:id', renderAccountForm, o);
   route('/economia/ahorro/mov/:id', renderSavingMove, o);
   route('/economia/simular', renderSim, o);
+  route('/economia/pagos', renderPagos, o);
   route('/economia/metas', renderGoals, o);
   route('/economia/meta/:id', renderGoalForm, o);
   route('/economia/estadisticas', renderStats, o);

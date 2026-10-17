@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v18';
+const CACHE = 'wibi-v19';
 
 const ASSETS = [
   './',
@@ -39,6 +39,7 @@ const ASSETS = [
   'js/modules/economy/shell.js',
   'js/modules/economy/sim.js',
   'js/modules/economy/stats.js',
+  'js/modules/economy/pagos.js',
   'js/modules/economy/goals.js',
   'js/modules/economy/state.js',
   'js/modules/economy/summary.js',

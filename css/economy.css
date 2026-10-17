@@ -262,3 +262,25 @@ svg .p-cur { stroke: var(--primary); } svg .p-prev { stroke: #B9C7C1; } svg circ
 .gl-mo { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 700; }
 .gl-mo .eco-unit { width: 130px; }
 .gl-eta { font-size: 13px; font-weight: 700; color: var(--accent-text); }
+
+/* Pagos */
+.pg-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px 2px; text-align: center; }
+.pg-dh { font-size: 11px; font-weight: 800; color: var(--muted); }
+.pg-day { font-size: 13px; font-weight: 600; height: 38px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 3px; border-radius: 10px; }
+.pg-day.has { font-weight: 800; } .pg-day.today { background: var(--soft); }
+.pg-dots { display: flex; gap: 2px; height: 6px; margin-top: 3px; }
+.pg-dot { width: 6px; height: 6px; border-radius: 3px; background: var(--muted); }
+.pg-dot.paid { background: var(--primary); } .pg-dot.late { background: var(--danger); } .pg-dot.soon { background: #E0A020; } .pg-dot.skipped { background: var(--dash); }
+.pg-weeks { display: flex; align-items: flex-end; justify-content: space-around; gap: 8px; min-height: 110px; }
+.pg-w { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; }
+.pg-w i { width: 70%; max-width: 44px; border-radius: 8px 8px 4px 4px; background: var(--primary); opacity: .85; }
+.pg-w b { font-size: 12px; } .pg-w span { font-size: 11px; color: var(--muted); }
+.pg-row { border-bottom: 1px solid var(--dash); }
+.pg-main { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; text-align: left; }
+.pg-d { width: 34px; height: 34px; border-radius: 17px; background: var(--soft); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex: none; }
+.pg-main .tx { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; } .pg-main .tx em { font-style: normal; font-weight: 600; color: var(--muted); font-size: 12px; }
+.pg-main .am { font-weight: 800; font-size: 15px; }
+.pg-st { font-size: 12px; font-weight: 700; color: var(--muted); }
+.pg-st.paid { color: var(--accent-text); } .pg-st.late { color: var(--danger); } .pg-st.soon { color: #A8700B; }
+.pg-act { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 14px 46px; } .pg-act[hidden] { display: none; }
+.pg-warn { text-align: left; width: 100%; }

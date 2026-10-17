@@ -42,7 +42,7 @@ function defaults() {
     fixed: DEFAULT_FIXED.map(([name, cat, freq], i) => ({ id: 'fx' + i, name, cat, freq })), // ids fijos: así no cambian entre lecturas
     incomeTypes: ['Sueldo', 'Otros ingresos'],
     expenses: [], incomes: [], accounts: [], movements: [], cushion: 0,
-    goals: [], sim: {},
+    goals: [], pay: { skip: [], move: [], extras: [] }, sim: {},
   };
 }
 
@@ -69,7 +69,10 @@ export function normalize(raw) {
   const fixed = arr(r.fixed).map((f) => {
     const id = f && uniq(f.id);
     const name = f && str(f.name, 40);
-    return id && name ? { id, name, cat: catId(f.cat), freq: f.freq === 'occasional' ? 'occasional' : 'monthly' } : null;
+    if (!id || !name) return null;
+    const every = [0, 1, 2, 3, 12].includes(Number(f.every)) && f.every !== null && f.every !== undefined && f.every !== '' ? Number(f.every) : null;
+    const day = Math.min(31, Math.max(1, Math.round(num(f.day)) || 1));
+    return { id, name, cat: catId(f.cat), freq: f.freq === 'occasional' ? 'occasional' : 'monthly', every, day, start: /^\d{4}-\d{2}$/.test(f.start || '') ? f.start : '' };
   }).filter(Boolean);
   const fixedIds = new Set(fixed.map((f) => f.id));
 
@@ -118,10 +121,21 @@ export function normalize(raw) {
     return { id, name, target: pos(g.target), base: pos(g.base), monthly: pos(g.monthly), icon: str(g.icon, 4) || '🎯' };
   }).filter(Boolean);
 
+  const pr = r.pay && typeof r.pay === 'object' ? r.pay : {};
+  const mkOk = (v) => /^\d{4}-\d{2}$/.test(v || '');
+  const pay = {
+    skip: arr(pr.skip).filter((x) => x && fixedIds.has(x.fixedId) && mkOk(x.mk)).map((x) => ({ fixedId: x.fixedId, mk: x.mk })),
+    move: arr(pr.move).filter((x) => x && fixedIds.has(x.fixedId) && mkOk(x.mk)).map((x) => ({ fixedId: x.fixedId, mk: x.mk, day: Math.min(31, Math.max(1, Math.round(num(x.day)) || 1)) })),
+    extras: arr(pr.extras).map((x) => {
+      const id = x && uniq(x.id);
+      return id && DATE_RE.test(x.date) && str(x.name, 40) ? { id, name: str(x.name, 40), amount: pos(x.amount), date: x.date, cat: catId(x.cat) } : null;
+    }).filter(Boolean),
+  };
+
   const incomeTypes = [...new Set(arr(r.incomeTypes).map((t) => str(t, 30)).filter(Boolean))];
   const sim = r.sim && typeof r.sim === 'object' ? r.sim : {};
   return {
-    version: 1, setupDone: r.setupDone === true, categories, fixed, expenses, incomes, accounts, movements, goals,
+    version: 1, setupDone: r.setupDone === true, categories, fixed, expenses, incomes, accounts, movements, goals, pay,
     incomeTypes: incomeTypes.length ? incomeTypes : ['Sueldo', 'Otros ingresos'],
     cushion: pos(r.cushion), sim,
   };
