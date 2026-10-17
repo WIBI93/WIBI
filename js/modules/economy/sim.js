@@ -118,7 +118,7 @@ export function renderSim(el) {
         <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow"><span class="eco-sub">Economía</span><span class="eco-h1">Simular</span></div></header>
         <div class="eco-seg" role="group"><button type="button" data-t="interes" aria-pressed="${tab === 'interes'}">Interés compuesto</button><button type="button" data-t="hipoteca" aria-pressed="${tab === 'hipoteca'}">Hipoteca</button></div>
         <div id="sim">${tab === 'interes' ? interestHtml(s) : mortgageHtml(s)}</div>
-      </div>${navHtml('simular')}</div>`;
+      </div>${navHtml('ahorro')}</div>`;
     bindNav(el);
     el.querySelector('#go-back').addEventListener('click', () => go('/economia'));
     el.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.t; draw(); }));
