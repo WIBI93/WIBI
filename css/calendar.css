@@ -279,3 +279,9 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-ybars i { display: block; border-radius: 4px 4px 0 0; min-height: 2px; }
 .cal-ylabels { display: flex; gap: 5px; font-size: 10px; color: var(--muted); }
 .cal-ylabels span { flex: 1; text-align: center; }
+
+/* Horas: bloque destacado más pequeño */
+.cal-hero.compact { padding: 12px 16px; align-items: center; }
+.cal-hero.compact .big { font-size: 26px; }
+.cal-hero.compact .k { font-size: 13px; }
+.cal-hero.compact .rt { font-size: 13px; }

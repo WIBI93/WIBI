@@ -7,6 +7,7 @@ import { renderHours, renderStress, renderZones, renderPending } from './summary
 import { renderShifts, renderShiftEdit } from './shifts.js';
 import { renderZoneList, renderZoneEdit } from './zones.js';
 import { renderSettings } from './settings.js';
+import { renderCalendarsSettings, renderCausesSettings } from './settings-sub.js';
 import { renderHolidays } from './holidays.js';
 import { renderNewCalendar } from './newcal.js';
 
@@ -24,6 +25,8 @@ export function registerCalendar(route) {
   route('/calendario/turno/:id', renderShiftEdit, o);
   route('/calendario/zona/:id', renderZoneEdit, o);
   route('/calendario/ajustes', renderSettings, o);
+  route('/calendario/ajustes/calendarios', renderCalendarsSettings, o);
+  route('/calendario/ajustes/causas', renderCausesSettings, o);
   route('/calendario/festivos', renderHolidays, o);
   route('/calendario/nuevo', renderNewCalendar, o);
 }

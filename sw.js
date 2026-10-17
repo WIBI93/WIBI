@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v19';
+const CACHE = 'wibi-v20';
 
 const ASSETS = [
   './',
@@ -55,6 +55,7 @@ const ASSETS = [
   'js/modules/calendar/shifts.js',
   'js/modules/calendar/zones.js',
   'js/modules/calendar/settings.js',
+  'js/modules/calendar/settings-sub.js',
   'js/modules/calendar/holidays.js',
   'js/modules/calendar/newcal.js',
   'icons/icon-192.png',

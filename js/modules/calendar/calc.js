@@ -74,6 +74,21 @@ export function monthStats(cal, holidays, y, m) {
   return st;
 }
 
+// Estadísticas de un mes, o del año entero si m es null (suma los 12 meses).
+export function periodStats(cal, holidays, y, m) {
+  if (m != null) return monthStats(cal, holidays, y, m);
+  const all = { worked: 0, hours: 0, off: 0, out: 0, unpainted: 0, fest: 0, byShift: {} };
+  cal.shifts.forEach((s) => { all.byShift[s.id] = { days: 0, hours: 0 }; });
+  for (let i = 0; i < 12; i++) {
+    const s = monthStats(cal, holidays, y, i);
+    ['worked', 'hours', 'off', 'out', 'fest'].forEach((k) => { all[k] += s[k]; });
+    Object.keys(s.byShift).forEach((id) => { all.byShift[id].days += s.byShift[id].days; all.byShift[id].hours += s.byShift[id].hours; });
+  }
+  all.hours = Math.round(all.hours * 100) / 100;
+  Object.values(all.byShift).forEach((b) => { b.hours = Math.round(b.hours * 100) / 100; });
+  return all;
+}
+
 const prefix = (y, m) => (m == null ? `${y}-` : `${y}-${pad(m + 1)}-`);
 
 // Veces en cada zona (mes, o año entero si m es null).
