@@ -160,3 +160,9 @@
 .sv-pick .ck { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--dash); flex: none; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
 .sv-pick button[aria-pressed="true"] .ck { background: var(--primary); border-color: var(--primary); }
 .sv-pick .g { flex: 1; min-width: 0; } .sv-pick .nm { display: block; font-weight: 800; font-size: 14px; } .sv-pick .sb { display: block; font-size: 12px; color: var(--muted); }
+
+.eco .sv-big.sv-proj, .eco .sv-big.sv-sim { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.eco .sv-big.sv-proj { background: #27B36A; color: #fff; }
+.eco .sv-big.sv-sim { background: #F1C04A; color: #3A2E08; }
+:root[data-theme="dark"] .eco .sv-big.sv-proj { background: #34C77B; color: #06210F; }
+:root[data-theme="dark"] .eco .sv-big.sv-sim { background: #E8B83F; color: #241B03; }

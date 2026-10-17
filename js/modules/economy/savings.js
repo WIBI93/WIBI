@@ -52,7 +52,8 @@ export function renderSavings(el) {
       ${d.cushion > 0 && tot.medio < d.cushion ? `<div class="eco-info warn">${ei('info', 18)}<span>El saldo de medio plazo está por debajo de tu colchón de ${money(d.cushion)}.</span></div>` : ''}
       ${zone('medio', medio, tot.medio)}
       ${zone('largo', largo, tot.largo)}
-      <button type="button" class="sv-out" id="proj">Proyección</button>
+      <button type="button" class="sv-big sv-proj" id="proj">${ei('trend', 22, 2.2)}<span>Proyección</span></button>
+      <button type="button" class="sv-big sv-sim" id="sim">${ei('simular', 22, 2)}<span>Simulador</span></button>
     </div>${navHtml('ahorro')}</div>`;
   bindNav(el);
   el.querySelector('#newacc').addEventListener('click', () => navigate('/economia/ahorro/cuenta/nueva'));
@@ -62,6 +63,7 @@ export function renderSavings(el) {
     if (!(t === 'medio' ? medio : largo).length) return toast(`Primero añade una cuenta de ${t} plazo`);
     navigate('/economia/ahorro/' + t);
   }));
+  el.querySelector('#sim').addEventListener('click', () => navigate('/economia/simular'));
   el.querySelector('#proj').addEventListener('click', () => (d.accounts.length ? navigate('/economia/ahorro/proyeccion') : toast('Primero añade una cuenta')));
   const cb = el.querySelector('#cushion');
   if (cb) cb.addEventListener('click', async () => {
