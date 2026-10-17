@@ -34,11 +34,11 @@ export function renderSummary(el) {
     </div>`;
   const cards = `
     <div class="eco-grid2">
-      <div class="eco-card"><span class="k">Gastado</span><span class="v">${money(s.spent)}</span>
+      <div class="eco-card tint-sand"><span class="k">Gastado</span><span class="v">${money(s.spent)}</span>
         <div class="eco-bar"><i style="width:${share(s.fixedSum, s.spent)}%;background:#3F5650"></i><i style="width:${share(s.puntualSum, s.spent)}%;background:#B9C7C1"></i></div>
         <div class="eco-leg"><span class="dot" style="background:#3F5650"></span><span class="grow">Fijos</span><span>${money(s.fixedSum)}</span></div>
         <div class="eco-leg"><span class="dot" style="background:#B9C7C1"></span><span class="grow">Puntuales</span><span>${money(s.puntualSum)}</span></div></div>
-      <div class="eco-card"><span class="k">Aportado a ahorro</span><span class="v" style="color:var(--accent-text)">${money(s.contrib.medio + s.contrib.largo)}</span>
+      <div class="eco-card tint-mint"><span class="k">Aportado a ahorro</span><span class="v" style="color:var(--accent-text)">${money(s.contrib.medio + s.contrib.largo)}</span>
         <div class="eco-bar"><i style="width:${share(s.contrib.medio, s.contrib.medio + s.contrib.largo)}%;background:#2F8F6B"></i><i style="width:${share(s.contrib.largo, s.contrib.medio + s.contrib.largo)}%;background:#4F6678"></i></div>
         <div class="eco-leg"><span class="dot" style="background:#2F8F6B"></span><span class="grow">Medio plazo</span><span>${moneyAuto(s.contrib.medio)}</span></div>
         <div class="eco-leg"><span class="dot" style="background:#4F6678"></span><span class="grow">Largo plazo</span><span>${moneyAuto(s.contrib.largo)}</span></div></div>
@@ -50,7 +50,7 @@ export function renderSummary(el) {
         `<div class="eco-cat"><span class="dot" style="background:${c.color}"></span><span class="grow">${esc(c.name)}</span><span class="p">${Math.round(share(c.amount, catTotal))} %</span><span class="a">${money(c.amount)}</span></div>`).join('')}</div></div>` : '';
   const free = Math.max(0, tot.medio - cushion);
   const saving = `
-    <div class="eco-card pad">
+    <div class="eco-card pad tint-mist">
       <div style="display:flex;align-items:baseline;justify-content:space-between"><h3>Ahorro total</h3><span class="v">${money(tot.total)}</span></div>
       ${!isNow ? '<span class="eco-note" style="font-size:12px">Es el saldo de hoy, no el de ese mes.</span>' : ''}
       ${d.accounts.length ? `<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600">
