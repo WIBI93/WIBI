@@ -7,6 +7,7 @@ import { renderSettings } from './screens/settings.js';
 import { renderColors } from './screens/colors.js';
 import { registerEconomy } from './modules/economy/index.js';
 import { registerCalendar } from './modules/calendar/index.js';
+import { registerFit } from './modules/fit/index.js';
 
 ensureInstalledAt();
 applyTheme();
@@ -16,6 +17,7 @@ route('/ajustes', renderSettings);
 route('/ajustes/colores', renderColors);
 registerEconomy(route);
 registerCalendar(route);
+registerFit(route);
 
 start(document.getElementById('app'));
 

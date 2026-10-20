@@ -25,6 +25,10 @@ export function save(key, value) {
   }
 }
 
+export function remove(key) {
+  try { localStorage.removeItem(PREFIX + key); } catch { /* nada */ }
+}
+
 export function allKeys() {
   const keys = [];
   for (let i = 0; i < localStorage.length; i++) {

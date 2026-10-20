@@ -1,0 +1,102 @@
+/* ============================================================
+   W fit · tres aspectos: común (crema), gimnasio (hierro), running (noche)
+   Se activan con las clases in-fitc, in-fitg, in-fitr en <html>.
+   ============================================================ */
+:root.in-fitc {
+  --f-bg: #F4EFE6; --f-card: #FFFDF8; --f-ink: #1F1B16; --f-mute: #7A7266; --f-line: #E4DCCD;
+  --f-acc: #19C6D2; --f-on: #06303D; --f-acc2: #FF4B2B; --f-font: 'Manrope', system-ui, sans-serif; --f-head: 'Bricolage Grotesque', 'Manrope', sans-serif; --f-r: 18px;
+}
+:root.in-fitg {
+  --f-bg: #121212; --f-card: #1E1E1E; --f-ink: #F2F2F2; --f-mute: #8C8C8C; --f-line: #333;
+  --f-acc: #FF4B2B; --f-on: #121212; --f-acc2: #FF4B2B; --f-font: 'Barlow', system-ui, sans-serif; --f-head: 'Barlow Condensed', 'Barlow', sans-serif; --f-r: 6px;
+}
+:root.in-fitg[data-accent="lima"] { --f-acc: #C8FF2E; --f-acc2: #C8FF2E; }
+:root.in-fitr {
+  --f-bg: #0D1230; --f-card: #1A2150; --f-ink: #F3F5FF; --f-mute: #9AA3D6; --f-line: #2B3470;
+  --f-acc: #FFC83D; --f-on: #1B1400; --f-acc2: #3DE0FF; --f-font: 'Rubik', system-ui, sans-serif; --f-head: 'Rubik', sans-serif; --f-r: 20px;
+}
+html[class*="in-fit"], html[class*="in-fit"] body { background: var(--f-bg); color: var(--f-ink); font-family: var(--f-font); }
+html.in-fitr, html.in-fitr body { background: linear-gradient(180deg, #0D1230, #131A44) fixed; }
+
+.f-screen { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; color: var(--f-ink); font-family: var(--f-font); }
+.f-screen .grow, .f-screen .rowh .grow { flex: 1; }
+.f-head { display: flex; align-items: center; gap: 12px; padding: 22px 18px 8px; }
+.f-head h1 { margin: 0; font-family: var(--f-head); font-size: 30px; line-height: 1.05; font-weight: 800; letter-spacing: -.3px; }
+.in-fitg .f-head h1 { text-transform: uppercase; letter-spacing: 1px; font-size: 34px; }
+.f-sub { font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--f-mute); }
+.f-main { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 10px 16px 110px; }
+.f-round { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--f-line); background: var(--f-card); color: var(--f-ink); display: grid; place-items: center; cursor: pointer; flex: none; }
+.in-fitg .f-round { border-radius: 6px; }
+
+.f-card { background: var(--f-card); border: 1px solid var(--f-line); border-radius: var(--f-r); padding: 14px; display: flex; flex-direction: column; gap: 8px; color: var(--f-ink); text-align: left; font: inherit; }
+button.f-card { cursor: pointer; width: 100%; }
+.f-card .rowh { display: flex; align-items: center; gap: 8px; }
+.f-card.sport-gym { border-left: 5px solid #FF4B2B; }
+.f-card.sport-run { border-left: 5px solid #19C6D2; }
+.f-card.level { border-color: var(--f-acc); }
+.f-card.pausa { border-style: dashed; border-color: var(--f-acc); }
+.f-ico { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--f-bg); }
+.f-big { font-family: var(--f-head); font-size: 26px; font-weight: 800; line-height: 1.1; }
+.in-fitg .f-big, .in-fitg .f-num { text-transform: uppercase; letter-spacing: .5px; }
+.f-num { font-family: var(--f-head); font-size: 30px; font-weight: 800; line-height: 1; }
+.f-mini { font-size: 13px; color: var(--f-mute); line-height: 1.4; }
+.f-mini.center { text-align: center; }
+.f-note { font-size: 14px; color: var(--f-mute); background: transparent; border: 1px dashed var(--f-line); border-radius: var(--f-r); padding: 12px 14px; line-height: 1.45; }
+.f-guino { font-size: 14px; font-style: italic; color: var(--f-mute); padding: 0 4px; }
+.f-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.f-grid .f-card { padding: 12px; gap: 4px; }
+.f-bar { height: 10px; border-radius: 99px; background: var(--f-bg); overflow: hidden; }
+.f-bar i { display: block; height: 100%; background: var(--f-acc); border-radius: 99px; }
+
+.f-link { background: none; border: 0; color: var(--f-acc); font: inherit; font-weight: 700; cursor: pointer; padding: 4px 0; text-align: left; }
+.in-fitc .f-link { color: #0E8F99; }
+.f-link.wide { padding: 10px 4px; color: var(--f-mute); font-weight: 600; }
+.f-btn { border: 0; border-radius: var(--f-r); background: var(--f-acc); color: var(--f-on); font: inherit; font-weight: 800; font-size: 16px; padding: 14px; cursor: pointer; }
+.f-btn.ghost { background: transparent; color: var(--f-ink); border: 1px solid var(--f-line); }
+.f-btn.danger { background: transparent; color: #E5484D; border: 1px solid #E5484D; }
+
+.f-seg { display: flex; gap: 4px; background: var(--f-bg); border: 1px solid var(--f-line); border-radius: 99px; padding: 3px; }
+.in-fitg .f-seg { border-radius: 6px; }
+.f-seg button { flex: 1; border: 0; background: transparent; color: var(--f-mute); font: inherit; font-weight: 700; padding: 9px 10px; border-radius: 99px; cursor: pointer; }
+.in-fitg .f-seg button { border-radius: 4px; }
+.f-seg button[aria-pressed="true"] { background: var(--f-acc); color: var(--f-on); }
+.f-seg.small button { padding: 6px 12px; font-size: 13px; }
+.f-presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.f-presets button { border: 1px solid var(--f-line); background: var(--f-card); color: var(--f-ink); font: inherit; font-weight: 700; padding: 12px; border-radius: var(--f-r); cursor: pointer; }
+.f-presets button[aria-pressed="true"] { border-color: var(--f-acc); box-shadow: inset 0 0 0 1px var(--f-acc); }
+
+.f-step { display: inline-flex; align-items: center; gap: 4px; }
+.f-step button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--f-line); background: var(--f-bg); color: var(--f-ink); display: grid; place-items: center; cursor: pointer; }
+.in-fitg .f-step button { border-radius: 6px; }
+.f-step output { min-width: 38px; text-align: center; font-family: var(--f-head); font-size: 22px; font-weight: 800; }
+.f-switch { width: 50px; height: 30px; border-radius: 99px; border: 1px solid var(--f-line); background: var(--f-bg); position: relative; cursor: pointer; }
+.f-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--f-mute); transition: transform .15s; }
+.f-switch[aria-pressed="true"] { background: var(--f-acc); }
+.f-switch[aria-pressed="true"]::after { transform: translateX(20px); background: var(--f-on); }
+
+.f-dots { display: flex; gap: 8px; }
+.f-dot { flex: 1; height: 14px; border-radius: 99px; background: var(--f-bg); border: 1px solid var(--f-line); }
+.f-dot.met { background: var(--f-acc); border-color: var(--f-acc); }
+.f-dot.current { border-color: var(--f-acc); border-style: dashed; }
+.f-dot.comodin { background: repeating-linear-gradient(45deg, var(--f-acc) 0 4px, transparent 4px 8px); }
+.f-dot.paused { background: var(--f-line); }
+.f-dot.unmet { background: transparent; }
+
+.f-medals { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.f-medal { display: flex; flex-direction: column; align-items: center; width: 64px; }
+.f-medal b { font-size: 15px; } .f-medal span { font-size: 11px; color: var(--f-mute); }
+
+/* Barras inferiores */
+.f-nav { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); background: var(--f-card); border-top: 1px solid var(--f-line); z-index: 5; }
+.f-nav.sport { grid-template-columns: 1fr 1fr 1fr 74px 1fr 1fr 1fr; }
+.f-tab { display: flex; flex-direction: column; align-items: center; gap: 3px; border: 1px solid transparent; background: none; color: var(--f-mute); font: inherit; font-size: 10.5px; font-weight: 700; padding: 6px 0; border-radius: 12px; cursor: pointer; min-width: 0; }
+.f-tab[aria-current="page"] { color: var(--f-ink); }
+.f-tab[aria-current="page"] svg { color: var(--f-acc); }
+.in-fitc .f-tab[aria-current="page"] svg { color: #0E8F99; }
+.f-tab.frame-gym { border-color: #FF4B2B; color: #D93A1C; }
+.f-tab.frame-run { border-color: #19C6D2; color: #0E8F99; }
+.f-center { width: 60px; height: 60px; margin: -24px auto 0; border-radius: 50%; border: 4px solid var(--f-bg); background: var(--f-acc); color: var(--f-on); display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.in-fitg .f-center { border-radius: 12px; }
+.f-nav.sport .f-tab { font-size: 9.5px; letter-spacing: -.2px; padding: 6px 0; }
+.f-nav.sport { grid-template-columns: 1fr 1fr 1fr 66px 1fr 1fr 1fr; }
+.f-tab span { max-width: 100%; overflow: hidden; text-overflow: clip; white-space: nowrap; }

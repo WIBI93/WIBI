@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v20';
+const CACHE = 'wibi-v21';
 
 const ASSETS = [
   './',
@@ -10,6 +10,7 @@ const ASSETS = [
   'manifest.webmanifest',
   'css/styles.css',
   'css/calendar.css',
+  'css/fit.css',
   'css/economy.css',
   'js/main.js',
   'js/core/icons.js',
@@ -43,6 +44,14 @@ const ASSETS = [
   'js/modules/economy/goals.js',
   'js/modules/economy/state.js',
   'js/modules/economy/summary.js',
+  'js/modules/fit/index.js',
+  'js/modules/fit/dates.js',
+  'js/modules/fit/data.js',
+  'js/modules/fit/engine.js',
+  'js/modules/fit/medals.js',
+  'js/modules/fit/shell.js',
+  'js/modules/fit/common.js',
+  'js/modules/fit/sport.js',
   'js/modules/calendar/index.js',
   'js/modules/calendar/calc.js',
   'js/modules/calendar/data.js',

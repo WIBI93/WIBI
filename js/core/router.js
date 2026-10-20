@@ -8,6 +8,7 @@ let container = null;
 const split = (p) => p.split('/').filter(Boolean);
 
 // opts.cal = true -> la pantalla usa el aspecto propio del calendario.
+// opts.theme = 'fitc' | 'fitg' | 'fitr' -> aspecto propio de W fit (común, gimnasio o running).
 // opts.full = true -> la pantalla ocupa todo el ancho (barra inferior propia).
 export function route(path, render, opts = {}) {
   routes.push({ parts: split(path), render, opts });
@@ -61,8 +62,12 @@ function currentPath() {
 function show() {
   const hit = find(currentPath()) || find('/');
   const cal = !!hit.r.opts.cal;
-  document.documentElement.classList.toggle('in-cal', cal);
-  container.classList.toggle('full', cal || !!hit.r.opts.full);
+  const theme = hit.r.opts.theme || '';
+  const root = document.documentElement;
+  root.classList.toggle('in-cal', cal);
+  for (const t of ['fitc', 'fitg', 'fitr']) root.classList.toggle('in-' + t, t === theme);
+  if (!theme) delete root.dataset.accent;
+  container.classList.toggle('full', cal || !!theme || !!hit.r.opts.full);
   container.innerHTML = '';
   hit.r.render(container, hit.params);
   window.scrollTo(0, 0);
