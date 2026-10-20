@@ -2,6 +2,12 @@
 
 import { renderHome, renderWeek, renderCommonMedals, renderCommonSettings } from './common.js';
 import { renderSportHome, renderSportTab } from './sport.js';
+import { renderRoutines, renderRoutineEdit, renderSessions, renderSessionDetail, renderStart, renderMyExercises } from './gym.js';
+
+import { getFit } from './data.js';
+
+// Pone el color de acento del gimnasio antes de dibujar su pantalla.
+const gymScreen = (fn) => (el, params) => { document.documentElement.dataset.accent = getFit().settings.accent; return fn(el, params); };
 
 export function registerFit(route) {
   route('/fit', renderHome, { theme: 'fitc' });
@@ -9,7 +15,14 @@ export function registerFit(route) {
   route('/fit/medallas', renderCommonMedals, { theme: 'fitc' });
   route('/fit/ajustes', renderCommonSettings, { theme: 'fitc' });
   route('/fit/gym', renderSportHome('gym'), { theme: 'fitg' });
-  route('/fit/gym/:tab', renderSportTab('gym'), { theme: 'fitg' });
+  const g = { theme: 'fitg' };
+  route('/fit/gym/rutinas', gymScreen(renderRoutines), g);
+  route('/fit/gym/rutina/:id', gymScreen(renderRoutineEdit), g);
+  route('/fit/gym/entrenos', gymScreen(renderSessions), g);
+  route('/fit/gym/entreno/:id', gymScreen(renderSessionDetail), g);
+  route('/fit/gym/empezar', gymScreen(renderStart), g);
+  route('/fit/gym/ejercicios', gymScreen(renderMyExercises), g);
+  route('/fit/gym/:tab', renderSportTab('gym'), g);
   route('/fit/running', renderSportHome('run'), { theme: 'fitr' });
   route('/fit/running/:tab', renderSportTab('run'), { theme: 'fitr' });
 }

@@ -21,7 +21,7 @@ function setAccent(sport) {
 
 function centerAction(el, sport) {
   const b = el.querySelector('#f-center');
-  if (b) b.addEventListener('click', () => toast(sport === 'gym' ? 'Empezar entreno llega en la siguiente etapa' : 'Importar carrera llega en la etapa de running'));
+  if (b) b.addEventListener('click', () => { if (sport === 'gym') navigate('/fit/gym/empezar'); else toast('Importar carrera llega en la etapa de running'); });
 }
 
 function weekDots(fit, sport) {
@@ -48,6 +48,7 @@ export function renderSportHome(sport) {
     el.innerHTML = `<div class="f-screen">
       ${header(SPORT_NAME[sport], 'Esta semana ' + weekRangeText(thisMonday()), `<button type="button" class="f-round" data-go="${base(sport)}/ajustes" aria-label="Ajustes">${ico('gear')}</button>`)}
       <main class="f-main">
+        ${sport === 'gym' ? `<button type="button" class="f-btn" data-go="/fit/gym/empezar">${fit.gym.draft ? 'Continuar entreno en curso' : 'Empezar entreno'}</button>` : ''}
         ${pause ? `<section class="f-card pausa"><strong>${ico('pause', 18)} En pausa</strong><div class="f-mini">${pause.to ? 'Hasta la semana del ' + weekRangeText(pause.to) : 'Sin fecha de vuelta'} · tu racha está congelada.</div><button type="button" class="f-link" data-go="${base(sport)}/pausa">Gestionar pausa</button></section>` : ''}
         <section class="f-card level"><div class="f-sub">Nivel</div><div class="f-big">${lv.name}</div>
           <div class="f-bar"><i style="width:${lv.pct}%"></i></div><div class="f-mini">${lv.xp} XP · siguiente nivel a ${lv.to} XP${lv.stars ? ' · ' + '★'.repeat(Math.min(lv.stars, 5)) : ''}</div></section>
@@ -96,6 +97,10 @@ function renderSportSettings(sport) {
           <div class="rowh"><span>Objetivo habitual<br><small class="f-mini">sesiones por semana</small></span><span class="grow"></span>${stepper('goal', s.goal, 1, 7)}</div>
           <div class="rowh"><span>Mínimo para la racha<br><small class="f-mini">sesiones mínimas en una semana</small></span><span class="grow"></span>${stepper('minStreak', s.minStreak, 1, 7)}</div>
         </section>
+        ${!run ? `<section class="f-card plain">
+          <div class="rowh"><span>Descanso entre series<br><small class="f-mini">segundos</small></span><span class="grow"></span>${stepper('restSecs', s.restSecs, 15, 600)}</div>
+          <button type="button" class="f-link" data-go="/fit/gym/ejercicios">Mis ejercicios (renombrar, ocultar)</button>
+        </section>` : ''}
         ${run ? `<section class="f-card plain">
           <div class="rowh"><span>Ritmo límite<br><small class="f-mini">más lento que esto cuenta como caminar (min/km)</small></span><span class="grow"></span>${stepper('paceMin', Math.floor(s.paceLimit / 60), 6, 12)}</div>
           <div class="rowh"><span>Segundos<br><small class="f-mini">del ritmo límite</small></span><span class="grow"></span>${stepper('paceSec', s.paceLimit % 60, 0, 59)}</div>
@@ -113,6 +118,7 @@ function renderSportSettings(sport) {
       updateFit((f) => {
         const x = f.settings[sport];
         if (id === 'paceMin' || id === 'paceSec') x.paceLimit = tmp.paceMin * 60 + tmp.paceSec;
+        else if (id === 'restSecs') x.restSecs = v;
         else x[id] = v;
         if (id === 'goal' && x.minStreak > v) x.minStreak = v;
       });

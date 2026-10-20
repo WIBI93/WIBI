@@ -21,14 +21,14 @@ export function defaults() {
       guinos: true,
       accent: 'red', // acento del gimnasio: 'red' o 'lima'
       bodyWeight: null, // peso corporal opcional, en kg
-      gym: { goal: 3, minStreak: 1 },
+      gym: { goal: 3, minStreak: 1, restSecs: 90 },
       run: { goal: 2, minStreak: 1, paceLimit: 570, minRunMin: 8, stopTol: 30, reviewImport: true },
     },
     plans: {}, // lunes de la semana -> { gym: n, run: n } (0 = esa semana en pausa)
     pauses: { gym: [], run: [] }, // { from: lunes, to: lunes | null }
     comodines: { gym: [], run: [] }, // semanas en las que se ha usado el comodín
     awarded: {}, // id de medalla -> fecha en la que se consiguió (se guarda aparte: no se pierde)
-    gym: { sessions: [], xpLog: [] },
+    gym: { sessions: [], xpLog: [], routines: [], custom: [], hidden: [], renames: {}, draft: null },
     run: { runs: [], xpLog: [] },
   };
 }
@@ -74,7 +74,7 @@ export function normalize(raw) {
     guinos: s.guinos !== false,
     accent: s.accent === 'lima' ? 'lima' : 'red',
     bodyWeight: Number.isFinite(Number(s.bodyWeight)) && Number(s.bodyWeight) > 20 && Number(s.bodyWeight) < 400 ? Number(s.bodyWeight) : null,
-    gym: { goal: int(g.goal, 1, 7, 3), minStreak: 1 },
+    gym: { goal: int(g.goal, 1, 7, 3), minStreak: 1, restSecs: int(g.restSecs, 15, 600, 90) },
     run: {
       goal: int(u.goal, 1, 7, 2),
       minStreak: 1,
@@ -97,6 +97,9 @@ export function normalize(raw) {
   d.run = { ...d.run, ...(r.run && typeof r.run === 'object' ? r.run : {}) };
   d.gym.sessions = Array.isArray(d.gym.sessions) ? d.gym.sessions : [];
   d.gym.xpLog = Array.isArray(d.gym.xpLog) ? d.gym.xpLog : [];
+  for (const k of ['routines', 'custom', 'hidden']) d.gym[k] = Array.isArray(d.gym[k]) ? d.gym[k] : [];
+  d.gym.renames = d.gym.renames && typeof d.gym.renames === 'object' && !Array.isArray(d.gym.renames) ? d.gym.renames : {};
+  d.gym.draft = d.gym.draft && typeof d.gym.draft === 'object' && Array.isArray(d.gym.draft.exercises) ? d.gym.draft : null;
   d.run.runs = Array.isArray(d.run.runs) ? d.run.runs : [];
   d.run.xpLog = Array.isArray(d.run.xpLog) ? d.run.xpLog : [];
   return d;

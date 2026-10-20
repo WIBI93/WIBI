@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v21';
+const CACHE = 'wibi-v22';
 
 const ASSETS = [
   './',
@@ -52,6 +52,9 @@ const ASSETS = [
   'js/modules/fit/shell.js',
   'js/modules/fit/common.js',
   'js/modules/fit/sport.js',
+  'js/modules/fit/exercises.js',
+  'js/modules/fit/gymlogic.js',
+  'js/modules/fit/gym.js',
   'js/modules/calendar/index.js',
   'js/modules/calendar/calc.js',
   'js/modules/calendar/data.js',

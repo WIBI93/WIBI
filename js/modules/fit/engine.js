@@ -6,7 +6,7 @@ export const SPORT_NAME = { gym: 'Gimnasio', run: 'Running' };
 
 // Entrenos (gym) o carreras válidas (run) con su fecha.
 export function sessionDates(fit, sport) {
-  if (sport === 'gym') return fit.gym.sessions.map((s) => s && s.date).filter(Boolean);
+  if (sport === 'gym') return fit.gym.sessions.filter((s) => s && s.date && s.valid !== false).map((s) => s.date);
   return fit.run.runs.filter((r) => r && r.date && r.valid !== false).map((r) => r.date);
 }
 

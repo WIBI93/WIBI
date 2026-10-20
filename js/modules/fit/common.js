@@ -25,7 +25,7 @@ function sportCard(fit, sport) {
 
 // Valores para las medallas comunes.
 export function commonValues(fit) {
-  const gd = new Set(fit.gym.sessions.map((s) => s && s.date).filter(Boolean));
+  const gd = new Set(fit.gym.sessions.filter((s) => s && s.date && s.valid !== false).map((s) => s.date));
   const rd = new Set(fit.run.runs.filter((r) => r && r.date && r.valid !== false).map((r) => r.date));
   const both = [...gd].filter((d) => rd.has(d)).length;
   const days = new Set([...gd, ...rd]);
