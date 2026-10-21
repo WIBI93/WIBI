@@ -176,3 +176,18 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-grid2.four { grid-template-columns: repeat(2, 1fr); }
 .f-num.sm { font-size: 24px; }
 .f-chips.yr { padding: 0; }
+
+/* Calendario del mes y actividades */
+.f-cal .hd, .f-cal .bd { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.f-cal .hd b { font-size: 11px; color: var(--f-mute); font-weight: 700; padding: 2px 0; }
+.f-cal .day { aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; font-size: 13px; color: var(--f-ink); }
+.f-cal .day.g { background: #FF4B2B; color: #fff; font-weight: 700; }
+.f-cal .day.r { background: #19C6D2; color: #06303D; font-weight: 700; }
+.f-cal .day.both { background: linear-gradient(135deg, #FF4B2B 50%, #19C6D2 50%); color: #fff; font-weight: 700; }
+.f-cal .day.today { outline: 2px solid var(--f-ink); outline-offset: 1px; }
+.f-legend i.g { background: #FF4B2B; } .f-legend i.r { background: #19C6D2; } .f-legend i.both { background: linear-gradient(135deg, #FF4B2B 50%, #19C6D2 50%); }
+.f-card .center { text-align: center; }
+.f-act { display: flex; align-items: center; gap: 10px; background: none; border: 0; border-top: 1px solid var(--f-line); color: var(--f-ink); font: inherit; text-align: left; padding: 10px 0; cursor: pointer; }
+.f-act small { display: block; color: var(--f-mute); font-size: 12px; }
+.f-act .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.f-act.gym .dot { background: #FF4B2B; } .f-act.run .dot { background: #19C6D2; }

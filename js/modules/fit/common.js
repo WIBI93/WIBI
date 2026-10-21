@@ -5,7 +5,7 @@ import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { lastBackupText } from '../../core/backup.js';
 import { runExport, runImport } from '../../core/backup-ui.js';
 import { getFit, updateFit, resetFit } from './data.js';
-import { thisMonday, addDaysKey, weekRangeText, longDateText, parseKey, keyOf, mondayKey } from './dates.js';
+import { thisMonday, addDaysKey, weekRangeText, longDateText, parseKey, keyOf, mondayKey, shortDateText, monthTitle, todayKey } from './dates.js';
 import { weekProgress, goalFor, hasPlan, streak, forma, formaName, levelInfo, totalXp, firstWeek, countsByWeek, SPORT_NAME } from './engine.js';
 import { commonNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 import { medalSvg, commonMedals, METAL_NAME } from './medals.js';
@@ -56,8 +56,38 @@ function awardCommon(fit) {
   return fit;
 }
 
+// Calendario del mes: cada día marcado con gym (rojo), running (turquesa) o los dos.
+function monthGrid(fit, y, m) {
+  const g = new Set(fit.gym.sessions.filter((s) => s.valid !== false).map((s) => s.date));
+  const r = new Set(fit.run.runs.filter((x) => x.valid !== false).map((x) => x.date));
+  const first = new Date(y, m, 1);
+  const lead = (first.getDay() + 6) % 7;
+  const days = new Date(y, m + 1, 0).getDate();
+  const today = todayKey();
+  let cells = '';
+  for (let i = 0; i < lead; i++) cells += '<i class="empty"></i>';
+  for (let d = 1; d <= days; d++) {
+    const k = keyOf(new Date(y, m, d));
+    const cls = g.has(k) && r.has(k) ? 'both' : g.has(k) ? 'g' : r.has(k) ? 'r' : '';
+    cells += `<span class="day ${cls} ${k === today ? 'today' : ''}">${d}</span>`;
+  }
+  return `<div class="f-cal"><div class="hd">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((x) => `<b>${x}</b>`).join('')}</div><div class="bd">${cells}</div></div>
+    <div class="f-legend"><span><i class="g"></i>Gym</span><span><i class="r"></i>Running</span><span><i class="both"></i>Los dos</span></div>`;
+}
+
+function lastActivities(fit) {
+  const a = [
+    ...fit.gym.sessions.filter((s) => s.valid !== false).map((s) => ({ sport: 'gym', date: s.date, ts: s.startedAt || parseKey(s.date).getTime(), id: s.id, title: (fit.gym.routines.find((r) => r.id === s.routineId) || {}).name || 'Entreno libre', sub: `${s.minutes} min` })),
+    ...fit.run.runs.filter((r) => r.valid !== false).map((r) => ({ sport: 'run', date: r.date, ts: r.startedAt, id: r.id, title: r.name, sub: `${(r.runM / 1000).toFixed(1).replace('.', ',')} km` })),
+  ];
+  return a.sort((x, y) => y.ts - x.ts).slice(0, 5);
+}
+
 export function renderHome(el) {
   const fit = awardCommon(getFit());
+  const now = new Date();
+  let cy = now.getFullYear();
+  let cm = now.getMonth();
   const mk = thisMonday();
   const empty = !firstWeek(fit, 'gym') && !firstWeek(fit, 'run');
   const guino = fit.settings.guinos ? `<div class="f-guino">${esc(GUINOS[new Date().getDate() % GUINOS.length])}</div>` : '';
@@ -71,9 +101,14 @@ export function renderHome(el) {
         <div class="f-mini">${planned ? 'Tu semana está planificada.' : 'Aún no has planificado esta semana: se usa tu objetivo habitual.'}</div></section>
       ${sportCard(fit, 'gym')}
       ${sportCard(fit, 'run')}
+      <section class="f-card plain"><div class="rowh"><button type="button" class="f-x" id="prevm" aria-label="Mes anterior">‹</button><strong class="grow center" id="mt">${monthTitle(cy, cm)}</strong><button type="button" class="f-x" id="nextm" aria-label="Mes siguiente">›</button></div><div id="grid">${monthGrid(fit, cy, cm)}</div></section>
+      ${lastActivities(fit).length ? `<section class="f-card plain"><strong>Últimas actividades</strong>${lastActivities(fit).map((a) => `<button type="button" class="f-act ${a.sport}" data-go="/fit/${a.sport === 'gym' ? 'gym/entreno' : 'running/carrera'}/${a.id}"><span class="dot"></span><span class="grow">${esc(a.title)}<small>${esc(shortDateText(a.date))} · ${esc(a.sub)}</small></span>${ico('next', 16)}</button>`).join('')}</section>` : ''}
       ${empty ? '<div class="f-note">Todo empieza en cero. Cuando hagas tu primer entreno aparecerán tu nivel, tu racha y tus medallas.</div>' : ''}
     </main>${commonNav('inicio')}</div>`;
   bindGo(el);
+  const upd = () => { el.querySelector('#mt').textContent = monthTitle(cy, cm); el.querySelector('#grid').innerHTML = monthGrid(fit, cy, cm); };
+  el.querySelector('#prevm').onclick = () => { cm--; if (cm < 0) { cm = 11; cy--; } upd(); };
+  el.querySelector('#nextm').onclick = () => { cm++; if (cm > 11) { cm = 0; cy++; } upd(); };
 }
 
 // ---- Semana ----

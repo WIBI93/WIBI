@@ -157,3 +157,31 @@ export function streakStats(fit, sport) {
   }
   return { best, total };
 }
+
+// Comodines de racha: 1 al mes, se pueden guardar hasta 2. Devuelve cuántos tienes ahora.
+export function comodinBank(fit, sport) {
+  const first = firstWeek(fit, sport);
+  if (!first) return 0;
+  const fd = parseKey(first);
+  const now = new Date();
+  const used = fit.comodines[sport].map((mk) => { const d = parseKey(mk); return d.getFullYear() * 12 + d.getMonth(); });
+  let bank = 0;
+  for (let k = fd.getFullYear() * 12 + fd.getMonth(); k <= now.getFullYear() * 12 + now.getMonth(); k++) {
+    bank = Math.min(2, bank + 1);
+    bank = Math.max(0, bank - used.filter((u) => u === k).length);
+  }
+  return bank;
+}
+
+// Última semana cerrada que no cumpliste y en la que aún puedes usar el comodín (últimas 8).
+export function comodinCandidate(fit, sport) {
+  const first = firstWeek(fit, sport);
+  if (!first) return null;
+  const counts = countsByWeek(fit, sport);
+  for (let i = 1; i <= 8; i++) {
+    const mk = addDaysKey(thisMonday(), -7 * i);
+    if (mk < first) break;
+    if (weekStatus(fit, sport, mk, counts) === 'unmet') return mk;
+  }
+  return null;
+}

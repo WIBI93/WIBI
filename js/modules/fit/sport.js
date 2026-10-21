@@ -4,7 +4,7 @@ import { navigate, refresh, back } from '../../core/router.js';
 import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { getFit, updateFit, resetSport } from './data.js';
 import { thisMonday, addDaysKey, weekRangeText, weeksBetween } from './dates.js';
-import { weekProgress, streak, forma, formaName, levelInfo, totalXp, activePause, firstWeek, SPORT_NAME, weekStatus, countsByWeek } from './engine.js';
+import { comodinBank, comodinCandidate, weekProgress, streak, forma, formaName, levelInfo, totalXp, activePause, firstWeek, SPORT_NAME, weekStatus, countsByWeek } from './engine.js';
 import { sportNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 
 const SLUG = { gym: 'gym', run: 'running' };
@@ -59,12 +59,15 @@ export function renderSportHome(sport) {
           <section class="f-card plain"><div class="f-sub">Forma</div><div class="f-num">${f}</div><div class="f-mini">${formaName(f)}</div></section>
         </div>
         <section class="f-card plain"><strong>Últimas 8 semanas</strong>${weekDots(fit, sport)}</section>
+        ${(() => { const c = comodinCandidate(fit, sport); const bank = comodinBank(fit, sport); if (!c) return bank ? `<div class="f-mini center">Comodín de racha: tienes ${bank} guardado${bank > 1 ? 's' : ''} (1 al mes, hasta 2).</div>` : ''; return `<section class="f-card plain"><strong>Comodín de racha</strong><div class="f-mini">La semana del ${weekRangeText(c)} no se cumplió. ${bank ? `Tienes ${bank} comodín${bank > 1 ? 'es' : ''}: úsalo y esa semana cuenta como cumplida para tu racha.` : 'No te queda ningún comodín (recibes 1 al mes y puedes guardar hasta 2).'}</div>${bank ? `<button type="button" class="f-btn ghost" id="comodin" data-mk="${c}">Usar comodín en esa semana</button>` : ''}</section>`; })()}
         ${started ? '' : `<div class="f-note">${sport === 'gym' ? 'Todavía no has registrado ningún entreno.' : 'Todavía no has importado ninguna carrera.'} Aquí irá apareciendo tu progreso.</div>`}
         ${pause ? '' : `<button type="button" class="f-link wide" data-go="${base(sport)}/pausa">Pausar ${SPORT_NAME[sport].toLowerCase()}</button>`}
         <button type="button" class="f-link wide" data-go="/fit">← Volver a W fit</button>
       </main>${sportNav(sport, 'inicio')}</div>`;
     bindGo(el);
     centerAction(el, sport);
+    const cb = el.querySelector('#comodin');
+    if (cb) cb.addEventListener('click', () => { updateFit((f) => { f.comodines[sport].push(cb.dataset.mk); }); toast('Comodín usado: esa semana cuenta como cumplida'); refresh(); });
   };
 }
 
