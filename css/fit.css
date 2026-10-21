@@ -202,8 +202,8 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-ex .grow { flex: 1; }
 
 /* ---- Mapa muscular ---- */
-.f-mm { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: #fff; border-radius: 12px; padding: 8px 2px 6px; margin: 10px 0 8px; }
-.f-mm-view small { display: block; text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #5d6670; }
+.f-mm { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 8px 2px 6px; margin: 10px 0 8px; }
+.f-mm-view small { display: block; text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: inherit; opacity: .6; }
 .f-mm svg { display: block; width: 100%; height: auto; }
 .f-mm path { fill: #e0242b; }
 .f-mm-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; opacity: .85; }
