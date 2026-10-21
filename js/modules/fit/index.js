@@ -4,6 +4,7 @@ import { renderHome, renderWeek, renderCommonMedals, renderCommonSettings } from
 import { renderSportHome, renderSportTab } from './sport.js';
 import { renderRoutines, renderRoutineEdit, renderSessions, renderSessionDetail, renderStart, renderMyExercises } from './gym.js';
 
+import { renderGymMedals, renderGymStats, renderGymRetos } from './gym2.js';
 import { getFit } from './data.js';
 
 // Pone el color de acento del gimnasio antes de dibujar su pantalla.
@@ -22,6 +23,9 @@ export function registerFit(route) {
   route('/fit/gym/entreno/:id', gymScreen(renderSessionDetail), g);
   route('/fit/gym/empezar', gymScreen(renderStart), g);
   route('/fit/gym/ejercicios', gymScreen(renderMyExercises), g);
+  route('/fit/gym/medallas', gymScreen(renderGymMedals), g);
+  route('/fit/gym/estadisticas', gymScreen(renderGymStats), g);
+  route('/fit/gym/retos', gymScreen(renderGymRetos), g);
   route('/fit/gym/:tab', renderSportTab('gym'), g);
   route('/fit/running', renderSportHome('run'), { theme: 'fitr' });
   route('/fit/running/:tab', renderSportTab('run'), { theme: 'fitr' });

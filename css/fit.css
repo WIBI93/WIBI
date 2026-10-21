@@ -135,3 +135,19 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-picker-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: #121212; border-top: 1px solid var(--f-line); }
 .f-picker .f-btn { width: 100%; border: 0; border-radius: 6px; background: var(--f-acc); color: var(--f-on); font: inherit; font-weight: 800; font-size: 16px; padding: 14px; }
 .f-picker .f-btn.ghost { background: transparent; color: var(--f-ink); border: 1px solid var(--f-line); }
+
+/* Medallas, celebraciones, estadísticas */
+.tabs4 button { padding: 8px 2px; font-size: 11.5px; min-width: 0; }
+.tabs4 { overflow: hidden; }
+.f-bigger { font-family: var(--f-head); font-size: 34px; font-weight: 800; line-height: 1.1; text-transform: uppercase; text-align: center; }
+.f-cele { position: fixed; inset: 0; z-index: 60; background: rgba(18,18,18,.96); display: grid; place-items: center; padding: 24px; color: #F2F2F2; font-family: 'Barlow', system-ui, sans-serif; --f-mute: #8C8C8C; --f-acc: #FF4B2B; --f-on: #121212; --f-head: 'Barlow Condensed', sans-serif; --f-r: 6px; }
+:root[data-accent="lima"] .f-cele { --f-acc: #C8FF2E; }
+.f-cele-in { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 340px; text-align: center; }
+.f-cele .f-btn { margin-top: 18px; width: 100%; border: 0; border-radius: 6px; background: var(--f-acc); color: var(--f-on); font: inherit; font-weight: 800; font-size: 16px; padding: 14px; }
+.f-cele .f-guino { color: #BDBDBD; }
+.f-bars { display: flex; align-items: flex-end; gap: 8px; height: 110px; }
+.f-bcol { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.f-bcol i { width: 100%; background: var(--f-acc); border-radius: 4px 4px 0 0; min-height: 2px; }
+.f-bcol span { font-size: 11px; color: var(--f-mute); }
+.f-line { width: 100%; height: 90px; }
+.f-select { width: 100%; font: inherit; font-size: 16px; color: var(--f-ink); background: var(--f-bg); border: 1px solid var(--f-line); border-radius: var(--f-r); padding: 10px; }

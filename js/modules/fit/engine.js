@@ -139,3 +139,21 @@ export function weekProgress(fit, sport, mk = thisMonday()) {
 }
 
 export { weeksBetween };
+
+// Mejor racha de semanas seguidas que has tenido alguna vez, y semanas cumplidas en total.
+export function streakStats(fit, sport) {
+  const first = firstWeek(fit, sport);
+  if (!first) return { best: 0, total: 0 };
+  const counts = countsByWeek(fit, sport);
+  const cur = thisMonday();
+  let run = 0;
+  let best = 0;
+  let total = 0;
+  for (let mk = first; mk <= cur; mk = addDaysKey(mk, 7)) {
+    const st = weekStatus(fit, sport, mk, counts, cur);
+    if (st === 'met') { run++; total++; best = Math.max(best, run); }
+    else if (st === 'comodin' || st === 'paused' || st === 'current') continue;
+    else run = 0;
+  }
+  return { best, total };
+}

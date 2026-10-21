@@ -34,6 +34,11 @@ const GLYPH = {
   week: '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 11h16M8 3v4M16 3v4"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
   year: '<path d="M12 4v16M7 8l5-4 5 4M7 14l5-4 5 4"/>',
+  chart: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/>',
+  flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
+  bolt: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
   lock: '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/>',
 };
 
@@ -72,3 +77,5 @@ export function commonMedals() {
   }
   return out;
 }
+
+export const MEDAL_XP = { bronce: 10, plata: 20, oro: 35, platino: 60, diamante: 100 };

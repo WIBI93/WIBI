@@ -6,6 +6,8 @@ import { getFit, updateFit } from './data.js';
 import { shortDateText, todayKey } from './dates.js';
 import { MUSCLES, exerciseList, exerciseMap } from './exercises.js';
 import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
+import { awardGym } from './gymmedals.js';
+import { celebrate } from './gym2.js';
 import { uid, num, fmt, lastSets, newDraft, suggestedSets, finishDraft, sessionVolume, sessionSets, isValid, MIN_EXERCISES } from './gymlogic.js';
 
 const B = '/fit/gym';
@@ -240,7 +242,10 @@ function renderActive(el) {
     const res = finishDraft((Date.now() - d.startedAt) / 60000);
     if (!res) return;
     toast(res.sess.valid ? `Entreno guardado · +${res.xp} XP${res.prs.length ? ' · ' + res.prs.length + ' récord' + (res.prs.length > 1 ? 's' : '') + ' 🏆' : ''}${res.levelUp ? ' · ¡Subes a ' + res.levelUp.name + '!' : ''}` : 'Entreno guardado (sin XP)');
+    const extra = awardGym();
     navigate(`${B}/entreno/${res.sess.id}`);
+    extra.levelUp = extra.levelUp || res.levelUp;
+    if (extra.medals.length || extra.reto || extra.levelUp) celebrate(extra);
   };
   draw();
 }
