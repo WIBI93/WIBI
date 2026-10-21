@@ -5,6 +5,7 @@ import { renderSportHome, renderSportTab } from './sport.js';
 import { renderRoutines, renderRoutineEdit, renderSessions, renderSessionDetail, renderStart, renderMyExercises } from './gym.js';
 
 import { renderRunMedals, renderRunRetos } from './gym2.js';
+import { renderPlans } from './plans.js';
 import { renderImport, renderRuns, renderRunDetail, renderRunStats } from './run.js';
 import { renderGymMedals, renderGymStats, renderGymRetos } from './gym2.js';
 import { getFit } from './data.js';
@@ -33,6 +34,7 @@ export function registerFit(route) {
   const r = { theme: 'fitr' };
   route('/fit/running/importar', renderImport, r);
   route('/fit/running/carreras', renderRuns, r);
+  route('/fit/running/planes', renderPlans, r);
   route('/fit/running/carrera/:id', renderRunDetail, r);
   route('/fit/running/estadisticas', renderRunStats, r);
   route('/fit/running/medallas', renderRunMedals, r);

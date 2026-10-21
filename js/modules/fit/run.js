@@ -9,6 +9,7 @@ import { parseGpx, analyze, summarize, paceText, durText } from './gpx.js';
 import { saveRun, isDuplicate, PR_NAMES } from './runlogic.js';
 import { awardRun } from './runmedals.js';
 import { celebrate } from './gym2.js';
+import { checkPlan } from './plans.js';
 
 const B = '/fit/running';
 const SCREEN = (inner, nav) => `<div class="f-screen">${inner}${nav || ''}</div>`;
@@ -90,9 +91,11 @@ function review(el, st) {
     el.querySelectorAll('[data-flip]').forEach((b) => (b.onclick = () => { const s = st.segs[+b.dataset.flip]; s.type = s.type === 'run' ? 'walk' : 'run'; draw(); }));
     el.querySelector('#save').onclick = async () => {
       const res = saveRun({ analysis: st.analysis, segs: st.segs, name: st.name, paceLimit: set.paceLimit });
+      const planMsg = checkPlan(res.run);
       const extra = awardRun();
       extra.levelUp = extra.levelUp || res.levelUp;
       toast(res.run.valid ? `Carrera guardada · +${res.run.xp} XP${res.run.prs.length ? ' · ' + res.run.prs.length + ' récord' + (res.run.prs.length > 1 ? 's' : '') + ' 🏆' : ''}` : 'Carrera guardada (sin XP)');
+      if (planMsg) setTimeout(() => toast(planMsg), 1800);
       navigate(`${B}/carrera/${res.run.id}`);
       if (extra.medals.length || extra.reto || extra.levelUp) celebrate(extra, 'run');
     };

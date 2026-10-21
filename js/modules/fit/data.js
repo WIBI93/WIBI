@@ -29,7 +29,7 @@ export function defaults() {
     comodines: { gym: [], run: [] }, // semanas en las que se ha usado el comodín
     awarded: {}, // id de medalla -> fecha en la que se consiguió (se guarda aparte: no se pierde)
     gym: { sessions: [], xpLog: [], routines: [], custom: [], hidden: [], renames: {}, draft: null },
-    run: { runs: [], xpLog: [] },
+    run: { runs: [], xpLog: [], plan: null },
   };
 }
 
@@ -102,6 +102,8 @@ export function normalize(raw) {
   d.gym.draft = d.gym.draft && typeof d.gym.draft === 'object' && Array.isArray(d.gym.draft.exercises) ? d.gym.draft : null;
   d.run.runs = Array.isArray(d.run.runs) ? d.run.runs : [];
   d.run.xpLog = Array.isArray(d.run.xpLog) ? d.run.xpLog : [];
+  const pl = d.run.plan;
+  d.run.plan = pl && typeof pl === 'object' && typeof pl.id === 'string' && dateOr(pl.start) ? { id: pl.id, start: pl.start, done: pl.done && typeof pl.done === 'object' ? pl.done : {} } : null;
   return d;
 }
 
