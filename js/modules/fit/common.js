@@ -152,7 +152,7 @@ export function renderWeek(el) {
     el.querySelector('#save').addEventListener('click', () => {
       const fit2 = getFit();
       for (const sp of ['gym', 'run']) {
-        if (st[sp] === 0 && !(fit2.plans[st.mk] && fit2.plans[st.mk][sp] === 0) && !canPause(fit2, sp, [st.mk]).ok) { toast(`${SPORT_NAME[sp]}: te pasas del tope de pausas (20 días cada 3 meses)`); return; }
+        if (st[sp] === 0 && !(fit2.plans[st.mk] && fit2.plans[st.mk][sp] === 0) && !canPause(fit2, sp, [st.mk]).ok) { toast(`${SPORT_NAME[sp]}: te pasas del tope de pausas (3 semanas cada 3 meses)`); return; }
       }
       updateFit((f) => { f.plans[st.mk] = { gym: st.gym, run: st.run }; });
       toast('Semana guardada');

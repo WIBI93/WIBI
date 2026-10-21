@@ -187,8 +187,8 @@ export function comodinCandidate(fit, sport) {
 }
 
 // ---- Tope de pausas: máximo 20 días cada 3 meses ----
-// Las pausas son por semanas completas, así que en la práctica caben 2 semanas (14 días) en cualquier tramo de 13 semanas.
-export const PAUSE_MAX_WEEKS = 2;
+// Las pausas son por semanas completas: caben 3 semanas (21 días) en cualquier tramo de 13 semanas.
+export const PAUSE_MAX_WEEKS = 3;
 export const PAUSE_WINDOW_WEEKS = 13;
 
 export function pausedWeeks(fit, sport) {

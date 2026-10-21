@@ -164,7 +164,7 @@ function renderPause(sport) {
       if (st.weeks > Math.max(1, free)) st.weeks = Math.max(1, free);
       el.innerHTML = `<div class="f-screen">${backHeader('Pausar ' + SPORT_NAME[sport], base(sport))}
         <main class="f-main">
-          <div class="f-note">No hace falta dar ningún motivo. Durante la pausa tu racha se congela, tu forma no baja y los retos de la semana no cuentan ni se fallan.<br><br><b>Tope:</b> máximo 20 días de pausa cada 3 meses. Como las pausas son por semanas completas, caben ${PAUSE_MAX_WEEKS} semanas (14 días) en cualquier tramo de 13 semanas. Las semanas «Sin entrenar» del planificador también cuentan.</div>
+          <div class="f-note">No hace falta dar ningún motivo. Durante la pausa tu racha se congela, tu forma no baja y los retos de la semana no cuentan ni se fallan.<br><br><b>Tope:</b> máximo ${PAUSE_MAX_WEEKS} semanas (21 días) de pausa en cualquier tramo de 3 meses (13 semanas). Las semanas «Sin entrenar» del planificador también cuentan.</div>
           <section class="f-card plain"><strong>¿Cuándo empieza?</strong>
             <div class="f-seg"><button type="button" data-st="now" aria-pressed="${st.start === 'now'}">Esta semana</button><button type="button" data-st="next" aria-pressed="${st.start === 'next'}">Próxima semana</button></div></section>
           ${free < 1 ? '<div class="f-note">Con ese inicio ya no te queda pausa disponible en estos 3 meses. Prueba con otra semana de inicio o espera a que pasen las semanas.</div>' : `<section class="f-card plain"><strong>¿Cuánto dura?</strong>
