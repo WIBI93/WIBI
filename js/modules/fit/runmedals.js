@@ -6,6 +6,7 @@ import { rar, MEDAL_XP } from './medals.js';
 import { GYM_SECRETS as _g, RUN_SECRETS, SECRET_XP } from './secrets.js';
 import { parseKey } from './dates.js';
 import { checkGoals } from './goals.js';
+import { processPeriods, periodFamilies } from './seasons.js';
 import { weekProgress, streakStats, levelInfo, totalXp } from './engine.js';
 
 const valid = (f) => f.run.runs.filter((r) => r.valid !== false);
@@ -27,6 +28,7 @@ const prsCount = (f) => valid(f).reduce((a, r) => a + (r.prs || []).filter((k) =
 const paceGain = (f) => { const l = valid(f).filter((r) => r.paceRun).sort((a, b) => a.startedAt - b.startedAt); if (l.length < 2) return 0; return Math.max(0, (l[0].paceRun / Math.min(...l.map((r) => r.paceRun)) - 1) * 100); };
 const returns = (f) => { const d = [...new Set(valid(f).map((r) => r.date))].sort(); let n = 0; for (let i = 1; i < d.length; i++) if ((parseKey(d[i]) - parseKey(d[i - 1])) / 86400000 >= 21) n++; return n; };
 RUN_FAMILIES.push(
+  ...periodFamilies('run'),
   { id: 'ritmo', group: 'perm', name: 'Mejora de ritmo', unit: '% más rápido', glyph: 'bolt', steps: [5, 10, 15, 20, 30], value: paceGain },
   { id: 'marcas', group: 'perm', name: 'Mejores marcas', unit: 'mejoras', glyph: 'star', steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value: prsCount },
   { id: 'regresos', group: 'const', name: 'Regresos tras una pausa', unit: 'regresos', glyph: 'target', steps: [1, 3, 5, 10], value: returns },
@@ -69,6 +71,7 @@ export function awardRun() {
     }
   });
   out.medals.push(...checkGoals('run'));
+  out.medals.push(...processPeriods('run'));
   updateFit((f) => {
     for (const m of secretMedals()) {
       if (!f.awarded[m.id] && m.test(f)) {

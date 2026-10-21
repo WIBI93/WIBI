@@ -17,6 +17,7 @@ import * as RM from './runmedals.js';
 import { secretMedals as gymSec } from './gymmedals.js';
 import { exerciseMap } from './exercises.js';
 import { goalsHtml, bindGoals } from './goals.js';
+import { SEASONS, MONTH_NAMES, seasonOf, seasonGoals, monthMetal, showcase, trophyMetal } from './seasons.js';
 import { sessionVolume, sessionSets, est1rm, num, fmt } from './gymlogic.js';
 
 const B = '/fit/gym';
@@ -42,7 +43,7 @@ export async function celebrate(out, sport = 'gym') {
       const k = Math.floor(Math.random() * 3);
       let body;
       if (p.kind === 'lv') body = `<div class="f-sub">¡Subes de nivel!</div><div class="f-bigger">${esc(p.lv.name)}</div><div class="f-mini">${p.lv.xp} XP en total</div>${frases ? `<div class="f-guino">${FRIKI_NIVEL[k]}</div>` : ''}`;
-      else if (p.kind === 'm') body = `${medalSvg({ shape: p.m.shape, metal: p.m.metal, earned: true, glyph: p.m.glyph, size: 150 })}<div class="f-sub">${p.m.goal ? '¡Meta cumplida!' : p.m.secret ? '¡Medalla secreta!' : 'Medalla de ' + METAL_NAME[p.m.metal]}</div><div class="f-bigger">${esc(p.m.name)}</div><div class="f-mini">${p.m.goal ? esc(p.m.desc) + ' · +100 XP' : p.m.secret ? esc(p.m.desc) + ' · +50 XP' : p.m.n + ' ' + esc(p.m.unit) + ' · +' + MEDAL_XP[p.m.metal] + ' XP'}</div>${frases ? `<div class="f-guino">${FRIKI_MEDALLA[k]}</div>` : ''}`;
+      else if (p.kind === 'm') body = `${medalSvg({ shape: p.m.shape, metal: p.m.metal, earned: true, glyph: p.m.glyph, size: 150 })}<div class="f-sub">${p.m.period ? 'Medalla de ' + METAL_NAME[p.m.metal] : p.m.goal ? '¡Meta cumplida!' : p.m.secret ? '¡Medalla secreta!' : 'Medalla de ' + METAL_NAME[p.m.metal]}</div><div class="f-bigger">${esc(p.m.name)}</div><div class="f-mini">${p.m.period ? esc(p.m.desc) : p.m.goal ? esc(p.m.desc) + ' · +100 XP' : p.m.secret ? esc(p.m.desc) + ' · +50 XP' : p.m.n + ' ' + esc(p.m.unit) + ' · +' + MEDAL_XP[p.m.metal] + ' XP'}</div>${frases ? `<div class="f-guino">${FRIKI_MEDALLA[k]}</div>` : ''}`;
       else body = `<div class="f-sub">Reto semanal</div><div class="f-bigger">¡Completado!</div><div class="f-mini">+${p.r.xp} XP</div>`;
       w.innerHTML = `<div class="f-cele-in">${body}<button type="button" class="f-btn">${i < pages.length - 1 ? 'Siguiente' : 'Genial'}</button></div>`;
       w.querySelector('button').onclick = () => { w.remove(); resolve(); };
@@ -73,7 +74,15 @@ const renderSportMedals = (sport) => (el) => {
       const n = sm.filter((m) => fit.awarded[m.id]).length;
       body = `<div class="f-note">Se revelan solas al conseguirlas (+50 XP cada una). Llevas ${n} de ${sm.length}.</div><div class="f-medals big">${sm.map((m) => { const e = !!fit.awarded[m.id]; return `<div class="f-medal wide">${medalSvg({ shape: m.shape, metal: m.metal, earned: e, glyph: m.glyph, size: 56 })}<b>${e ? esc(m.name) : '???'}</b><span>${e ? esc(m.desc) : 'Secreta'}</span></div>`; }).join('')}</div>`;
     }
-    else if (tab === 'vit') body = '<div class="f-note">Aquí irán los trofeos de cada temporada y las medallas de cada mes. Llegarán con las temporadas.</div>';
+    else if (tab === 'vit') {
+      const sc = showcase(fit, sport);
+      const shape = sport === 'gym' ? 'shield' : 'hex';
+      const years = [...new Set([...sc.months.map((x) => x.y), ...sc.seasons.map((x) => x.y)])].sort((a, b) => b - a);
+      body = years.map((y) => `<section class="f-card plain"><strong>${y}</strong>
+        <div class="f-sub">Trofeos de temporada</div><div class="f-medals">${sc.seasons.filter((x) => x.y === y).map((x) => `<div class="f-medal wide">${medalSvg({ shape, metal: x.metal, earned: true, glyph: 'star', size: 56 })}<b>${x.s.name}</b><span>${METAL_NAME[x.metal]}</span></div>`).join('') || '<div class="f-mini">Ninguno todavía</div>'}</div>
+        <div class="f-sub">Medallas de mes</div><div class="f-medals">${sc.months.filter((x) => x.y === y).sort((a, b) => a.m - b.m).map((x) => `<div class="f-medal">${medalSvg({ shape, metal: x.metal, earned: true, glyph: 'sun', size: 48 })}<b>${MONTH_NAMES[x.m].slice(0, 3)}</b><span>${METAL_NAME[x.metal]}</span></div>`).join('') || '<div class="f-mini">Ninguna todavía</div>'}</div></section>`).join('')
+        || '<div class="f-note">Aquí se irán guardando los trofeos de cada temporada y las medallas de cada mes en cuanto se cierren. Un mes cuenta si cumples tu objetivo en al menos 3 de sus semanas.</div>';
+    }
     else body = fams.map((fam) => {
       const ms = C.fm(fam);
       const v = fam.value(fit);
@@ -91,6 +100,19 @@ const renderSportMedals = (sport) => (el) => {
   draw();
 };
 
+function seasonCard(fit, sport) {
+  const { s, y } = seasonOf();
+  const g = seasonGoals(fit, sport, y, s);
+  const n = g.list.filter((x) => x.ok).length;
+  const mm = seasonOf().s.months.map((m) => ({ m, y: s.k === 'inv' && m < 6 ? y + 1 : y }));
+  const now = new Date();
+  const metal = trophyMetal(n);
+  return `<section class="f-card plain"><div class="rowh"><strong class="grow">${s.name} ${y}</strong><span class="f-mini">${n} de 6 objetivos${metal ? ' · ' + METAL_NAME[metal] : ''}</span></div>
+    ${g.list.map((x) => `<div class="f-mini">${x.ok ? '✓' : '○'} ${esc(x.t)}${x.n > 1 ? ` (${Math.min(x.v, x.n)}/${x.n})` : ''}</div>`).join('')}
+    <div class="f-mini">Trofeo: Bronce con 2, Plata con 4, Oro con 6. Se entrega al cerrar la temporada.</div>
+    <div class="f-mini">Meses de esta temporada: ${mm.map((x) => `${MONTH_NAMES[x.m].slice(0, 3)}${x.y === now.getFullYear() && x.m === now.getMonth() ? ' (en curso)' : ''}`).join(' · ')}. Reto mensual: cierra el mes con todas las semanas cumplidas y un récord (+200 XP).</div></section>`;
+}
+
 // ---- Retos ----
 const renderSportRetos = (sport) => (el) => {
   const C = CFG[sport];
@@ -105,8 +127,8 @@ const renderSportRetos = (sport) => (el) => {
       ${r.paused ? '<div class="f-mini">Los retos no cuentan ni se fallan durante una pausa.</div>' : `<div class="f-bar"><i style="width:${pct}%"></i></div>
       <div class="f-mini">${r.done} de ${r.goal} sesiones · ${r.complete || r.claimed ? '¡completado!' : 'recompensa +' + r.xp + ' XP'}</div>`}</section>
     <section class="f-card plain"><strong>Racha</strong><div class="f-mini">${streak(fit, sport)} semanas seguidas cumpliendo tu objetivo.</div></section>
+    ${seasonCard(fit, sport)}
     ${goalsHtml(fit, sport)}
-    <div class="f-note">Los retos mensuales y las temporadas llegarán en una próxima parte.</div>
   </main>${sportNav(sport, 'retos')}</div>`;
   bindGo(el); center(el);
   bindGoals(el, sport, () => renderSportRetos(sport)(el), celebrate);
@@ -154,6 +176,7 @@ export function renderGymStats(el) {
         <section class="f-card plain"><div class="f-sub">Series</div><div class="f-num">${sets}</div><div class="f-mini">${Math.round(mins / 60 * 10) / 10} h</div></section>
       </div>
       <section class="f-card plain"><strong>Volumen por semana</strong><div class="f-bars">${bars.map((b) => `<div class="f-bcol"><i style="height:${Math.round((b.v / maxV) * 100)}%"></i><span>${parseKey(b.mk).getDate()}</span></div>`).join('')}</div></section>
+      <button type="button" class="f-card level" data-go="${B}/anual"><strong>Tu año de gimnasio</strong><div class="f-mini">Resumen anual: totales, mejores momentos y comparación con el año pasado</div></button>
       <section class="f-card plain"><strong>Evolución de un ejercicio</strong>
         ${used.length ? `<select id="ex" class="f-select">${used.map((id) => `<option value="${id}" ${id === exId ? 'selected' : ''}>${esc((map.get(id) || { name: '?' }).name)}</option>`).join('')}</select>${line}
         <div class="f-mini">Fuerza estimada (1 repetición) en cada entreno.</div>` : '<div class="f-mini">Cuando hagas entrenos verás aquí tu progreso.</div>'}</section>

@@ -173,3 +173,6 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-goal.done { opacity: .75; }
 .f-seg.vertical { flex-direction: column; border-radius: var(--f-r); }
 .f-seg.vertical button { text-align: left; border-radius: var(--f-r); }
+.f-grid2.four { grid-template-columns: repeat(2, 1fr); }
+.f-num.sm { font-size: 24px; }
+.f-chips.yr { padding: 0; }

@@ -165,6 +165,7 @@ export function renderRunStats(el) {
         <section class="f-card plain"><div class="f-sub">Tiempo</div><div class="f-num">${Math.round(sec / 60)}</div><div class="f-mini">min</div></section>
       </div>
       <section class="f-card plain"><strong>Km por semana</strong><div class="f-bars">${bars.map((b) => `<div class="f-bcol"><i style="height:${Math.round((b.v / maxV) * 100)}%"></i><span>${parseKey(b.mk).getDate()}</span></div>`).join('')}</div></section>
+      <button type="button" class="f-card level" data-go="${B}/anual"><strong>Tu año de running</strong><div class="f-mini">Resumen anual: totales, mejores momentos y comparación con el año pasado</div></button>
       <section class="f-card plain"><strong>Evolución del ritmo</strong>${line}</section>
     </main>`, sportNav('run', 'estadisticas'));
     bindGo(el); center(el);

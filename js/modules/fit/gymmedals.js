@@ -8,6 +8,7 @@ import { sessionVolume, sessionSets, sessionReps, est1rm, num } from './gymlogic
 import { GYM_SECRETS, SECRET_XP } from './secrets.js';
 import { exerciseMap } from './exercises.js';
 import { checkGoals } from './goals.js';
+import { processPeriods, periodFamilies } from './seasons.js';
 import { parseKey, keyOf, addDays } from './dates.js';
 
 const valid = (fit) => fit.gym.sessions.filter((s) => s.valid !== false);
@@ -46,6 +47,7 @@ const balancedWeeks = (f) => {
 };
 const returns = (dates) => { const d = [...new Set(dates)].sort(); let n = 0; for (let i = 1; i < d.length; i++) if ((parseKey(d[i]) - parseKey(d[i - 1])) / 86400000 >= 21) n++; return n; };
 GYM_FAMILIES.push(
+  ...periodFamilies('gym'),
   ...MAIN.map(([id, name]) => ({ id: 'fz-' + id.slice(2), group: 'perm', name: 'Fuerza: ' + name, unit: '% de mejora', glyph: 'flame', steps: [10, 25, 50, 75, 100], value: (f) => strengthGain(f, id) })),
   { id: 'equilibrio', group: 'perm', name: 'Equilibrio muscular', unit: 'semanas con los 6 grupos', glyph: 'target', steps: [1, 3, 6, 12, 24, 52], value: balancedWeeks },
   { id: 'fiel', group: 'perm', name: 'Fiel a tu rutina', unit: 'veces la misma rutina', glyph: 'star', steps: [5, 10, 25, 50, 100], value: (f) => { const c = {}; for (const s of valid(f)) if (s.routineId) c[s.routineId] = (c[s.routineId] || 0) + 1; return Math.max(0, ...Object.values(c)); } },
@@ -94,6 +96,7 @@ export function awardGym() {
     }
   });
   out.medals.push(...checkGoals('gym'));
+  out.medals.push(...processPeriods('gym'));
   // secretas
   updateFit((f) => {
     for (const m of secretMedals()) {
