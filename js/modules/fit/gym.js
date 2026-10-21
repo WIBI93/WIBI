@@ -6,6 +6,7 @@ import { getFit, updateFit } from './data.js';
 import { shortDateText, todayKey } from './dates.js';
 import { MUSCLES, exerciseList, exerciseMap } from './exercises.js';
 import { exFig } from './stickfigs.js';
+import { routineMapCard } from './musclemap.js';
 import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
 import { awardGym } from './gymmedals.js';
 import { celebrate } from './gym2.js';
@@ -84,6 +85,7 @@ export function renderRoutineEdit(el, { id }) {
         ${r.exIds.map((x, i) => `<div class="f-exrow">${exFig(map.get(x) || { name: '' }, 28)}<span class="grow">${esc((map.get(x) || { name: 'Ejercicio borrado' }).name)}</span>
           <button type="button" data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Subir">↑</button><button type="button" data-down="${i}" ${i === r.exIds.length - 1 ? 'disabled' : ''} aria-label="Bajar">↓</button><button type="button" data-rm="${i}" aria-label="Quitar">✕</button></div>`).join('') || '<div class="f-mini">Todavía sin ejercicios.</div>'}
         <button type="button" class="f-btn ghost" id="add">+ Añadir ejercicios</button></section>
+      ${r.exIds.length ? routineMapCard(getFit(), r.exIds, 'Músculos de esta rutina') : ''}
       <button type="button" class="f-btn" id="save">Guardar rutina</button>
       ${existing ? '<button type="button" class="f-btn danger" id="del">Borrar rutina</button>' : ''}
     </main>`);
@@ -174,13 +176,15 @@ function renderActive(el) {
   const map = exerciseMap(fit0);
   const rest = fit0.settings.gym.restSecs;
   let timerEnd = 0;
+  let mapOpen = false;
   const save = () => updateFit((f) => { f.gym.draft = d; });
   const rname = (fit0.gym.routines.find((r) => r.id === d.routineId) || {}).name || 'Entreno libre';
   const draw = () => {
     const fit = getFit();
-    el.innerHTML = SCREEN(`<header class="f-head"><button type="button" class="f-round" data-go="${B}" aria-label="Salir (se guarda)">${ico('back')}</button>
+    el.innerHTML = SCREEN(`<header class="f-head"><button type="button" class="f-round f-back" data-go="${B}" aria-label="Salir (se guarda)">${ico('back')}</button>
       <div class="grow"><div class="f-sub">En curso · se guarda solo</div><h1>${esc(rname)}</h1></div><span class="f-timer" id="rest"></span></header>
       <main class="f-main">
+      ${d.exercises.length ? routineMapCard(fit, d.exercises.map((e) => e.exId), 'Músculos de hoy', true, mapOpen) : ''}
       ${d.exercises.map((ex, xi) => {
         const last = lastSets(fit, ex.exId, d.id);
         return `<section class="f-card plain"><div class="rowh">${exFig(map.get(ex.exId) || { name: '' }, 34)}<strong class="grow">${esc((map.get(ex.exId) || { name: 'Ejercicio borrado' }).name)}</strong><button type="button" class="f-x" data-rmex="${xi}" aria-label="Quitar ejercicio">✕</button></div>
@@ -220,6 +224,8 @@ function renderActive(el) {
       if (!(await confirmDialog({ title: 'Descartar entreno', text: 'Se perderá lo que has apuntado en este entreno.', confirmLabel: 'Descartar', danger: true }))) return;
       updateFit((f) => { f.gym.draft = null; }); navigate(B);
     };
+    const fold = el.querySelector('#mm-fold');
+    if (fold) fold.addEventListener('toggle', () => { mapOpen = fold.open; });
     el.querySelector('#finish').onclick = finish;
     tick();
   };

@@ -15,7 +15,20 @@ import { getFit } from './data.js';
 // Pone el color de acento del gimnasio antes de dibujar su pantalla.
 const gymScreen = (fn) => (el, params) => { document.documentElement.dataset.accent = getFit().settings.accent; return fn(el, params); };
 
-export function registerFit(route) {
+// Si la app se abre directamente en Gym o Running, "atrás" debe llevar a la pantalla común de W fit.
+function withParent(fn) {
+  return (el, params) => {
+    if (!(history.state && history.state.inApp)) {
+      const here = location.hash;
+      history.replaceState({ inApp: true }, '', '#/fit');
+      history.pushState({ inApp: true }, '', here);
+    }
+    return fn(el, params);
+  };
+}
+
+export function registerFit(route0) {
+  const route = (path, fn, opts) => route0(path, opts && opts.theme && opts.theme !== 'fitc' ? withParent(fn) : fn, opts);
   route('/fit', renderHome, { theme: 'fitc' });
   route('/fit/semana', renderWeek, { theme: 'fitc' });
   route('/fit/medallas', renderCommonMedals, { theme: 'fitc' });

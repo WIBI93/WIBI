@@ -193,8 +193,6 @@ export function renderCommonSettings(el) {
       <section class="f-card plain">
         <div class="rowh"><span>Guiños frikis</span><span class="grow"></span><button type="button" class="f-switch" id="guinos" aria-pressed="${fit.settings.guinos}"></button></div>
         <div class="f-mini">Frases cortas de texto en las pantallas de inicio.</div>
-        <div class="rowh"><span>Color del gimnasio</span><span class="grow"></span>
-          <div class="f-seg small"><button type="button" data-acc="red" aria-pressed="${fit.settings.accent === 'red'}">Rojo</button><button type="button" data-acc="lima" aria-pressed="${fit.settings.accent === 'lima'}">Lima</button></div></div>
       </section>
       <section class="f-card plain">
         <strong>Copia de seguridad</strong>
@@ -211,7 +209,6 @@ export function renderCommonSettings(el) {
     </main>${commonNav('ajustes')}</div>`;
   bindGo(el);
   el.querySelector('#guinos').addEventListener('click', () => { updateFit((f) => { f.settings.guinos = !f.settings.guinos; }); refresh(); });
-  el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => { updateFit((f) => { f.settings.accent = b.dataset.acc; }); refresh(); }));
   el.querySelector('#export').addEventListener('click', () => runExport());
   const file = el.querySelector('#file');
   el.querySelector('#import').addEventListener('click', () => file.click());

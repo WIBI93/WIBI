@@ -200,3 +200,25 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-fig { flex: none; color: var(--f-acc); }
 .f-ex .f-fig, .f-exrow .f-fig { margin-right: 6px; }
 .f-ex .grow { flex: 1; }
+
+/* ---- Mapa muscular ---- */
+.f-mm { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: #fff; border-radius: 12px; padding: 8px 2px 6px; margin: 10px 0 8px; }
+.f-mm-view small { display: block; text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #5d6670; }
+.f-mm svg { display: block; width: 100%; height: auto; }
+.f-mm path { fill: #e0242b; }
+.f-mm-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; opacity: .85; }
+.f-mm-leg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+.f-mm-leg .m1 { background: #e0242b; }
+.f-mm-leg .m2 { background: color-mix(in srgb, #e0242b 40%, #fff); }
+.f-mm-leg .m0 { background: #9aa3b0; }
+.f-mm-ramp { width: 90px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, color-mix(in srgb, #e0242b 28%, #fff), #e0242b); }
+.f-mm-rank { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 8px; }
+.f-mm-row { display: grid; grid-template-columns: 88px 1fr 34px; gap: 8px; align-items: center; font-size: 13px; }
+.f-mm-row.zero { opacity: .5; }
+.f-mm-row em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.f-mm-bar { height: 8px; border-radius: 3px; background: color-mix(in srgb, currentColor 14%, transparent); overflow: hidden; }
+.f-mm-bar i { display: block; height: 100%; background: #e0242b; }
+.f-fold summary { cursor: pointer; list-style: none; }
+.f-fold summary::-webkit-details-marker { display: none; }
+.f-fold summary::after { content: ' ▾'; opacity: .6; }
+.f-fold[open] summary::after { content: ' ▴'; }

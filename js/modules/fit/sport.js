@@ -62,7 +62,6 @@ export function renderSportHome(sport) {
         ${(() => { const c = comodinCandidate(fit, sport); const bank = comodinBank(fit, sport); if (!c) return bank ? `<div class="f-mini center">Comodín de racha: tienes ${bank} guardado${bank > 1 ? 's' : ''} (1 al mes, hasta 2).</div>` : ''; return `<section class="f-card plain"><strong>Comodín de racha</strong><div class="f-mini">La semana del ${weekRangeText(c)} no se cumplió. ${bank ? `Tienes ${bank} comodín${bank > 1 ? 'es' : ''}: úsalo y esa semana cuenta como cumplida para tu racha.` : 'No te queda ningún comodín (recibes 1 al mes y puedes guardar hasta 2).'}</div>${bank ? `<button type="button" class="f-btn ghost" id="comodin" data-mk="${c}">Usar comodín en esa semana</button>` : ''}</section>`; })()}
         ${started ? '' : `<div class="f-note">${sport === 'gym' ? 'Todavía no has registrado ningún entreno.' : 'Todavía no has importado ninguna carrera.'} Aquí irá apareciendo tu progreso.</div>`}
         ${pause ? '' : `<button type="button" class="f-link wide" data-go="${base(sport)}/pausa">Pausar ${SPORT_NAME[sport].toLowerCase()}</button>`}
-        <button type="button" class="f-link wide" data-go="/fit">← Volver a W fit</button>
       </main>${sportNav(sport, 'inicio')}</div>`;
     bindGo(el);
     centerAction(el, sport);
@@ -102,6 +101,8 @@ function renderSportSettings(sport) {
           <div class="rowh"><span>Mínimo para la racha<br><small class="f-mini">sesiones mínimas en una semana</small></span><span class="grow"></span>${stepper('minStreak', s.minStreak, 1, 7)}</div>
         </section>
         ${!run ? `<section class="f-card plain">
+          <div class="rowh"><span>Color del gimnasio</span><span class="grow"></span>
+            <div class="f-seg small"><button type="button" data-acc="red" aria-pressed="${fit.settings.accent === 'red'}">Rojo</button><button type="button" data-acc="lima" aria-pressed="${fit.settings.accent === 'lima'}">Lima</button></div></div>
           <div class="rowh"><span>Descanso entre series<br><small class="f-mini">segundos</small></span><span class="grow"></span>${stepper('restSecs', s.restSecs, 15, 600)}</div>
           <button type="button" class="f-link" data-go="/fit/gym/ejercicios">Mis ejercicios (renombrar, ocultar)</button>
         </section>` : ''}
@@ -116,6 +117,7 @@ function renderSportSettings(sport) {
           <button type="button" class="f-btn danger" id="reset">Borrar ${SPORT_NAME[sport].toLowerCase()}</button></section>
       </main></div>`;
     bindGo(el);
+    el.querySelectorAll('[data-acc]').forEach((b) => b.addEventListener('click', () => { updateFit((f) => { f.settings.accent = b.dataset.acc; }); document.documentElement.dataset.accent = b.dataset.acc; refresh(); }));
     const tmp = { paceMin: Math.floor(s.paceLimit / 60), paceSec: s.paceLimit % 60 };
     bindSteppers(el, (id, v) => {
       if (id === 'paceMin' || id === 'paceSec') tmp[id] = v;

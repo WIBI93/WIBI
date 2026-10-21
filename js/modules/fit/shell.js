@@ -1,6 +1,6 @@
 // Piezas comunes de W fit: iconos, barras inferiores y cabeceras.
 
-import { go } from '../../core/router.js';
+import { go, navigate, back } from '../../core/router.js';
 
 const P = {
   back: '<path d="M15 5l-7 7 7 7"/>',
@@ -28,14 +28,14 @@ export function ico(name, size = 22, sw = 2) {
 }
 
 const tab = (t, active) =>
-  `<button type="button" class="f-tab ${t.cls || ''}" data-go="${t.path}" ${t.id === active ? 'aria-current="page"' : ''}>${ico(t.icon, 22)}<span>${t.label}</span></button>`;
+  `<button type="button" class="f-tab ${t.cls || ''}" data-go="${t.path}" ${t.push ? 'data-push="1"' : ''} ${t.id === active ? 'aria-current="page"' : ''}>${ico(t.icon, 22)}<span>${t.label}</span></button>`;
 
 export function commonNav(active) {
   const tabs = [
     { id: 'inicio', label: 'Inicio', icon: 'home', path: '/fit' },
     { id: 'semana', label: 'Semana', icon: 'week', path: '/fit/semana' },
-    { id: 'gym', label: 'Gym', icon: 'gym', path: '/fit/gym', cls: 'frame-gym' },
-    { id: 'run', label: 'Running', icon: 'run', path: '/fit/running', cls: 'frame-run' },
+    { id: 'gym', label: 'Gym', icon: 'gym', path: '/fit/gym', cls: 'frame-gym', push: true },
+    { id: 'run', label: 'Running', icon: 'run', path: '/fit/running', cls: 'frame-run', push: true },
     { id: 'medallas', label: 'Medallas', icon: 'medal', path: '/fit/medallas' },
     { id: 'ajustes', label: 'Ajustes', icon: 'gear', path: '/fit/ajustes' },
   ];
@@ -56,8 +56,15 @@ export function sportNav(sport, active) {
   return `<nav class="f-nav sport" aria-label="${sport === 'gym' ? 'Gimnasio' : 'Running'}">${L.map(t).join('')}${center}${R.map(t).join('')}</nav>`;
 }
 
+// Pestañas de abajo: cambian de pantalla sin añadir pasos al historial (salvo entrar a Gym o Running desde la pantalla común).
+// Flecha de volver: vuelve a la pantalla anterior. Resto de botones: abren la pantalla como un paso nuevo.
 export function bindGo(el) {
-  el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+  el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
+    const path = b.dataset.go;
+    if (b.classList.contains('f-back')) back(path);
+    else if (b.classList.contains('f-tab') && !b.hasAttribute('data-push')) go(path);
+    else navigate(path);
+  }));
 }
 
 export function header(title, sub = '', right = '') {
@@ -65,7 +72,7 @@ export function header(title, sub = '', right = '') {
 }
 
 export function backHeader(title, backPath) {
-  return `<header class="f-head"><button type="button" class="f-round" data-go="${backPath}" aria-label="Volver">${ico('back')}</button><h1 class="grow">${title}</h1></header>`;
+  return `<header class="f-head"><button type="button" class="f-round f-back" data-go="${backPath}" aria-label="Volver">${ico('back')}</button><h1 class="grow">${title}</h1></header>`;
 }
 
 export function stepper(id, value, min, max) {

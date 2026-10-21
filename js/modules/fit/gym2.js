@@ -16,6 +16,7 @@ import { GYM_FAMILIES, familyMedals, awardGym, weeklyReto } from './gymmedals.js
 import * as RM from './runmedals.js';
 import { secretMedals as gymSec } from './gymmedals.js';
 import { exerciseMap } from './exercises.js';
+import { statsMapCard } from './musclemap.js';
 import { goalsHtml, bindGoals } from './goals.js';
 import { SEASONS, MONTH_NAMES, seasonOf, seasonGoals, monthMetal, showcase, trophyMetal } from './seasons.js';
 import { sessionVolume, sessionSets, est1rm, num, fmt } from './gymlogic.js';
@@ -176,6 +177,7 @@ export function renderGymStats(el) {
         <section class="f-card plain"><div class="f-sub">Series</div><div class="f-num">${sets}</div><div class="f-mini">${Math.round(mins / 60 * 10) / 10} h</div></section>
       </div>
       <section class="f-card plain"><strong>Volumen por semana</strong><div class="f-bars">${bars.map((b) => `<div class="f-bcol"><i style="height:${Math.round((b.v / maxV) * 100)}%"></i><span>${parseKey(b.mk).getDate()}</span></div>`).join('')}</div></section>
+      ${statsMapCard(fit, sel, range === 'mes' ? 'Este mes' : range === 'año' ? 'Este año' : 'Todos tus entrenos')}
       <button type="button" class="f-card level" data-go="${B}/anual"><strong>Tu año de gimnasio</strong><div class="f-mini">Resumen anual: totales, mejores momentos y comparación con el año pasado</div></button>
       <section class="f-card plain"><strong>Evolución de un ejercicio</strong>
         ${used.length ? `<select id="ex" class="f-select">${used.map((id) => `<option value="${id}" ${id === exId ? 'selected' : ''}>${esc((map.get(id) || { name: '?' }).name)}</option>`).join('')}</select>${line}
