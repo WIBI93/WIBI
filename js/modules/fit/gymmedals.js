@@ -4,7 +4,11 @@ import { getFit, updateFit } from './data.js';
 import { todayKey, thisMonday } from './dates.js';
 import { rar, MEDAL_XP } from './medals.js';
 import { weekProgress, streakStats, levelInfo, totalXp } from './engine.js';
-import { sessionVolume, sessionSets, sessionReps } from './gymlogic.js';
+import { sessionVolume, sessionSets, sessionReps, est1rm, num } from './gymlogic.js';
+import { GYM_SECRETS, SECRET_XP } from './secrets.js';
+import { exerciseMap } from './exercises.js';
+import { checkGoals } from './goals.js';
+import { parseKey, keyOf, addDays } from './dates.js';
 
 const valid = (fit) => fit.gym.sessions.filter((s) => s.valid !== false);
 
@@ -21,6 +25,34 @@ export const GYM_FAMILIES = [
   { id: 'cumplidas', group: 'const', name: 'Semanas cumplidas en total', unit: 'semanas', glyph: 'two', steps: [4, 8, 12, 26, 52, 104, 156, 208, 260, 390], value: (f) => streakStats(f, 'gym').total },
   { id: 'retos', group: 'const', name: 'Retos semanales completados', unit: 'retos', glyph: 'target', steps: [1, 5, 10, 25, 50, 100, 150, 200, 300, 500], value: (f) => Object.keys(f.awarded).filter((k) => k.startsWith('gym.reto.')).length },
 ];
+
+
+// ---- Colecciones extra ----
+const MAIN = [['b-press-banca-barra', 'Press banca'], ['b-sentadilla-con-barra', 'Sentadilla'], ['b-peso-muerto-barra', 'Peso muerto'], ['b-press-militar-barra', 'Press militar'], ['b-remo-con-barra', 'Remo con barra'], ['b-jalon-al-pecho-polea', 'Jalón al pecho'], ['b-hip-thrust', 'Hip thrust']];
+const bestRm = (s, exId) => { const ex = s.exercises.find((e) => e.exId === exId); return ex ? Math.max(0, ...ex.sets.map((st) => est1rm(num(st.kg), num(st.reps)))) : 0; };
+const strengthGain = (f, exId) => {
+  const l = valid(f).filter((s) => s.exercises.some((e) => e.exId === exId)).sort((a, b) => a.date.localeCompare(b.date));
+  if (l.length < 2) return 0;
+  const first = bestRm(l[0], exId);
+  return first ? Math.max(0, (Math.max(...l.map((s) => bestRm(s, exId))) / first - 1) * 100) : 0;
+};
+const groupOf = (m) => (m === 'Bíceps' || m === 'Tríceps' ? 'Brazos' : m);
+const weekKey = (d) => keyOf(addDays(parseKey(d), -((parseKey(d).getDay() + 6) % 7)));
+const balancedWeeks = (f) => {
+  const map = exerciseMap(f);
+  const by = {};
+  for (const s of valid(f)) for (const e of s.exercises) { const m = (map.get(e.exId) || {}).muscle; if (m) (by[weekKey(s.date)] = by[weekKey(s.date)] || new Set()).add(groupOf(m)); }
+  return Object.values(by).filter((set) => ['Pecho', 'Espalda', 'Piernas', 'Hombro', 'Brazos', 'Core'].every((g) => set.has(g))).length;
+};
+const returns = (dates) => { const d = [...new Set(dates)].sort(); let n = 0; for (let i = 1; i < d.length; i++) if ((parseKey(d[i]) - parseKey(d[i - 1])) / 86400000 >= 21) n++; return n; };
+GYM_FAMILIES.push(
+  ...MAIN.map(([id, name]) => ({ id: 'fz-' + id.slice(2), group: 'perm', name: 'Fuerza: ' + name, unit: '% de mejora', glyph: 'flame', steps: [10, 25, 50, 75, 100], value: (f) => strengthGain(f, id) })),
+  { id: 'equilibrio', group: 'perm', name: 'Equilibrio muscular', unit: 'semanas con los 6 grupos', glyph: 'target', steps: [1, 3, 6, 12, 24, 52], value: balancedWeeks },
+  { id: 'fiel', group: 'perm', name: 'Fiel a tu rutina', unit: 'veces la misma rutina', glyph: 'star', steps: [5, 10, 25, 50, 100], value: (f) => { const c = {}; for (const s of valid(f)) if (s.routineId) c[s.routineId] = (c[s.routineId] || 0) + 1; return Math.max(0, ...Object.values(c)); } },
+  { id: 'regresos', group: 'const', name: 'Regresos tras una pausa', unit: 'regresos', glyph: 'bolt', steps: [1, 3, 5, 10], value: (f) => returns(valid(f).map((s) => s.date)) },
+);
+export const secretMedals = () => GYM_SECRETS.map((s) => ({ id: `gym.sec.${s.id}`, name: s.name, desc: s.desc, secret: true, test: s.test, shape: 'shield', glyph: 'star', metal: 'oro' }));
+export const returnsOf = returns;
 
 export function familyMedals(fam) {
   const metals = rar(fam.steps.length);
@@ -58,6 +90,17 @@ export function awardGym() {
           f.gym.xpLog.push({ date: today, xp: MEDAL_XP[m.metal], why: 'medalla', ref: m.id });
           out.medals.push(m);
         }
+      }
+    }
+  });
+  out.medals.push(...checkGoals('gym'));
+  // secretas
+  updateFit((f) => {
+    for (const m of secretMedals()) {
+      if (!f.awarded[m.id] && m.test(f)) {
+        f.awarded[m.id] = today;
+        f.gym.xpLog.push({ date: today, xp: SECRET_XP, why: 'secreta', ref: m.id });
+        out.medals.push({ ...m, n: '', unit: '' });
       }
     }
   });

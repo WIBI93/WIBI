@@ -76,7 +76,7 @@ export function finishDraft(minutes) {
     .map((ex) => ({ exId: ex.exId, sets: doneSets(ex).map((s) => ({ kg: num(s.kg), reps: num(s.reps) })) }))
     .filter((ex) => ex.sets.length)
     .map((ex) => ({ ...ex, sets: ex.sets.map((s) => ({ ...s, done: true })) }));
-  const sess = { id: draft.id, date: draft.date, routineId: draft.routineId || null, minutes: Math.max(1, Math.round(minutes)), exercises };
+  const sess = { id: draft.id, date: draft.date, startedAt: draft.startedAt, endedAt: Date.now(), routineId: draft.routineId || null, minutes: Math.max(1, Math.round(minutes)), exercises };
   sess.valid = isValid(sess);
   const prs = sess.valid ? sessionPRs(before, sess) : [];
   const alreadyXpToday = before.gym.sessions.some((s) => s.date === sess.date && s.valid && s.xp > 0);

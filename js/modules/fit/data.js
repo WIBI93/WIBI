@@ -27,6 +27,7 @@ export function defaults() {
     plans: {}, // lunes de la semana -> { gym: n, run: n } (0 = esa semana en pausa)
     pauses: { gym: [], run: [] }, // { from: lunes, to: lunes | null }
     comodines: { gym: [], run: [] }, // semanas en las que se ha usado el comodín
+    goals: [], // metas propias (máx. 5 activas por deporte)
     awarded: {}, // id de medalla -> fecha en la que se consiguió (se guarda aparte: no se pierde)
     gym: { sessions: [], xpLog: [], routines: [], custom: [], hidden: [], renames: {}, draft: null },
     run: { runs: [], xpLog: [], plan: null },
@@ -89,6 +90,7 @@ export function normalize(raw) {
   d.plans = normPlans(r.plans);
   d.pauses = normPauses(r.pauses);
   d.comodines = normSet(r.comodines);
+  d.goals = (Array.isArray(r.goals) ? r.goals : []).filter((g) => g && typeof g.id === 'string' && SPORTS.includes(g.sport) && typeof g.name === 'string' && typeof g.type === 'string' && Number.isFinite(Number(g.target))).map((g) => ({ id: g.id, sport: g.sport, name: g.name.slice(0, 60), type: g.type, target: Number(g.target), exId: typeof g.exId === 'string' ? g.exId : null, deadline: dateOr(g.deadline), created: dateOr(g.created, null), done: dateOr(g.done) }));
   if (r.awarded && typeof r.awarded === 'object') {
     for (const [id, date] of Object.entries(r.awarded)) if (dateOr(date)) d.awarded[id] = date;
   }

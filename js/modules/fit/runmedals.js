@@ -3,6 +3,9 @@
 import { getFit, updateFit } from './data.js';
 import { todayKey, thisMonday } from './dates.js';
 import { rar, MEDAL_XP } from './medals.js';
+import { GYM_SECRETS as _g, RUN_SECRETS, SECRET_XP } from './secrets.js';
+import { parseKey } from './dates.js';
+import { checkGoals } from './goals.js';
 import { weekProgress, streakStats, levelInfo, totalXp } from './engine.js';
 
 const valid = (f) => f.run.runs.filter((r) => r.valid !== false);
@@ -18,6 +21,17 @@ export const RUN_FAMILIES = [
   { id: 'cumplidas', group: 'const', name: 'Semanas cumplidas en total', unit: 'semanas', glyph: 'week', steps: [4, 8, 12, 26, 52, 104, 156, 208, 260, 390], value: (f) => streakStats(f, 'run').total },
   { id: 'retos', group: 'const', name: 'Retos semanales completados', unit: 'retos', glyph: 'target', steps: [1, 5, 10, 25, 50, 100, 150, 200, 300, 500], value: (f) => Object.keys(f.awarded).filter((k) => k.startsWith('run.reto.')).length },
 ];
+
+
+const prsCount = (f) => valid(f).reduce((a, r) => a + (r.prs || []).filter((k) => k.startsWith('best')).length, 0);
+const paceGain = (f) => { const l = valid(f).filter((r) => r.paceRun).sort((a, b) => a.startedAt - b.startedAt); if (l.length < 2) return 0; return Math.max(0, (l[0].paceRun / Math.min(...l.map((r) => r.paceRun)) - 1) * 100); };
+const returns = (f) => { const d = [...new Set(valid(f).map((r) => r.date))].sort(); let n = 0; for (let i = 1; i < d.length; i++) if ((parseKey(d[i]) - parseKey(d[i - 1])) / 86400000 >= 21) n++; return n; };
+RUN_FAMILIES.push(
+  { id: 'ritmo', group: 'perm', name: 'Mejora de ritmo', unit: '% más rápido', glyph: 'bolt', steps: [5, 10, 15, 20, 30], value: paceGain },
+  { id: 'marcas', group: 'perm', name: 'Mejores marcas', unit: 'mejoras', glyph: 'star', steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], value: prsCount },
+  { id: 'regresos', group: 'const', name: 'Regresos tras una pausa', unit: 'regresos', glyph: 'target', steps: [1, 3, 5, 10], value: returns },
+);
+export const secretMedals = () => RUN_SECRETS.map((s) => ({ id: `run.sec.${s.id}`, name: s.name, desc: s.desc, secret: true, test: s.test, shape: 'hex', glyph: 'star', metal: 'oro' }));
 
 export function familyMedals(fam) {
   const metals = rar(fam.steps.length);
@@ -51,6 +65,16 @@ export function awardRun() {
           f.run.xpLog.push({ date: today, xp: MEDAL_XP[m.metal], why: 'medalla', ref: m.id });
           out.medals.push(m);
         }
+      }
+    }
+  });
+  out.medals.push(...checkGoals('run'));
+  updateFit((f) => {
+    for (const m of secretMedals()) {
+      if (!f.awarded[m.id] && m.test(f)) {
+        f.awarded[m.id] = today;
+        f.run.xpLog.push({ date: today, xp: SECRET_XP, why: 'secreta', ref: m.id });
+        out.medals.push({ ...m, n: '', unit: '' });
       }
     }
   });

@@ -166,3 +166,10 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-cele.run { background: rgba(13,18,48,.97); font-family: 'Rubik', system-ui, sans-serif; --f-acc: #FFC83D; --f-on: #1B1400; --f-head: 'Rubik', sans-serif; --f-r: 20px; }
 .f-cele.run .f-bigger { text-transform: none; }
 .f-cele.run .f-btn { border-radius: 20px; }
+.f-medals.big { gap: 14px 10px; }
+.f-medal.wide { width: 96px; text-align: center; }
+.f-medal.wide b { font-size: 13px; line-height: 1.15; } .f-medal.wide span { font-size: 10.5px; line-height: 1.2; }
+.f-goal { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; border-top: 1px solid var(--f-line); }
+.f-goal.done { opacity: .75; }
+.f-seg.vertical { flex-direction: column; border-radius: var(--f-r); }
+.f-seg.vertical button { text-align: left; border-radius: var(--f-r); }

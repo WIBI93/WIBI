@@ -9,6 +9,7 @@ import { thisMonday, addDaysKey, weekRangeText, longDateText, parseKey, keyOf, m
 import { weekProgress, goalFor, hasPlan, streak, forma, formaName, levelInfo, totalXp, firstWeek, countsByWeek, SPORT_NAME } from './engine.js';
 import { commonNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 import { medalSvg, commonMedals, METAL_NAME } from './medals.js';
+import { COMMON_SECRETS } from './secrets.js';
 
 const GUINOS = ['Hoy el hierro no se mueve solo.', 'Un kilómetro más, una excusa menos.', 'La constancia gana al talento.'];
 
@@ -46,9 +47,10 @@ export function commonValues(fit) {
 function awardCommon(fit) {
   const v = commonValues(fit);
   const fresh = commonMedals().filter((m) => !fit.awarded[m.id] && v[m.family] >= m.n);
-  if (fresh.length) {
+  const freshSec = COMMON_SECRETS.filter((m) => !fit.awarded['com.sec.' + m.id] && m.test(fit));
+  if (fresh.length || freshSec.length) {
     const today = keyOf(new Date());
-    updateFit((f) => fresh.forEach((m) => { f.awarded[m.id] = today; }));
+    updateFit((f) => { fresh.forEach((m) => { f.awarded[m.id] = today; }); freshSec.forEach((m) => { f.awarded['com.sec.' + m.id] = today; }); });
     return getFit();
   }
   return fit;
@@ -126,16 +128,18 @@ export function renderCommonMedals(el) {
   const fit = awardCommon(getFit());
   const v = commonValues(fit);
   const list = commonMedals();
-  const got = list.filter((m) => fit.awarded[m.id]).length;
+  const got = list.filter((m) => fit.awarded[m.id]).length + COMMON_SECRETS.filter((m) => fit.awarded['com.sec.' + m.id]).length;
   const fam = [...new Set(list.map((m) => m.family))];
   el.innerHTML = `<div class="f-screen">
-    ${header('Medallas', `${got} de ${list.length} conseguidas · comunes`)}
+    ${header('Medallas', `${got} de ${list.length + COMMON_SECRETS.length} conseguidas · comunes`)}
     <main class="f-main">
       ${fam.map((id) => {
         const ms = list.filter((m) => m.family === id);
         return `<section class="f-card plain"><strong>${esc(ms[0].name)}</strong><div class="f-mini">${esc(ms[0].desc)} · llevas ${v[id]}</div>
           <div class="f-medals">${ms.map((m) => `<div class="f-medal">${medalSvg({ shape: m.shape, metal: m.metal, earned: !!fit.awarded[m.id], glyph: m.glyph, size: 60 })}<b>${m.n}</b><span>${METAL_NAME[m.metal]}</span></div>`).join('')}</div></section>`;
       }).join('')}
+      <section class="f-card plain"><strong>Secretas</strong><div class="f-mini">${COMMON_SECRETS.filter((m) => fit.awarded['com.sec.' + m.id]).length} de ${COMMON_SECRETS.length} descubiertas</div>
+        <div class="f-medals">${COMMON_SECRETS.map((m) => { const e = !!fit.awarded['com.sec.' + m.id]; return `<div class="f-medal wide">${medalSvg({ shape: 'coin', metal: 'oro', earned: e, glyph: 'star', size: 56 })}<b>${e ? esc(m.name) : '???'}</b><span>${e ? esc(m.desc) : 'Secreta'}</span></div>`; }).join('')}</div></section>
       <div class="f-note">Las medallas de cada deporte están dentro de Gym y Running.</div>
     </main>${commonNav('medallas')}</div>`;
   bindGo(el);
