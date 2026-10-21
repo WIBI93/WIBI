@@ -5,6 +5,7 @@ import { esc, toast, confirmDialog, formDialog } from '../../core/ui.js';
 import { getFit, updateFit } from './data.js';
 import { shortDateText, todayKey } from './dates.js';
 import { MUSCLES, exerciseList, exerciseMap } from './exercises.js';
+import { exFig } from './stickfigs.js';
 import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
 import { awardGym } from './gymmedals.js';
 import { celebrate } from './gym2.js';
@@ -29,7 +30,7 @@ export function pickExercises(preselected = []) {
       wrap.innerHTML = `
         <div class="f-picker-top"><button type="button" class="f-round" data-x="cancel" aria-label="Cerrar">${ico('back')}</button><input id="q" type="search" placeholder="Buscar ejercicio" value="${esc(q)}"></div>
         <div class="f-chips">${['Todos', ...MUSCLES].map((m) => `<button type="button" data-m="${m}" aria-pressed="${muscle === m}">${m}</button>`).join('')}</div>
-        <div class="f-picker-list">${list.map((e) => `<button type="button" class="f-ex ${sel.includes(e.id) ? 'on' : ''}" data-id="${e.id}"><span>${esc(e.name)}<small>${e.muscle}</small></span><i>${sel.includes(e.id) ? '✓' : '+'}</i></button>`).join('') || '<div class="f-note">Nada con ese nombre.</div>'}
+        <div class="f-picker-list">${list.map((e) => `<button type="button" class="f-ex ${sel.includes(e.id) ? 'on' : ''}" data-id="${e.id}">${exFig(e, 34)}<span class="grow">${esc(e.name)}<small>${e.muscle}</small></span><i>${sel.includes(e.id) ? '✓' : '+'}</i></button>`).join('') || '<div class="f-note">Nada con ese nombre.</div>'}
           ${q.trim() ? `<button type="button" class="f-btn ghost" data-x="new">Crear «${esc(q.trim())}» como ejercicio propio</button>` : ''}</div>
         <div class="f-picker-bar"><button type="button" class="f-btn" data-x="done">Listo · ${sel.length} elegidos</button></div>`;
       wrap.querySelector('[data-x="cancel"]').onclick = () => close(null);
@@ -80,7 +81,7 @@ export function renderRoutineEdit(el, { id }) {
     el.innerHTML = SCREEN(backHeader(existing ? 'Editar rutina' : 'Nueva rutina', B + '/rutinas') + `<main class="f-main">
       <label class="f-field"><span>Nombre</span><input id="name" maxlength="40" placeholder="Por ejemplo: Pecho y tríceps" value="${esc(r.name)}"></label>
       <section class="f-card plain"><strong>Ejercicios</strong>
-        ${r.exIds.map((x, i) => `<div class="f-exrow"><span class="grow">${esc((map.get(x) || { name: 'Ejercicio borrado' }).name)}</span>
+        ${r.exIds.map((x, i) => `<div class="f-exrow">${exFig(map.get(x) || { name: '' }, 28)}<span class="grow">${esc((map.get(x) || { name: 'Ejercicio borrado' }).name)}</span>
           <button type="button" data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Subir">↑</button><button type="button" data-down="${i}" ${i === r.exIds.length - 1 ? 'disabled' : ''} aria-label="Bajar">↓</button><button type="button" data-rm="${i}" aria-label="Quitar">✕</button></div>`).join('') || '<div class="f-mini">Todavía sin ejercicios.</div>'}
         <button type="button" class="f-btn ghost" id="add">+ Añadir ejercicios</button></section>
       <button type="button" class="f-btn" id="save">Guardar rutina</button>
@@ -139,7 +140,7 @@ export function renderSessionDetail(el, { id }) {
     <section class="f-card level"><div class="f-sub">${shortDateText(s.date)}</div>
       <div class="f-grid2"><div><div class="f-num">${fmt(sessionVolume(s) / 1000)} t</div><div class="f-mini">volumen</div></div><div><div class="f-num">${sessionSets(s)}</div><div class="f-mini">series</div></div><div><div class="f-num">${s.minutes}</div><div class="f-mini">minutos</div></div></div>
       <div class="f-mini">${s.valid === false ? 'No cuenta como sesión válida (mínimo ' + MIN_EXERCISES + ' ejercicios): sin XP.' : '+' + (s.xp || 0) + ' XP' + (s.prs && s.prs.length ? ' · ' + s.prs.length + ' récord' + (s.prs.length > 1 ? 's' : '') : '')}</div></section>
-    ${s.exercises.map((ex) => `<section class="f-card plain"><strong>${esc((map.get(ex.exId) || { name: 'Ejercicio borrado' }).name)}${(s.prs || []).includes(ex.exId) ? ' 🏆' : ''}</strong>
+    ${s.exercises.map((ex) => `<section class="f-card plain"><div class="rowh">${exFig(map.get(ex.exId) || { name: '' }, 30)}<strong>${esc((map.get(ex.exId) || { name: 'Ejercicio borrado' }).name)}${(s.prs || []).includes(ex.exId) ? ' 🏆' : ''}</strong></div>
       ${ex.sets.map((st, i) => `<div class="f-mini">Serie ${i + 1}: ${fmt(st.kg)} kg × ${st.reps}</div>`).join('')}</section>`).join('')}
     <button type="button" class="f-btn danger" id="del">Borrar entreno</button></main>`);
   bindGo(el);
@@ -182,7 +183,7 @@ function renderActive(el) {
       <main class="f-main">
       ${d.exercises.map((ex, xi) => {
         const last = lastSets(fit, ex.exId, d.id);
-        return `<section class="f-card plain"><div class="rowh"><strong class="grow">${esc((map.get(ex.exId) || { name: 'Ejercicio borrado' }).name)}</strong><button type="button" class="f-x" data-rmex="${xi}" aria-label="Quitar ejercicio">✕</button></div>
+        return `<section class="f-card plain"><div class="rowh">${exFig(map.get(ex.exId) || { name: '' }, 34)}<strong class="grow">${esc((map.get(ex.exId) || { name: 'Ejercicio borrado' }).name)}</strong><button type="button" class="f-x" data-rmex="${xi}" aria-label="Quitar ejercicio">✕</button></div>
           <div class="f-mini">${last ? 'Última vez (' + shortDateText(last.date) + '): ' + last.sets.map((s) => fmt(s.kg) + '×' + s.reps).join(' · ') : 'Primera vez: sin referencia'}</div>
           ${ex.sets.map((s, si) => `<div class="f-set ${s.done ? 'done' : ''}"><span class="n">${si + 1}</span>
             <input inputmode="decimal" data-k="kg" data-x="${xi}" data-s="${si}" placeholder="kg" value="${esc(s.kg)}"><em>kg</em>

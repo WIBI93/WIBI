@@ -1,48 +1,28 @@
-// Planes de running: progresiones de correr-caminar. La app no avisa durante la carrera:
-// al importar el GPX comprueba si has cumplido la siguiente sesión y la marca sola.
-// OJO: las progresiones son un ejemplo razonable, no una pauta médica validada.
+// Planes de running: los creas y editas tú. La app no avisa durante la carrera:
+// al importar el GPX comprueba si has cumplido la siguiente sesión del plan y la marca sola.
 
 import { navigate } from '../../core/router.js';
 import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { getFit, updateFit } from './data.js';
-import { todayKey, thisMonday, weekRangeText, addDaysKey } from './dates.js';
-import { sportNav, bindGo, header, ico } from './shell.js';
+import { todayKey, thisMonday, weekRangeText } from './dates.js';
+import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
+import { uid } from './gymlogic.js';
 
 export const PLAN_XP = 100;
+const B = '/fit/running';
 
-// Cada sesión pide: tramo seguido mínimo y total corriendo. Unidades: seguido en minutos (min) o en km.
-const w = (sessions) => sessions;
-export const PLANS = [
-  {
-    id: 'c0a5', name: 'De cero a 5 km sin parar', desc: '8 semanas, 3 sesiones por semana. Vas alargando el tiempo que corres seguido, caminando entre medias.',
-    weeks: [
-      w([[2, 8], [2, 8], [3, 9]]), w([[3, 9], [3, 12], [4, 12]]), w([[5, 15], [5, 15], [6, 15]]), w([[6, 18], [8, 16], [8, 16]]),
-      w([[8, 20], [10, 20], [10, 20]]), w([[12, 24], [12, 24], [15, 25]]), w([[15, 25], [18, 27], [20, 28]]), w([[20, 30], [22, 30], [25, 30]]),
-    ],
-    unit: 'min', goal: 'Correr unos 30 minutos seguidos (≈ 5 km).',
-  },
-  {
-    id: 'c5a10', name: 'De 5 a 10 km sin parar', desc: '8 semanas, 2 sesiones por semana. Una sesión larga que va subiendo de distancia y otra cómoda.',
-    weeks: [
-      [[5.5, 20], [4, 20]], [[6, 22], [4, 20]], [[6.5, 25], [5, 22]], [[7, 28], [5, 25]],
-      [[8, 32], [5, 25]], [[8.5, 35], [6, 28]], [[9, 38], [6, 30]], [[10, 42], [5, 25]],
-    ],
-    unit: 'km', goal: 'Correr 10 km seguidos.',
-  },
-];
-export const planById = (id) => PLANS.find((p) => p.id === id);
+export const planById = (fit, id) => fit.run.plans.find((p) => p.id === id) || null;
+const fmtN = (n) => String(n).replace('.', ',');
+const num = (v) => { const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) && n > 0 ? n : 0; };
 
 const sessionText = (plan, [seg, total]) => (plan.unit === 'min'
-  ? `Corre ${seg} min seguidos (${Math.ceil(total / seg)}×${seg} min si hace falta) hasta sumar ${total} min corriendo; camina entre tramos.`
-  : `Corre ${String(seg).replace('.', ',')} km seguidos y suma al menos ${total} min corriendo.`);
+  ? `Corre ${fmtN(seg)} min seguidos y suma ${fmtN(total)} min corriendo en total (caminando entre tramos).`
+  : `Corre ${fmtN(seg)} km seguidos y suma al menos ${fmtN(total)} min corriendo.`);
 
-// Lista plana de sesiones con su clave "semana-sesión".
 export function flat(plan) {
   return plan.weeks.flatMap((ws, wi) => ws.map((req, si) => ({ key: `${wi + 1}-${si + 1}`, week: wi + 1, n: si + 1, req })));
 }
-export function nextSession(plan, st) {
-  return flat(plan).find((s) => !st.done[s.key]) || null;
-}
+export const nextSession = (plan, st) => flat(plan).find((s) => !st.done[s.key]) || null;
 const meets = (plan, req, run) => (plan.unit === 'min' ? run.longestSec >= req[0] * 60 : run.longestM >= req[0] * 1000) && run.runSec >= req[1] * 60;
 
 // Tras guardar una carrera: marca la siguiente sesión del plan si la has cumplido.
@@ -50,7 +30,7 @@ export function checkPlan(run) {
   const fit = getFit();
   const st = fit.run.plan;
   if (!st || run.valid === false) return null;
-  const plan = planById(st.id);
+  const plan = planById(fit, st.id);
   const next = plan && nextSession(plan, st);
   if (!next || !meets(plan, next.req, run)) return null;
   let finished = false;
@@ -68,30 +48,82 @@ export function checkPlan(run) {
 export function renderPlans(el) {
   const fit = getFit();
   const st = fit.run.plan;
-  const plan = st && planById(st.id);
-  let body;
-  if (!plan) {
-    body = `<div class="f-note">Elige un plan y haz tus carreras con tu reloj como siempre. Al importar el GPX, la app mira si has cumplido la siguiente sesión.</div>
-      ${PLANS.map((p) => `<section class="f-card plain"><strong>${esc(p.name)}</strong><div class="f-mini">${esc(p.desc)}</div><div class="f-mini">Meta: ${esc(p.goal)}${fit.awarded['run.plan.' + p.id] ? ' · ✓ ya completado' : ''}</div><button type="button" class="f-btn" data-start="${p.id}">Empezar este plan</button></section>`).join('')}
-      <div class="f-note">Las progresiones son orientativas, no una pauta médica: si algo te duele, para y adapta.</div>`;
-  } else {
-    const list = flat(plan);
+  const active = st && planById(fit, st.id);
+  let body = '';
+  if (active) {
+    const list = flat(active);
     const done = list.filter((s) => st.done[s.key]).length;
-    const next = nextSession(plan, st);
-    body = `<section class="f-card level"><div class="f-sub">Plan activo</div><div class="f-big">${esc(plan.name)}</div>
+    const next = nextSession(active, st);
+    body += `<section class="f-card level"><div class="f-sub">Plan activo</div><div class="f-big">${esc(active.name)}</div>
       <div class="f-bar"><i style="width:${Math.round((done / list.length) * 100)}%"></i></div><div class="f-mini">${done} de ${list.length} sesiones · empezaste la semana del ${weekRangeText(st.start)}</div></section>
-      ${next ? `<section class="f-card plain"><div class="f-sub">Siguiente sesión · semana ${next.week}, sesión ${next.n}</div><div class="f-mini">${esc(sessionText(plan, next.req))}</div></section>` : '<div class="f-note">¡Has completado todas las sesiones!</div>'}
-      ${plan.weeks.map((ws, wi) => `<section class="f-card plain"><strong>Semana ${wi + 1}</strong>${ws.map((req, si) => { const k = `${wi + 1}-${si + 1}`; return `<div class="f-exrow ${st.done[k] ? '' : ''}"><span class="grow">${st.done[k] ? '✓' : '○'} ${esc(sessionText(plan, req))}</span></div>`; }).join('')}</section>`).join('')}
-      <button type="button" class="f-btn danger" id="drop">Dejar este plan</button>`;
+      ${next ? `<section class="f-card plain"><div class="f-sub">Siguiente sesión · semana ${next.week}, sesión ${next.n}</div><div class="f-mini">${esc(sessionText(active, next.req))}</div></section>` : '<div class="f-note">¡Has completado todas las sesiones!</div>'}
+      <button type="button" class="f-btn danger" id="drop">Dejar el plan activo</button>`;
   }
+  body += `<section class="f-card plain"><div class="rowh"><strong class="grow">Mis planes</strong><span class="f-mini">${fit.run.plans.length}</span></div>
+    ${fit.run.plans.map((p) => `<div class="f-plan"><div class="grow"><b>${esc(p.name)}</b><div class="f-mini">${p.weeks.length} semana${p.weeks.length === 1 ? "" : "s"} · ${p.weeks.reduce((a, w) => a + w.length, 0)} sesiones${fit.awarded['run.plan.' + p.id] ? ' · ✓ completado' : ''}</div></div>
+      <button type="button" class="f-link" data-edit="${p.id}">Editar</button>${active && active.id === p.id ? '' : `<button type="button" class="f-link" data-start="${p.id}">Empezar</button>`}</div>`).join('') || '<div class="f-mini">Aún no tienes ningún plan. Crea el tuyo: eliges las semanas y lo que corres en cada sesión.</div>'}
+    <button type="button" class="f-btn ghost" data-go="${B}/plan/nuevo">+ Crear un plan</button></section>
+    <div class="f-note">En cada sesión indicas el tramo que quieres correr seguido y el total corriendo. Al importar el GPX, la app mira si has cumplido la siguiente sesión y la marca sola.</div>`;
   el.innerHTML = `<div class="f-screen">${header('Planes', 'Running')}<main class="f-main">${body}</main>${sportNav('run', 'planes')}</div>`;
   bindGo(el);
   const c = el.querySelector('#f-center');
-  if (c) c.onclick = () => navigate('/fit/running/importar');
-  el.querySelectorAll('[data-start]').forEach((b) => (b.onclick = () => { updateFit((f) => { f.run.plan = { id: b.dataset.start, start: thisMonday(), done: {} }; }); renderPlans(el); }));
+  if (c) c.onclick = () => navigate(B + '/importar');
+  el.querySelectorAll('[data-edit]').forEach((b) => (b.onclick = () => navigate(`${B}/plan/${b.dataset.edit}`)));
+  el.querySelectorAll('[data-start]').forEach((b) => (b.onclick = async () => {
+    if (st && !(await confirmDialog({ title: 'Cambiar de plan', text: 'Dejas el plan activo y empiezas este desde cero. Tus carreras se conservan.', confirmLabel: 'Cambiar' }))) return;
+    updateFit((f) => { f.run.plan = { id: b.dataset.start, start: thisMonday(), done: {} }; });
+    renderPlans(el);
+  }));
   const drop = el.querySelector('#drop');
   if (drop) drop.onclick = async () => {
     if (!(await confirmDialog({ title: 'Dejar el plan', text: 'Tus carreras se conservan; solo se quita el seguimiento del plan.', confirmLabel: 'Dejar plan', danger: true }))) return;
     updateFit((f) => { f.run.plan = null; }); renderPlans(el);
   };
+}
+
+// ---- Crear / editar un plan ----
+export function renderPlanEdit(el, { id }) {
+  const fit = getFit();
+  const existing = planById(fit, id);
+  if (id !== 'nuevo' && !existing) { navigate(B + '/planes'); return; }
+  const p = existing ? JSON.parse(JSON.stringify(existing)) : { id: uid(), name: '', unit: 'min', weeks: [[[2, 8], [2, 8], [3, 9]]] };
+  const draw = () => {
+    el.innerHTML = `<div class="f-screen">${backHeader(existing ? 'Editar plan' : 'Nuevo plan', B + '/planes')}<main class="f-main">
+      <label class="f-field"><span>Nombre</span><input id="name" maxlength="50" value="${esc(p.name)}" placeholder="Por ejemplo: Mis primeros 5 km"></label>
+      <section class="f-card plain"><strong>¿Cómo mides el tramo seguido?</strong>
+        <div class="f-seg"><button type="button" data-u="min" aria-pressed="${p.unit === 'min'}">En minutos</button><button type="button" data-u="km" aria-pressed="${p.unit === 'km'}">En kilómetros</button></div></section>
+      ${p.weeks.map((w, wi) => `<section class="f-card plain"><div class="rowh"><strong class="grow">Semana ${wi + 1}</strong>${p.weeks.length > 1 ? `<button type="button" class="f-x" data-rmw="${wi}" aria-label="Quitar semana">✕</button>` : ''}</div>
+        ${w.map((q, si) => `<div class="f-plan-row"><span class="n">${si + 1}</span>
+          <label><input inputmode="decimal" data-w="${wi}" data-s="${si}" data-k="0" value="${esc(String(q[0]).replace('.', ','))}"><em>${p.unit === 'min' ? 'min seguidos' : 'km seguidos'}</em></label>
+          <label><input inputmode="decimal" data-w="${wi}" data-s="${si}" data-k="1" value="${esc(String(q[1]).replace('.', ','))}"><em>min en total</em></label>
+          ${w.length > 1 ? `<button type="button" class="f-x" data-rms="${wi}:${si}" aria-label="Quitar sesión">✕</button>` : '<span style="width:34px"></span>'}</div>`).join('')}
+        <button type="button" class="f-link" data-adds="${wi}">+ Sesión</button></section>`).join('')}
+      <button type="button" class="f-btn ghost" id="addw">+ Añadir semana</button>
+      <div class="f-mini">Consejo: para que cuente como salida, cada sesión debería sumar al menos 8 min corriendo.</div>
+      <button type="button" class="f-btn" id="save">Guardar plan</button>
+      ${existing ? '<button type="button" class="f-btn danger" id="del">Borrar plan</button>' : ''}</main></div>`;
+    bindGo(el);
+    const name = el.querySelector('#name');
+    name.oninput = () => { p.name = name.value; };
+    el.querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => { p.unit = b.dataset.u; draw(); }));
+    el.querySelectorAll('input[data-k]').forEach((i) => (i.oninput = () => { const v = num(i.value); p.weeks[+i.dataset.w][+i.dataset.s][+i.dataset.k] = v || 0; }));
+    el.querySelectorAll('[data-rmw]').forEach((b) => (b.onclick = () => { p.weeks.splice(+b.dataset.rmw, 1); draw(); }));
+    el.querySelectorAll('[data-rms]').forEach((b) => (b.onclick = () => { const [w, s] = b.dataset.rms.split(':').map(Number); p.weeks[w].splice(s, 1); draw(); }));
+    el.querySelectorAll('[data-adds]').forEach((b) => (b.onclick = () => { const w = p.weeks[+b.dataset.adds]; w.push([...(w[w.length - 1] || [2, 8])]); draw(); }));
+    el.querySelector('#addw').onclick = () => { const l = p.weeks[p.weeks.length - 1]; p.weeks.push(l.map((q) => [...q])); draw(); };
+    el.querySelector('#save').onclick = () => {
+      if (!p.name.trim()) { toast('Ponle un nombre al plan'); return; }
+      if (p.weeks.some((w) => w.some((q) => !(q[0] > 0) || !(q[1] > 0)))) { toast('Todas las sesiones necesitan un tramo y un total mayores que 0'); return; }
+      updateFit((f) => { const i = f.run.plans.findIndex((x) => x.id === p.id); const c = { ...p, name: p.name.trim() }; if (i >= 0) f.run.plans[i] = c; else f.run.plans.push(c); });
+      toast('Plan guardado');
+      navigate(B + '/planes');
+    };
+    const del = el.querySelector('#del');
+    if (del) del.onclick = async () => {
+      if (!(await confirmDialog({ title: 'Borrar plan', text: 'Se borra el plan (y su seguimiento si estaba activo). Tus carreras se conservan.', confirmLabel: 'Borrar', danger: true }))) return;
+      updateFit((f) => { f.run.plans = f.run.plans.filter((x) => x.id !== p.id); if (f.run.plan && f.run.plan.id === p.id) f.run.plan = null; });
+      navigate(B + '/planes');
+    };
+  };
+  draw();
 }

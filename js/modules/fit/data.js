@@ -30,7 +30,7 @@ export function defaults() {
     goals: [], // metas propias (máx. 5 activas por deporte)
     awarded: {}, // id de medalla -> fecha en la que se consiguió (se guarda aparte: no se pierde)
     gym: { sessions: [], xpLog: [], routines: [], custom: [], hidden: [], renames: {}, draft: null },
-    run: { runs: [], xpLog: [], plan: null },
+    run: { runs: [], xpLog: [], plan: null, plans: [] },
   };
 }
 
@@ -104,6 +104,11 @@ export function normalize(raw) {
   d.gym.draft = d.gym.draft && typeof d.gym.draft === 'object' && Array.isArray(d.gym.draft.exercises) ? d.gym.draft : null;
   d.run.runs = Array.isArray(d.run.runs) ? d.run.runs : [];
   d.run.xpLog = Array.isArray(d.run.xpLog) ? d.run.xpLog : [];
+  const numOr = (v, def, max) => { const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.min(max, n) : def; };
+  d.run.plans = (Array.isArray(d.run.plans) ? d.run.plans : []).filter((p) => p && typeof p.id === 'string' && Array.isArray(p.weeks)).slice(0, 30).map((p) => ({
+    id: p.id, name: String(p.name || 'Mi plan').slice(0, 50), unit: p.unit === 'km' ? 'km' : 'min',
+    weeks: p.weeks.slice(0, 60).map((w) => (Array.isArray(w) ? w : []).slice(0, 14).map((q) => [numOr(q && q[0], 5, 60), numOr(q && q[1], 10, 300)])).filter((w) => w.length),
+  })).filter((p) => p.weeks.length);
   const pl = d.run.plan;
   d.run.plan = pl && typeof pl === 'object' && typeof pl.id === 'string' && dateOr(pl.start) ? { id: pl.id, start: pl.start, done: pl.done && typeof pl.done === 'object' ? pl.done : {} } : null;
   return d;

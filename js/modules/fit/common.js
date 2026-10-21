@@ -6,7 +6,7 @@ import { lastBackupText } from '../../core/backup.js';
 import { runExport, runImport } from '../../core/backup-ui.js';
 import { getFit, updateFit, resetFit } from './data.js';
 import { thisMonday, addDaysKey, weekRangeText, longDateText, parseKey, keyOf, mondayKey, shortDateText, monthTitle, todayKey } from './dates.js';
-import { weekProgress, goalFor, hasPlan, streak, forma, formaName, levelInfo, totalXp, firstWeek, countsByWeek, SPORT_NAME } from './engine.js';
+import { canPause, weekProgress, goalFor, hasPlan, streak, forma, formaName, levelInfo, totalXp, firstWeek, countsByWeek, SPORT_NAME } from './engine.js';
 import { commonNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 import { medalSvg, commonMedals, METAL_NAME } from './medals.js';
 import { COMMON_SECRETS } from './secrets.js';
@@ -95,13 +95,13 @@ export function renderHome(el) {
   el.innerHTML = `<div class="f-screen">
     ${header('W fit', esc(longDateText()))}
     <main class="f-main">
+      <section class="f-card plain"><div class="rowh"><button type="button" class="f-x" id="prevm" aria-label="Mes anterior">‹</button><strong class="grow center" id="mt">${monthTitle(cy, cm)}</strong><button type="button" class="f-x" id="nextm" aria-label="Mes siguiente">›</button></div><div id="grid">${monthGrid(fit, cy, cm)}</div></section>
       ${guino}
       <section class="f-card plain"><div class="rowh"><strong>Semana ${weekRangeText(mk)}</strong><span class="grow"></span>
         <button type="button" class="f-link" data-go="/fit/semana">${planned ? 'Cambiar' : 'Planificar'}</button></div>
         <div class="f-mini">${planned ? 'Tu semana está planificada.' : 'Aún no has planificado esta semana: se usa tu objetivo habitual.'}</div></section>
       ${sportCard(fit, 'gym')}
       ${sportCard(fit, 'run')}
-      <section class="f-card plain"><div class="rowh"><button type="button" class="f-x" id="prevm" aria-label="Mes anterior">‹</button><strong class="grow center" id="mt">${monthTitle(cy, cm)}</strong><button type="button" class="f-x" id="nextm" aria-label="Mes siguiente">›</button></div><div id="grid">${monthGrid(fit, cy, cm)}</div></section>
       ${lastActivities(fit).length ? `<section class="f-card plain"><strong>Últimas actividades</strong>${lastActivities(fit).map((a) => `<button type="button" class="f-act ${a.sport}" data-go="/fit/${a.sport === 'gym' ? 'gym/entreno' : 'running/carrera'}/${a.id}"><span class="dot"></span><span class="grow">${esc(a.title)}<small>${esc(shortDateText(a.date))} · ${esc(a.sub)}</small></span>${ico('next', 16)}</button>`).join('')}</section>` : ''}
       ${empty ? '<div class="f-note">Todo empieza en cero. Cuando hagas tu primer entreno aparecerán tu nivel, tu racha y tus medallas.</div>' : ''}
     </main>${commonNav('inicio')}</div>`;
@@ -150,6 +150,10 @@ export function renderWeek(el) {
     el.querySelectorAll('[data-pre]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.pre !== 'custom') apply(b.dataset.pre); else st.preset = 'custom'; draw(); }));
     bindSteppers(el, (id, v) => { st[id] = v; st.preset = 'custom'; el.querySelectorAll('[data-pre]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.pre === 'custom')); });
     el.querySelector('#save').addEventListener('click', () => {
+      const fit2 = getFit();
+      for (const sp of ['gym', 'run']) {
+        if (st[sp] === 0 && !(fit2.plans[st.mk] && fit2.plans[st.mk][sp] === 0) && !canPause(fit2, sp, [st.mk]).ok) { toast(`${SPORT_NAME[sp]}: te pasas del tope de pausas (20 días cada 3 meses)`); return; }
+      }
       updateFit((f) => { f.plans[st.mk] = { gym: st.gym, run: st.run }; });
       toast('Semana guardada');
       navigate('/fit');

@@ -185,3 +185,38 @@ export function comodinCandidate(fit, sport) {
   }
   return null;
 }
+
+// ---- Tope de pausas: máximo 20 días cada 3 meses ----
+// Las pausas son por semanas completas, así que en la práctica caben 2 semanas (14 días) en cualquier tramo de 13 semanas.
+export const PAUSE_MAX_WEEKS = 2;
+export const PAUSE_WINDOW_WEEKS = 13;
+
+export function pausedWeeks(fit, sport) {
+  const set = new Set();
+  const end = thisMonday();
+  for (const p of fit.pauses[sport]) {
+    let mk = p.from;
+    const to = p.to === null ? end : p.to;
+    for (let i = 0; i < 200 && mk <= to; i++, mk = addDaysKey(mk, 7)) set.add(mk);
+  }
+  for (const [mk, pl] of Object.entries(fit.plans)) if (pl[sport] === 0) set.add(mk);
+  return set;
+}
+
+// ¿Se puede añadir esta pausa sin pasarse del tope? Devuelve { ok, free } (free = semanas que aún caben ahora).
+export function canPause(fit, sport, newMks) {
+  const all = [...new Set([...pausedWeeks(fit, sport), ...newMks])].sort();
+  for (let i = 0; i < all.length; i++) {
+    const inWin = all.filter((mk) => mk >= all[i] && weeksBetween(all[i], mk) < PAUSE_WINDOW_WEEKS).length;
+    if (inWin > PAUSE_MAX_WEEKS) return { ok: false };
+  }
+  return { ok: true };
+}
+export function pauseWeeksFree(fit, sport, startMk) {
+  let n = 0;
+  for (let k = 1; k <= PAUSE_MAX_WEEKS; k++) {
+    const mks = Array.from({ length: k }, (_, i) => addDaysKey(startMk, 7 * i));
+    if (canPause(fit, sport, mks).ok) n = k; else break;
+  }
+  return n;
+}

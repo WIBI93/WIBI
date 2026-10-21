@@ -4,7 +4,7 @@ import { navigate, refresh, back } from '../../core/router.js';
 import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { getFit, updateFit, resetSport } from './data.js';
 import { thisMonday, addDaysKey, weekRangeText, weeksBetween } from './dates.js';
-import { comodinBank, comodinCandidate, weekProgress, streak, forma, formaName, levelInfo, totalXp, activePause, firstWeek, SPORT_NAME, weekStatus, countsByWeek } from './engine.js';
+import { canPause, pauseWeeksFree, PAUSE_MAX_WEEKS, comodinBank, comodinCandidate, weekProgress, streak, forma, formaName, levelInfo, totalXp, activePause, firstWeek, SPORT_NAME, weekStatus, countsByWeek } from './engine.js';
 import { sportNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 
 const SLUG = { gym: 'gym', run: 'running' };
@@ -156,26 +156,29 @@ function renderPause(sport) {
       });
       return;
     }
-    const st = { start: 'now', weeks: 2, open: false };
+    const st = { start: 'now', weeks: 1 };
     const draw = () => {
+      const fit2 = getFit();
+      const from = st.start === 'now' ? cur : addDaysKey(cur, 7);
+      const free = pauseWeeksFree(fit2, sport, from);
+      if (st.weeks > Math.max(1, free)) st.weeks = Math.max(1, free);
       el.innerHTML = `<div class="f-screen">${backHeader('Pausar ' + SPORT_NAME[sport], base(sport))}
         <main class="f-main">
-          <div class="f-note">No hace falta dar ningún motivo. Durante la pausa tu racha se congela, tu forma no baja y los retos de la semana no cuentan ni se fallan.</div>
+          <div class="f-note">No hace falta dar ningún motivo. Durante la pausa tu racha se congela, tu forma no baja y los retos de la semana no cuentan ni se fallan.<br><br><b>Tope:</b> máximo 20 días de pausa cada 3 meses. Como las pausas son por semanas completas, caben ${PAUSE_MAX_WEEKS} semanas (14 días) en cualquier tramo de 13 semanas. Las semanas «Sin entrenar» del planificador también cuentan.</div>
           <section class="f-card plain"><strong>¿Cuándo empieza?</strong>
             <div class="f-seg"><button type="button" data-st="now" aria-pressed="${st.start === 'now'}">Esta semana</button><button type="button" data-st="next" aria-pressed="${st.start === 'next'}">Próxima semana</button></div></section>
-          <section class="f-card plain"><strong>¿Cuánto dura?</strong>
-            <div class="f-seg"><button type="button" data-open="0" aria-pressed="${!st.open}">Semanas</button><button type="button" data-open="1" aria-pressed="${st.open}">Sin fecha</button></div>
-            ${st.open ? '' : `<div class="rowh"><span>Semanas</span><span class="grow"></span>${stepper('weeks', st.weeks, 1, 52)}</div>`}</section>
-          <button type="button" class="f-btn" id="go">Empezar pausa</button>
+          ${free < 1 ? '<div class="f-note">Con ese inicio ya no te queda pausa disponible en estos 3 meses. Prueba con otra semana de inicio o espera a que pasen las semanas.</div>' : `<section class="f-card plain"><strong>¿Cuánto dura?</strong>
+            <div class="rowh"><span>Semanas (te caben ${free})</span><span class="grow"></span>${stepper('weeks', st.weeks, 1, free)}</div></section>`}
+          ${free < 1 ? '' : '<button type="button" class="f-btn" id="go">Empezar pausa</button>'}
         </main></div>`;
       bindGo(el);
       el.querySelectorAll('[data-st]').forEach((b) => b.addEventListener('click', () => { st.start = b.dataset.st; draw(); }));
-      el.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => { st.open = b.dataset.open === '1'; draw(); }));
       bindSteppers(el, (id, v) => { st[id] = v; });
-      el.querySelector('#go').addEventListener('click', () => {
-        const from = st.start === 'now' ? cur : addDaysKey(cur, 7);
-        const to = st.open ? null : addDaysKey(from, 7 * (st.weeks - 1));
-        updateFit((f) => { f.pauses[sport].push({ from, to }); });
+      const go = el.querySelector('#go');
+      if (go) go.addEventListener('click', () => {
+        const mks = Array.from({ length: st.weeks }, (_, i) => addDaysKey(from, 7 * i));
+        if (!canPause(getFit(), sport, mks).ok) { toast('Te pasas del tope de pausas'); return; }
+        updateFit((f) => { f.pauses[sport].push({ from, to: mks[mks.length - 1] }); });
         toast('Pausa activada');
         navigate(base(sport));
       });
