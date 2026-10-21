@@ -5,9 +5,15 @@ import { esc } from '../../core/ui.js';
 import { getFit } from './data.js';
 import { addDaysKey, thisMonday, weekRangeText, parseKey, mondayKey } from './dates.js';
 import { levelInfo, totalXp, weekProgress, streak, SPORT_NAME } from './engine.js';
+
+const CFG = {
+  gym: { fams: GYM_FAMILIES, fm: familyMedals, award: awardGym, reto: weeklyReto, base: '/fit/gym', name: 'Gimnasio', cls: 'gym' },
+  run: { fams: RM.RUN_FAMILIES, fm: RM.familyMedals, award: RM.awardRun, reto: RM.weeklyReto, base: '/fit/running', name: 'Running', cls: 'run' },
+};
 import { sportNav, bindGo, header, ico } from './shell.js';
 import { medalSvg, METAL_NAME, MEDAL_XP } from './medals.js';
-import { GYM_FAMILIES, familyMedals, awardGym, weeklyReto, retoXp } from './gymmedals.js';
+import { GYM_FAMILIES, familyMedals, awardGym, weeklyReto } from './gymmedals.js';
+import * as RM from './runmedals.js';
 import { exerciseMap } from './exercises.js';
 import { sessionVolume, sessionSets, est1rm, num, fmt } from './gymlogic.js';
 
@@ -16,10 +22,10 @@ const FRIKI_NIVEL = ['«Un gran poder conlleva…» una gran sentadilla.', 'Sube
 const FRIKI_MEDALLA = ['Eso no estaba en el manual del Hero Academy.', 'Otra para el cinturón de campeón.', 'Se acerca el invierno… y tú más fuerte.'];
 
 const fmtNum = (n, dec = 0) => (dec ? fmt(n) : Math.round(n).toLocaleString('es-ES'));
-const center = (el) => { const b = el.querySelector('#f-center'); if (b) b.onclick = () => navigate(B + '/empezar'); };
+const center = (el) => { const b = el.querySelector('#f-center'); if (b) b.onclick = () => navigate(el.querySelector('.f-nav.sport[aria-label="Running"]') ? '/fit/running/importar' : B + '/empezar'); };
 
 // Pantalla de celebración: primero la subida de nivel y luego cada medalla.
-export async function celebrate(out) {
+export async function celebrate(out, sport = 'gym') {
   const fit = getFit();
   const frases = fit.settings.guinos;
   const pages = [];
@@ -30,7 +36,7 @@ export async function celebrate(out) {
     const p = pages[i];
     await new Promise((resolve) => {
       const w = document.createElement('div');
-      w.className = 'f-cele in-fitg-scope';
+      w.className = 'f-cele ' + sport;
       const k = Math.floor(Math.random() * 3);
       let body;
       if (p.kind === 'lv') body = `<div class="f-sub">¡Subes de nivel!</div><div class="f-bigger">${esc(p.lv.name)}</div><div class="f-mini">${p.lv.xp} XP en total</div>${frases ? `<div class="f-guino">${FRIKI_NIVEL[k]}</div>` : ''}`;
@@ -44,20 +50,26 @@ export async function celebrate(out) {
 }
 
 // ---- Medallas ----
-export function renderGymMedals(el) {
+export const renderGymMedals = (el) => renderSportMedals('gym')(el);
+export const renderRunMedals = (el) => renderSportMedals('run')(el);
+export const renderGymRetos = (el) => renderSportRetos('gym')(el);
+export const renderRunRetos = (el) => renderSportRetos('run')(el);
+
+const renderSportMedals = (sport) => (el) => {
+  const C = CFG[sport];
   let tab = 'perm';
   const draw = () => {
-    awardGym();
+    C.award();
     const fit = getFit();
-    const fams = GYM_FAMILIES.filter((f) => f.group === tab);
-    const all = GYM_FAMILIES.flatMap((f) => familyMedals(f));
+    const fams = C.fams.filter((f) => f.group === tab);
+    const all = C.fams.flatMap((f) => C.fm(f));
     const got = all.filter((m) => fit.awarded[m.id]).length;
     const tabs = [['perm', 'Permanentes'], ['const', 'Constancia'], ['sec', 'Secretas'], ['vit', 'Vitrina']];
     let body;
     if (tab === 'sec') body = '<div class="f-note">Las medallas secretas se revelan solas al conseguirlas. Llegarán en una próxima parte.</div>';
     else if (tab === 'vit') body = '<div class="f-note">Aquí irán los trofeos de cada temporada y las medallas de cada mes. Llegarán con las temporadas.</div>';
     else body = fams.map((fam) => {
-      const ms = familyMedals(fam);
+      const ms = C.fm(fam);
       const v = fam.value(fit);
       const nextI = ms.findIndex((m) => !fit.awarded[m.id]);
       const next = nextI >= 0 ? ms[nextI] : null;
@@ -65,31 +77,32 @@ export function renderGymMedals(el) {
         <div class="f-mini">Llevas ${fmtNum(v, fam.decimals)} ${esc(fam.unit)}${next ? ' · siguiente: ' + fmtNum(next.n) : ' · ¡colección completa!'}</div>
         <div class="f-medals">${ms.map((m) => `<div class="f-medal">${medalSvg({ shape: m.shape, metal: m.metal, earned: !!fit.awarded[m.id], glyph: m.glyph, size: 56 })}<b>${fmtNum(m.n)}</b><span>${METAL_NAME[m.metal]}</span></div>`).join('')}</div></section>`;
     }).join('');
-    el.innerHTML = `<div class="f-screen">${header('Medallas', `${got} de ${all.length} conseguidas`)}
-      <main class="f-main"><div class="f-seg small tabs4">${tabs.map(([k, l]) => `<button type="button" data-t="${k}" aria-pressed="${tab === k}">${l}</button>`).join('')}</div>${body}</main>${sportNav('gym', 'medallas')}</div>`;
+    el.innerHTML = `<div class="f-screen">${header('Medallas', `${got} de ${all.length} conseguidas · ${C.name}`)}
+      <main class="f-main"><div class="f-seg small tabs4">${tabs.map(([k, l]) => `<button type="button" data-t="${k}" aria-pressed="${tab === k}">${l}</button>`).join('')}</div>${body}</main>${sportNav(sport, 'medallas')}</div>`;
     bindGo(el); center(el);
     el.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { tab = b.dataset.t; draw(); }));
   };
   draw();
-}
+};
 
 // ---- Retos ----
-export function renderGymRetos(el) {
-  const out = awardGym();
+const renderSportRetos = (sport) => (el) => {
+  const C = CFG[sport];
+  const out = C.award();
   const fit = getFit();
-  const r = weeklyReto(fit);
+  const r = C.reto(fit);
   const pct = r.goal ? Math.min(100, Math.round((r.done / r.goal) * 100)) : 0;
-  el.innerHTML = `<div class="f-screen">${header('Retos', 'Gimnasio')}<main class="f-main">
+  el.innerHTML = `<div class="f-screen">${header('Retos', C.name)}<main class="f-main">
     <section class="f-card level"><div class="f-sub">Reto de la semana · ${weekRangeText(r.mk)}</div>
       <div class="f-big">${r.paused ? 'Semana en pausa' : 'Cumple tu objetivo semanal'}</div>
       ${r.paused ? '<div class="f-mini">Los retos no cuentan ni se fallan durante una pausa.</div>' : `<div class="f-bar"><i style="width:${pct}%"></i></div>
       <div class="f-mini">${r.done} de ${r.goal} sesiones · ${r.complete || r.claimed ? '¡completado!' : 'recompensa +' + r.xp + ' XP'}</div>`}</section>
-    <section class="f-card plain"><strong>Racha</strong><div class="f-mini">${streak(fit, 'gym')} semanas seguidas cumpliendo tu objetivo.</div></section>
+    <section class="f-card plain"><strong>Racha</strong><div class="f-mini">${streak(fit, sport)} semanas seguidas cumpliendo tu objetivo.</div></section>
     <div class="f-note">Los retos mensuales, las temporadas y las metas propias llegarán en una próxima parte.</div>
-  </main>${sportNav('gym', 'retos')}</div>`;
+  </main>${sportNav(sport, 'retos')}</div>`;
   bindGo(el); center(el);
-  if (out.medals.length || out.reto || out.levelUp) celebrate(out);
-}
+  if (out.medals.length || out.reto || out.levelUp) celebrate(out, sport);
+};
 
 // ---- Estadísticas ----
 export function renderGymStats(el) {

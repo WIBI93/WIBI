@@ -34,6 +34,7 @@ const GLYPH = {
   week: '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 11h16M8 3v4M16 3v4"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
   year: '<path d="M12 4v16M7 8l5-4 5 4M7 14l5-4 5 4"/>',
+  run: '<circle cx="14" cy="4.5" r="1.8"/><path d="M12 8l-3 4 3 2 1 5M9 12l-3 1M12 8l3 3 3 .5M13 14l4 2"/>',
   chart: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   star: '<path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/>',
   flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',

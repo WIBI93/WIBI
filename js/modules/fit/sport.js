@@ -21,7 +21,7 @@ function setAccent(sport) {
 
 function centerAction(el, sport) {
   const b = el.querySelector('#f-center');
-  if (b) b.addEventListener('click', () => { if (sport === 'gym') navigate('/fit/gym/empezar'); else toast('Importar carrera llega en la etapa de running'); });
+  if (b) b.addEventListener('click', () => { if (sport === 'gym') navigate('/fit/gym/empezar'); else navigate('/fit/running/importar'); });
 }
 
 function weekDots(fit, sport) {
@@ -49,6 +49,7 @@ export function renderSportHome(sport) {
       ${header(SPORT_NAME[sport], 'Esta semana ' + weekRangeText(thisMonday()), `<button type="button" class="f-round" data-go="${base(sport)}/ajustes" aria-label="Ajustes">${ico('gear')}</button>`)}
       <main class="f-main">
         ${sport === 'gym' ? `<button type="button" class="f-btn" data-go="/fit/gym/empezar">${fit.gym.draft ? 'Continuar entreno en curso' : 'Empezar entreno'}</button>` : ''}
+        ${sport === 'run' ? `<button type="button" class="f-btn" data-go="/fit/running/importar">Importar carrera</button>` : ''}
         ${pause ? `<section class="f-card pausa"><strong>${ico('pause', 18)} En pausa</strong><div class="f-mini">${pause.to ? 'Hasta la semana del ' + weekRangeText(pause.to) : 'Sin fecha de vuelta'} · tu racha está congelada.</div><button type="button" class="f-link" data-go="${base(sport)}/pausa">Gestionar pausa</button></section>` : ''}
         <section class="f-card level"><div class="f-sub">Nivel</div><div class="f-big">${lv.name}</div>
           <div class="f-bar"><i style="width:${lv.pct}%"></i></div><div class="f-mini">${lv.xp} XP · siguiente nivel a ${lv.to} XP${lv.stars ? ' · ' + '★'.repeat(Math.min(lv.stars, 5)) : ''}</div></section>

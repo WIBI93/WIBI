@@ -137,7 +137,7 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-picker .f-btn.ghost { background: transparent; color: var(--f-ink); border: 1px solid var(--f-line); }
 
 /* Medallas, celebraciones, estadísticas */
-.tabs4 button { padding: 8px 2px; font-size: 11.5px; min-width: 0; }
+.tabs4 button { padding: 8px 1px; font-size: 11px; min-width: 0; letter-spacing: -.2px; }
 .tabs4 { overflow: hidden; }
 .f-bigger { font-family: var(--f-head); font-size: 34px; font-weight: 800; line-height: 1.1; text-transform: uppercase; text-align: center; }
 .f-cele { position: fixed; inset: 0; z-index: 60; background: rgba(18,18,18,.96); display: grid; place-items: center; padding: 24px; color: #F2F2F2; font-family: 'Barlow', system-ui, sans-serif; --f-mute: #8C8C8C; --f-acc: #FF4B2B; --f-on: #121212; --f-head: 'Barlow Condensed', sans-serif; --f-r: 6px; }
@@ -151,3 +151,18 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-bcol span { font-size: 11px; color: var(--f-mute); }
 .f-line { width: 100%; height: 90px; }
 .f-select { width: 100%; font: inherit; font-size: 16px; color: var(--f-ink); background: var(--f-bg); border: 1px solid var(--f-line); border-radius: var(--f-r); padding: 10px; }
+
+/* Running */
+.f-route { width: 100%; background: var(--f-card); border: 1px solid var(--f-line); border-radius: var(--f-r); }
+.f-segbar { display: flex; height: 14px; border-radius: 99px; overflow: hidden; gap: 2px; }
+.f-segbar i, .f-legend i { background: var(--f-line); display: block; }
+.f-segbar i.run, .f-legend i.run, .f-seg-row.run .dot { background: var(--f-acc); }
+.f-segbar i.walk, .f-legend i.walk, .f-seg-row.walk .dot { background: var(--f-acc2); }
+.f-legend { display: flex; gap: 14px; font-size: 12px; color: var(--f-mute); }
+.f-legend span { display: flex; align-items: center; gap: 5px; } .f-legend i { width: 10px; height: 10px; border-radius: 50%; }
+.f-seg-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--f-line); }
+.f-seg-row .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--f-line); flex: none; }
+.f-seg-row button { background: var(--f-bg); border: 1px solid var(--f-line); color: var(--f-ink); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 12px; cursor: pointer; flex: none; }
+.f-cele.run { background: rgba(13,18,48,.97); font-family: 'Rubik', system-ui, sans-serif; --f-acc: #FFC83D; --f-on: #1B1400; --f-head: 'Rubik', sans-serif; --f-r: 20px; }
+.f-cele.run .f-bigger { text-transform: none; }
+.f-cele.run .f-btn { border-radius: 20px; }
