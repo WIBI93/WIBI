@@ -12,6 +12,7 @@ const P = {
   trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/>',
   mes: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   resumen: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  comparar: '<rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/>',
   turnos: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   ajustes: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
 };

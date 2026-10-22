@@ -127,6 +127,7 @@ export function renderMonth(el) {
         <div class="row">
           ${roundBtn('go-back', 'back', 'Volver al inicio')}
           <button type="button" class="cal-pill" id="pill" aria-label="Cambiar de calendario"><span><i style="background:${cal.color}"></i>${esc(cal.name)}</span>${ico('down', 18, 2.4)}</button>
+          ${roundBtn('compare', 'comparar', 'Comparar con otro calendario')}
           ${isCurrentMonth() ? '' : '<button type="button" class="cal-today-btn" id="today">Hoy</button>'}
         </div>
         <div class="row month-row">
@@ -182,6 +183,7 @@ export function renderMonth(el) {
   }, { passive: true });
   const t = el.querySelector('#today');
   if (t) t.addEventListener('click', () => { toToday(); pendingDir = 0; refresh(); });
+  el.querySelector('#compare').addEventListener('click', () => navigate('/calendario/comparar'));
   el.querySelector('#edit').addEventListener('click', () => navigate('/calendario/pincel'));
   el.querySelectorAll('[data-key]').forEach((c) => c.addEventListener('click', () => navigate('/calendario/dia/' + c.dataset.key)));
 }

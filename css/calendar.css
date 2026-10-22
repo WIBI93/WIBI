@@ -285,3 +285,45 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-hero.compact .big { font-size: 26px; }
 .cal-hero.compact .k { font-size: 13px; }
 .cal-hero.compact .rt { font-size: 13px; }
+
+/* Comparar calendarios */
+.cmp-who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cmp-sel { background: var(--card); border-radius: 14px; box-shadow: inset 0 0 0 1px var(--line); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cmp-sel > span { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.cmp-sel select { width: 100%; min-width: 0; font: inherit; font-size: 15px; font-weight: 700; color: var(--text); background: transparent; border: 0; padding: 2px 0; text-overflow: ellipsis; }
+.cmp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cmp-chip { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 18px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; font-weight: 600; color: var(--text); }
+.cmp-chip i { width: 10px; height: 10px; border-radius: 5px; flex: none; }
+.cmp-chip .n { opacity: .7; font-variant-numeric: tabular-nums; }
+.cmp-chip[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); box-shadow: none; }
+.cmp-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.cmp-cell { position: relative; height: 64px; border-radius: 9px; overflow: hidden; display: flex; flex-direction: column; background: var(--card); text-align: left; }
+.cmp-cell.blank { visibility: hidden; }
+.cmp-cell::after { content: ""; position: absolute; inset: 0; border-radius: 9px; border: 3px solid transparent; pointer-events: none; z-index: 3; }
+.cmp-cell.free::after { border-color: #2F9E6B; } .cmp-cell.same::after { border-color: #3F6FD1; }
+.cmp-cell.one::after { border-color: #E0A020; } .cmp-cell.time::after { border-color: #8A5AC8; }
+.cmp-cell.dim { opacity: .22; }
+.cmp-cell.today { outline: 2px solid #E5383B; outline-offset: -2px; }
+.cmp-cell.sel { outline: 2.5px solid var(--text); outline-offset: 1px; z-index: 4; }
+.cmp-cell .dn { position: absolute; left: 4px; top: 2px; z-index: 2; font-size: 10px; font-weight: 700; line-height: 14px; padding: 0 3px; border-radius: 4px; background: rgba(255,255,255,.8); color: #14202B; }
+.cmp-row { flex: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; font-size: 13px; font-weight: 700; }
+.cmp-row.hers { border-top: 1px solid rgba(255,255,255,.55); }
+.cmp-tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 10px; color: #fff; }
+.cmp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cmp-sh { display: flex; align-items: center; gap: 10px; background: var(--track); border-radius: 12px; padding: 8px 10px; min-width: 0; }
+.cmp-sh .sw { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: 16px; flex: none; }
+.cmp-sh .tx { display: flex; flex-direction: column; min-width: 0; }
+.cmp-sh .tx span { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-sh .tx b { font-size: 12.5px; }
+.cmp-sum { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cmp-sum div { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.cmp-sum b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.cmp-sum span { font-size: 12px; color: var(--muted); }
+.cmp-sum i { display: inline-block; width: 9px; height: 9px; border-radius: 5px; margin-right: 6px; }
+.cmp-best { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 0; text-align: left; border-top: 1px solid var(--line2); color: var(--text); }
+.cmp-best:first-child { border-top: 0; }
+.cmp-best .d { width: 40px; text-align: center; line-height: 1.1; flex: none; }
+.cmp-best .d b { display: block; font-size: 17px; } .cmp-best .d span { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.cmp-best .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cmp-best .t b { font-size: 14px; } .cmp-best .t span { font-size: 12px; color: var(--muted); }
+.cmp-best i { width: 10px; height: 10px; border-radius: 5px; flex: none; }

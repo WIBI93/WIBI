@@ -10,10 +10,12 @@ import { renderSettings } from './settings.js';
 import { renderCalendarsSettings, renderCausesSettings } from './settings-sub.js';
 import { renderHolidays } from './holidays.js';
 import { renderNewCalendar } from './newcal.js';
+import { renderCompare } from './compare.js';
 
 export function registerCalendar(route) {
   const o = { cal: true };
   route('/calendario', renderMonth, o);
+  route('/calendario/comparar', renderCompare, o);
   route('/calendario/pincel', renderBrush, o);
   route('/calendario/dia/:key', renderDay, o);
   route('/calendario/resumen', renderHours, o);

@@ -6,6 +6,7 @@ export const state = {
   zoneScope: 'mes', // 'mes' | 'anio'
   stressScope: 'mes', // 'mes' | 'anio'
   hoursScope: 'mes', // 'mes' | 'anio'
+  cmpA: '', cmpB: '', cmpFilter: 'all', cmpDay: null, // comparar calendarios
   hoursYear: now.getFullYear(),
   holidayYear: now.getFullYear(),
   brush: null, // id de turno, '' = borrar, null = aún sin elegir

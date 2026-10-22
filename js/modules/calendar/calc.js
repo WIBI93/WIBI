@@ -151,3 +151,43 @@ export function yearHours(cal, y) {
   }
   return { hours: Math.round(hours * 100) / 100, days };
 }
+
+// ---------- Comparar dos calendarios ----------
+export const COMPARE_KINDS = {
+  free: { label: 'Libres juntos', color: '#2F9E6B' },
+  same: { label: 'Mismo turno', color: '#3F6FD1' },
+  one: { label: 'Uno libre', color: '#E0A020' },
+  time: { label: 'Tiempo juntos', color: '#8A5AC8' },
+};
+const WAKE_FROM = 8 * 60, WAKE_TO = 23 * 60, MIN_SHARED = 120;
+
+// Rato libre que comparten (de 8:00 a 23:00, mínimo 2 h) si al menos uno trabaja.
+// Los turnos de noche y los salientes cuentan como descanso, no como tiempo libre.
+function sharedWindow(a, b) {
+  const rest = (s) => s.kind === 'out' || endsNextDay(s);
+  if (rest(a) || rest(b)) return null;
+  let free = [[WAKE_FROM, WAKE_TO]];
+  [a, b].forEach((s) => {
+    if (s.kind !== 'work') return;
+    const st = toMin(s.start), en = toMin(s.end);
+    free = free.flatMap(([f0, f1]) => {
+      const out = [];
+      if (st > f0) out.push([f0, Math.min(f1, st)]);
+      if (en < f1) out.push([Math.max(f0, en), f1]);
+      return out.filter((r) => r[1] > r[0]);
+    });
+  });
+  const best = free.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0];
+  return best && best[1] - best[0] >= MIN_SHARED ? { from: best[0], to: best[1] } : null;
+}
+// a y b son turnos (o null si el día no está rellenado). Devuelve { kind, win? }.
+export function compareShifts(a, b) {
+  if (!a || !b) return { kind: null };
+  const aw = a.kind === 'work', bw = b.kind === 'work';
+  if (a.kind === 'off' && b.kind === 'off') return { kind: 'free' };
+  if (aw && bw && a.letter === b.letter && a.start === b.start && a.end === b.end) return { kind: 'same' };
+  if ((aw && b.kind === 'off') || (bw && a.kind === 'off')) return { kind: 'one' };
+  const win = aw || bw ? sharedWindow(a, b) : null;
+  return win ? { kind: 'time', win } : { kind: null };
+}
+export const fmtMin = (x) => `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`;
