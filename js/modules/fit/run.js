@@ -55,24 +55,45 @@ export function renderImport(el) {
   const fit = getFit();
   const set = fit.settings.run;
   el.innerHTML = SCREEN(backHeader('Importar carrera', B) + `<main class="f-main">
-    <div class="f-note">En Zepp abre la carrera, pulsa compartir y elige el archivo <b>GPX</b>. Guárdalo en el móvil y elígelo aquí. El archivo no sale del móvil.</div>
+    <div class="f-note">En Zepp abre la carrera, pulsa compartir, elige el archivo <b>GPX</b> y luego <b>WIBI</b>: la carrera llegará aquí sola. Si no te sale WIBI, guarda el archivo y elígelo con el botón de abajo. El archivo no sale del móvil.</div>
     <input type="file" id="file" hidden>
     <button type="button" class="f-btn" id="pick">Elegir archivo GPX</button>
     <div class="f-mini">Ritmo límite actual: ${paceText(set.paceLimit)} min/km (más lento = caminando). Puedes cambiarlo en Ajustes.</div></main>`);
   bindGo(el);
   const file = el.querySelector('#file');
   el.querySelector('#pick').onclick = () => file.click();
+  // Procesa el texto de un GPX (elegido con el botón o recibido desde Compartir).
+  const handle = (text, fname) => {
+    const { pts, name } = parseGpx(text);
+    const analysis = analyze(pts, set.paceLimit);
+    if (!analysis) { toast('No parece un GPX de carrera con recorrido. Prueba con otro archivo.'); file.value = ''; return; }
+    if (isDuplicate(getFit(), analysis.startedAt)) { toast('Esta carrera ya está importada'); file.value = ''; return; }
+    review(el, { analysis, name: name || String(fname || 'Carrera').replace(/\.[^.]+$/, ''), segs: analysis.segs.map((s) => ({ ...s })) });
+  };
   file.onchange = async () => {
     const f = file.files[0];
     if (!f) return;
     let text;
     try { text = await f.text(); } catch { toast('No he podido leer el archivo'); return; }
-    const { pts, name } = parseGpx(text);
-    const analysis = analyze(pts, set.paceLimit);
-    if (!analysis) { toast('No parece un GPX de carrera con recorrido. Prueba con otro archivo.'); file.value = ''; return; }
-    if (isDuplicate(getFit(), analysis.startedAt)) { toast('Esta carrera ya está importada'); file.value = ''; return; }
-    review(el, { analysis, name: name || f.name.replace(/\.[^.]+$/, ''), segs: analysis.segs.map((s) => ({ ...s })) });
+    handle(text, f.name);
   };
+  // ¿Ha llegado un archivo desde el menú Compartir de Android?
+  takeShared().then((sh) => { if (sh && el.isConnected && el.querySelector('#pick')) handle(sh.text, sh.name); });
+}
+
+// Recoge (y borra) el GPX que dejó el service worker al recibirlo desde Compartir.
+async function takeShared() {
+  try {
+    if (!('caches' in window)) return null;
+    const cache = await caches.open('wibi-share');
+    const r = await cache.match('pending');
+    if (!r) return null;
+    const text = await r.text();
+    await cache.delete('pending');
+    let name = '';
+    try { name = decodeURIComponent(r.headers.get('X-Name') || ''); } catch { /* nada */ }
+    return text ? { text, name } : null;
+  } catch { return null; }
 }
 
 function review(el, st) {

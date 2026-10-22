@@ -2,7 +2,9 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v31';
+const CACHE = 'wibi-v32';
+// Aquí se deja, un momento, el GPX que llega desde el menú Compartir de Android (la pantalla de importar lo recoge y lo borra).
+const SHARE_CACHE = 'wibi-share';
 
 const ASSETS = [
   './',
@@ -106,13 +108,28 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== SHARE_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+  // Archivo recibido desde "Compartir": se guarda y se abre la pantalla de importar carrera.
+  if (req.method === 'POST' && new URL(req.url).pathname.endsWith('/share-target')) {
+    event.respondWith((async () => {
+      try {
+        const form = await req.formData();
+        const file = form.getAll('gpx').find((f) => f && typeof f !== 'string');
+        if (file) {
+          const cache = await caches.open(SHARE_CACHE);
+          await cache.put('pending', new Response(await file.text(), { headers: { 'X-Name': encodeURIComponent(file.name || '') } }));
+        }
+      } catch (e) { /* si falla, se abre igualmente la pantalla de importar */ }
+      return Response.redirect(new URL('./#/fit/running/importar', self.registration.scope).href, 303);
+    })());
+    return;
+  }
   if (req.method !== 'GET') return;
   if (new URL(req.url).origin !== self.location.origin) return;
 
