@@ -1,9 +1,10 @@
 // Ajustes del calendario: pantallas interiores (calendarios y causas de estrés).
 
-import { back, refresh } from '../../core/router.js';
+import { back, refresh, navigate } from '../../core/router.js';
 import { esc, toast, confirmDialog, formDialog } from '../../core/ui.js';
 import { getData, activeCal, update, addCause, hideCause } from './data.js';
 import { roundBtn, navHtml, bindGo } from './shell.js';
+import { shareCalendar } from './share.js';
 
 export function renderCalendarsSettings(el) {
   const d = getData();
@@ -12,8 +13,9 @@ export function renderCalendarsSettings(el) {
       <header class="cal-head">${roundBtn('go-back', 'back', 'Volver a Ajustes')}<div class="grow"><div class="cal-sub">Ajustes</div><div class="cal-title">Calendarios</div></div></header>
       <main class="cal-main" style="gap:14px">
         <section class="cal-section" style="padding:14px 16px;gap:4px">
-          ${d.calendars.map((c) => `<div class="cal-cause-row"><span class="nm">${esc(c.name)}</span><button type="button" data-rencal="${esc(c.id)}">Renombrar</button>${d.calendars.length > 1 ? `<button type="button" class="del" data-delcal="${esc(c.id)}">Borrar</button>` : ''}</div>`).join('')}
+          ${d.calendars.map((c) => `<div class="cal-cause-row" style="flex-wrap:wrap;row-gap:0"><span class="nm" style="flex:1 1 100%;padding-top:6px">${esc(c.name)}</span><button type="button" data-rencal="${esc(c.id)}">Renombrar</button><button type="button" data-sharecal="${esc(c.id)}">Compartir</button>${d.calendars.length > 1 ? `<button type="button" class="del" data-delcal="${esc(c.id)}">Borrar</button>` : ''}</div>`).join('')}
           ${d.calendars.length === 1 ? '<div class="cal-note small">No se puede borrar el único calendario.</div>' : ''}
+          <button type="button" class="cal-btn dashed" id="importcal" style="margin-top:8px">Importar calendario recibido</button>
         </section>
       </main>
       <div class="cal-spacer"></div>
@@ -21,6 +23,8 @@ export function renderCalendarsSettings(el) {
     </div>`;
   bindGo(el);
   el.querySelector('#go-back').addEventListener('click', () => back('/calendario/ajustes'));
+  el.querySelector('#importcal').addEventListener('click', () => navigate('/calendario/importar'));
+  el.querySelectorAll('[data-sharecal]').forEach((b) => b.addEventListener('click', () => shareCalendar(d.calendars.find((x) => x.id === b.dataset.sharecal))));
   el.querySelectorAll('[data-rencal]').forEach((b) => b.addEventListener('click', async () => {
     const c = d.calendars.find((x) => x.id === b.dataset.rencal);
     const r = await formDialog({ title: 'Renombrar calendario', fields: [{ key: 'name', label: 'Nombre', type: 'text', value: c.name, maxLength: 40 }], confirmLabel: 'Guardar' });

@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v33';
+const CACHE = 'wibi-v34';
 // Aquí se deja, un momento, el GPX que llega desde el menú Compartir de Android (la pantalla de importar lo recoge y lo borra).
 const SHARE_CACHE = 'wibi-share';
 
@@ -92,6 +92,7 @@ const ASSETS = [
   'js/modules/calendar/holidays.js',
   'js/modules/calendar/newcal.js',
   'js/modules/calendar/compare.js',
+  'js/modules/calendar/share.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
@@ -119,15 +120,19 @@ self.addEventListener('fetch', (event) => {
   // Archivo recibido desde "Compartir": se guarda y se abre la pantalla de importar carrera.
   if (req.method === 'POST' && new URL(req.url).pathname.endsWith('/share-target')) {
     event.respondWith((async () => {
+      let target = './#/fit/running/importar';
       try {
         const form = await req.formData();
         const file = form.getAll('gpx').find((f) => f && typeof f !== 'string');
         if (file) {
+          const text = await file.text();
+          // Un calendario compartido por otra persona va a la pantalla de importar calendario.
+          if (text.includes('"type":"calendar-share"')) target = './#/calendario/importar';
           const cache = await caches.open(SHARE_CACHE);
-          await cache.put('pending', new Response(await file.text(), { headers: { 'X-Name': encodeURIComponent(file.name || '') } }));
+          await cache.put('pending', new Response(text, { headers: { 'X-Name': encodeURIComponent(file.name || '') } }));
         }
       } catch (e) { /* si falla, se abre igualmente la pantalla de importar */ }
-      return Response.redirect(new URL('./#/fit/running/importar', self.registration.scope).href, 303);
+      return Response.redirect(new URL(target, self.registration.scope).href, 303);
     })());
     return;
   }
