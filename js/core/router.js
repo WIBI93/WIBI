@@ -70,11 +70,37 @@ function show() {
   container.classList.toggle('full', cal || !!theme || !!hit.r.opts.full);
   container.innerHTML = '';
   hit.r.render(container, hit.params);
+  updateBackButton(currentPath());
   window.scrollTo(0, 0);
+}
+
+// Botón "atrás" discreto (arriba a la izquierda) para móviles sin botón atrás, como el iPhone.
+// Sale en todas las pantallas salvo el inicio de WIBI y las que ya tienen su propia flecha.
+let backBtn = null;
+function parentOf(path) {
+  return path.startsWith('/fit/gym') || path.startsWith('/fit/running') ? '/fit' : '/';
+}
+function updateBackButton(path) {
+  if (!backBtn) return;
+  const own = container.querySelector('#go-back, #go-home, .f-back');
+  const show = path !== '/' && !own;
+  backBtn.hidden = !show;
+  container.classList.toggle('has-back', show && container.classList.contains('full'));
+}
+function makeBackButton() {
+  backBtn = document.createElement('button');
+  backBtn.type = 'button';
+  backBtn.className = 'app-back';
+  backBtn.hidden = true;
+  backBtn.setAttribute('aria-label', 'Atrás');
+  backBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+  backBtn.addEventListener('click', () => back(parentOf(currentPath())));
+  document.body.appendChild(backBtn);
 }
 
 export function start(el) {
   container = el;
+  makeBackButton();
   window.addEventListener('popstate', show);
   show();
 }

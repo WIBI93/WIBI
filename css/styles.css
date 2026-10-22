@@ -229,3 +229,15 @@ svg.icon { width: 1em; height: 1em; display: block; }
   height: 48px; border: 1px solid var(--field, #8AA09A); border-radius: 12px; padding: 0 12px;
   font: inherit; font-size: 16px; font-weight: 600; color: var(--text); background: var(--card);
 }
+
+/* ---------- Botón atrás discreto ---------- */
+.app-back {
+  position: fixed; z-index: 15;
+  top: calc(2px + env(safe-area-inset-top, 0px)); left: calc(2px + env(safe-area-inset-left, 0px));
+  width: 44px; height: 40px; display: grid; place-items: center;
+  color: inherit; opacity: .45; background: none; border: 0; border-radius: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.app-back:active { opacity: .9; }
+.app-back[hidden] { display: none; }
+#app.full.has-back { padding-top: 30px; }
