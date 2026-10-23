@@ -222,3 +222,14 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-fold summary::-webkit-details-marker { display: none; }
 .f-fold summary::after { content: ' ▾'; opacity: .6; }
 .f-fold[open] summary::after { content: ' ▴'; }
+
+/* Dibujos de ejercicios (exdraw.js): muñeco gris con el músculo en rojo */
+.fd { flex: none; --fd-body: #9AA8B5; --fd-near: #C9D3DC; --fd-far: #6E7C89; --fd-eq: #C5D0DA; --fd-plate: #AEBBC6; --fd-floor: #333; --fd-red: #E4402F; }
+.fd .fd-body, .fd .fd-near, .fd .fd-far { stroke-linecap: round; fill: none; }
+.fd line.fd-body { stroke: var(--fd-body); } .fd line.fd-near { stroke: var(--fd-near); } .fd line.fd-far { stroke: var(--fd-far); }
+.fd .fd-bodyfill { fill: var(--fd-body); } .fd .fd-nearfill { fill: var(--fd-near); }
+.fd .fd-hl { stroke: var(--fd-red); stroke-linecap: round; opacity: .85; }
+.fd .fd-eq, .fd .fd-eqfill { fill: var(--fd-eq); } .fd .fd-eqln { stroke: var(--fd-eq); stroke-linecap: round; }
+.fd .fd-plate { fill: var(--fd-plate); } .fd .fd-floor { stroke: var(--fd-floor); stroke-width: 2; stroke-linecap: round; }
+.fd .fd-cable { stroke: var(--fd-eq); stroke-width: 1.4; } .fd .fd-line { stroke: var(--fd-eq); stroke-width: 2; fill: none; stroke-linecap: round; }
+.f-ex .fd, .f-exrow .fd { margin-right: 6px; }

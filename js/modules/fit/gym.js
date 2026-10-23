@@ -31,7 +31,7 @@ export function pickExercises(preselected = []) {
       wrap.innerHTML = `
         <div class="f-picker-top"><button type="button" class="f-round" data-x="cancel" aria-label="Cerrar">${ico('back')}</button><input id="q" type="search" placeholder="Buscar ejercicio" value="${esc(q)}"></div>
         <div class="f-chips">${['Todos', ...MUSCLES].map((m) => `<button type="button" data-m="${m}" aria-pressed="${muscle === m}">${m}</button>`).join('')}</div>
-        <div class="f-picker-list">${list.map((e) => `<button type="button" class="f-ex ${sel.includes(e.id) ? 'on' : ''}" data-id="${e.id}">${exFig(e, 34)}<span class="grow">${esc(e.name)}<small>${e.muscle}</small></span><i>${sel.includes(e.id) ? '✓' : '+'}</i></button>`).join('') || '<div class="f-note">Nada con ese nombre.</div>'}
+        <div class="f-picker-list">${list.map((e) => `<button type="button" class="f-ex ${sel.includes(e.id) ? 'on' : ''}" data-id="${e.id}">${exFig(e, 46)}<span class="grow">${esc(e.name)}<small>${e.muscle}</small></span><i>${sel.includes(e.id) ? '✓' : '+'}</i></button>`).join('') || '<div class="f-note">Nada con ese nombre.</div>'}
           ${q.trim() ? `<button type="button" class="f-btn ghost" data-x="new">Crear «${esc(q.trim())}» como ejercicio propio</button>` : ''}</div>
         <div class="f-picker-bar"><button type="button" class="f-btn" data-x="done">Listo · ${sel.length} elegidos</button></div>`;
       wrap.querySelector('[data-x="cancel"]').onclick = () => close(null);
@@ -82,7 +82,7 @@ export function renderRoutineEdit(el, { id }) {
     el.innerHTML = SCREEN(backHeader(existing ? 'Editar rutina' : 'Nueva rutina', B + '/rutinas') + `<main class="f-main">
       <label class="f-field"><span>Nombre</span><input id="name" maxlength="40" placeholder="Por ejemplo: Pecho y tríceps" value="${esc(r.name)}"></label>
       <section class="f-card plain"><strong>Ejercicios</strong>
-        ${r.exIds.map((x, i) => `<div class="f-exrow">${exFig(map.get(x) || { name: '' }, 28)}<span class="grow">${esc((map.get(x) || { name: 'Ejercicio borrado' }).name)}</span>
+        ${r.exIds.map((x, i) => `<div class="f-exrow">${exFig(map.get(x) || { name: '' }, 40)}<span class="grow">${esc((map.get(x) || { name: 'Ejercicio borrado' }).name)}</span>
           <button type="button" data-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Subir">↑</button><button type="button" data-down="${i}" ${i === r.exIds.length - 1 ? 'disabled' : ''} aria-label="Bajar">↓</button><button type="button" data-rm="${i}" aria-label="Quitar">✕</button></div>`).join('') || '<div class="f-mini">Todavía sin ejercicios.</div>'}
         <button type="button" class="f-btn ghost" id="add">+ Añadir ejercicios</button></section>
       ${r.exIds.length ? routineMapCard(getFit(), r.exIds, 'Músculos de esta rutina') : ''}

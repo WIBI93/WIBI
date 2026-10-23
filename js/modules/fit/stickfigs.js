@@ -1,5 +1,7 @@
 // Dibujos de monigote: uno por movimiento (27 familias). Cada ejercicio usa el de su movimiento.
 
+import { drawnEx } from './exdraw.js';
+
 const head = (x, y, r = 4.5) => `<circle cx="${x}" cy="${y}" r="${r}" fill="none"/>`;
 const L = (d) => `<path d="${d}"/>`;
 const plate = (x, y) => `<circle cx="${x}" cy="${y}" r="3" fill="currentColor" stroke="none"/>`;
@@ -74,6 +76,8 @@ export function figFor(name, muscle) {
 
 // Dibujo listo para meter en la pantalla. ex = { name, muscle }
 export function exFig(ex, size = 40) {
+  const d = ex && ex.id ? drawnEx(ex.id, size) : '';
+  if (d) return d;
   const f = figFor(ex.name, ex.muscle);
   return `<svg class="f-fig" width="${size}" height="${size}" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${FIGS[f]}</svg>`;
 }
