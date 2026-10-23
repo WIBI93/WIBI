@@ -12,12 +12,16 @@ import { renderHolidays } from './holidays.js';
 import { renderNewCalendar } from './newcal.js';
 import { renderCompare } from './compare.js';
 import { renderImport } from './share.js';
+import { renderSwaps, renderNewSwap, renderSwap } from './swaps.js';
 
 export function registerCalendar(route) {
   const o = { cal: true };
   route('/calendario', renderMonth, o);
   route('/calendario/importar', renderImport, o);
   route('/calendario/comparar', renderCompare, o);
+  route('/calendario/cambios', renderSwaps, o);
+  route('/calendario/cambios/nuevo', renderNewSwap, o);
+  route('/calendario/cambio/:id', renderSwap, o);
   route('/calendario/pincel', renderBrush, o);
   route('/calendario/dia/:key', renderDay, o);
   route('/calendario/resumen', renderHours, o);

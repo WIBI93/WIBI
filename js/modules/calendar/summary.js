@@ -5,7 +5,7 @@ import { readableOn } from '../../core/palette.js';
 import { esc } from '../../core/ui.js';
 import { getData, activeCal, update } from './data.js';
 import { state, shiftMonth } from './state.js';
-import { MONTHS, INK, WEEKDAYS, monthStats, periodStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap, stressStats, yearHours, stressColor, fmtAvg, STRESS_HEX } from './calc.js';
+import { MONTHS, INK, WEEKDAYS, monthStats, periodStats, zoneCounts, pendingDays, fmtHours, parseKey, weekdayOf, shiftMap, stressStats, zoneStress, ZONE_MIN_DAYS, yearHours, stressColor, fmtAvg, STRESS_HEX } from './calc.js';
 import { ico, flagIco, roundBtn, navHtml, bindGo } from './shell.js';
 
 function header(sub) {
@@ -155,6 +155,18 @@ export function renderStress(el) {
   const causes = rows.length
     ? rows.map((r) => `<div class="cal-zrow"><span class="zn" style="width:132px">${esc(r.name)}</span><span class="zb"><i style="width:${Math.round((r.n / max) * 100)}%"></i></span><span class="zc">${r.n} ${r.n === 1 ? 'día' : 'días'}</span></div>`).join('')
     : '<div class="cal-empty">Aún no hay días de 7 o más con causas marcadas.</div>';
+  const zs = zoneStress(cal, state.y, yearly ? null : state.m);
+  const zrows = cal.zones.filter((z) => zs[z.id]).map((z) => ({ z, ...zs[z.id], avg: zs[z.id].sum / zs[z.id].n }))
+    .sort((a, b) => (b.n >= ZONE_MIN_DAYS) - (a.n >= ZONE_MIN_DAYS) || b.avg - a.avg);
+  const zoneSection = !cal.zones.length ? '' : `<section class="cal-section"><h3>Estrés por zona${yearly ? ' · ' + state.y : ''}</h3>${zrows.length
+    ? zrows.map((r) => {
+      const few = r.n < ZONE_MIN_DAYS;
+      const cs = Object.entries(r.causes).map(([id, n]) => ({ name: names.get(id) || 'Causa eliminada', n })).sort((a, b) => b.n - a.n);
+      return `<details class="cs-zs ${few ? 'few' : ''}"><summary><span class="zn">${esc(r.z.name)}</span><span class="zb"><i style="width:${Math.round(r.avg * 10)}%;background:${stressColor(r.avg)}"></i></span><span class="zc">${fmtAvg(r.avg)}</span></summary>
+        <div class="cs-zd">${r.n} ${r.n === 1 ? 'día puntuado' : 'días puntuados'}${few ? ' · pocos datos todavía' : ''}<br>${r.high ? `${r.high} ${r.high === 1 ? 'día' : 'días'} de 7 o más` + (cs.length ? ': ' + cs.map((c) => `${esc(c.name)} (${c.n})`).join(', ') : ' (sin causas marcadas)') : 'Ningún día de 7 o más'}</div></details>`;
+    }).join('')
+    : '<div class="cal-empty">Aún no hay días con zona y estrés a la vez.</div>'}
+      <div class="cal-note small">Media de estrés de los días que apuntaste en cada zona. Las zonas con menos de ${ZONE_MIN_DAYS} días salen apagadas porque la media aún no es fiable. Toca una zona para ver sus causas.</div></section>`;
   const bandNames = ['tranquilos', 'normales', 'altos', 'muy altos'];
   const bandCols = [STRESS_HEX.g, STRESS_HEX.y, STRESS_HEX.o, STRESS_HEX.r];
   const bands = st.count
@@ -182,6 +194,7 @@ export function renderStress(el) {
         ${monthChart}
         <section class="cal-section"><h3>Qué te ha causado más estrés${yearly ? ' · ' + state.y : ''}</h3>${causes}
           <div class="cal-note small">Cuenta los días de 7 o más en los que marcaste cada causa.</div></section>
+        ${zoneSection}
         ${bands}
       </main>
       <div class="cal-spacer"></div>

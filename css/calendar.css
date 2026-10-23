@@ -110,7 +110,7 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 
 /* Barra inferior */
 .cal-nav { position: sticky; bottom: 0; margin-top: auto; z-index: 5; display: flex; justify-content: space-around; background: var(--card); border-top: 1px solid var(--line); padding: 6px 8px calc(14px + env(safe-area-inset-bottom)); }
-.cal-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 72px; min-height: 48px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.cal-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 62px; min-height: 48px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .cal-tab[aria-current="page"] { color: var(--accent-text); font-weight: 700; }
 .cal-spacer { height: 16px; flex: none; }
 
@@ -327,3 +327,51 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cmp-best .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .cmp-best .t b { font-size: 14px; } .cmp-best .t span { font-size: 12px; color: var(--muted); }
 .cmp-best i { width: 10px; height: 10px; border-radius: 5px; flex: none; }
+
+/* Cambios de turno */
+.cs-sb { display: inline-grid; place-items: center; width: 1.4em; height: 1.4em; border-radius: 7px; font-size: .8em; font-weight: 800; vertical-align: .05em; line-height: 1; box-shadow: inset 0 0 0 1px rgba(20, 32, 43, 0.12); }
+.cs-sb.none { background: var(--track); color: var(--muted); }
+.cs-h { margin: 4px 0 -4px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.cs-item { background: var(--card); border-radius: 16px; padding: 12px 14px; box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%; color: var(--text); }
+.cs-item .r { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.cs-item b { font-size: 16px; font-weight: 700; }
+.cs-item small { font-size: 13px; color: var(--muted); }
+.cs-chip { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--track); color: var(--muted); white-space: nowrap; }
+.cs-chip.find { background: rgba(15, 118, 110, .16); color: var(--accent-text); }
+.cs-chip.send { background: rgba(238, 139, 79, .22); color: var(--text); }
+.cs-chip.ok { background: rgba(76, 175, 122, .24); color: var(--text); }
+.cs-day { border-radius: 16px; overflow: hidden; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+.cs-day > header { background: var(--track); padding: 9px 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.cs-day > header span { flex: 1; min-width: 0; }
+.cs-day > header em { font-style: normal; font-weight: 500; color: var(--muted); font-size: 13px; }
+.cs-person { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--line2); }
+.cs-person .nm { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.cs-person.no .nm { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+.cs-person.yes { background: rgba(76, 175, 122, .18); }
+.cs-sm { font: inherit; font-size: 13px; font-weight: 700; padding: 0 12px; min-height: 40px; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--field); background: var(--card); color: var(--text); }
+.cs-sm.yes { color: #1E7A46; box-shadow: inset 0 0 0 1.5px #1E7A46; }
+:root[data-theme="dark"] .cs-sm.yes { color: #6FD39A; box-shadow: inset 0 0 0 1.5px #6FD39A; }
+.cs-sm.undo { box-shadow: inset 0 0 0 1px var(--field); color: var(--muted); font-weight: 600; }
+.cs-x { width: 36px; min-height: 40px; display: grid; place-items: center; color: var(--muted); flex: none; }
+.cs-add { display: flex; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--line2); }
+.cs-add input { flex: 1; min-width: 0; height: 40px; font: inherit; padding: 0 10px; border-radius: 10px; border: 1px solid var(--field); background: var(--bg); color: var(--text); }
+.cs-banner { background: rgba(76, 175, 122, .2); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-weight: 600; }
+.cs-steps { display: flex; gap: 6px; }
+.cs-steps div { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 8px 4px; border-radius: 10px; background: var(--track); color: var(--muted); }
+.cs-steps div.on { background: var(--primary); color: var(--on-primary); }
+.cs-steps div.done { background: rgba(15, 118, 110, .18); color: var(--accent-text); }
+.cs-kv { background: var(--card); border-radius: 16px; padding: 12px 14px; box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 10px; }
+.cs-kv div { display: flex; flex-direction: column; gap: 1px; }
+.cs-kv span { font-size: 12px; color: var(--muted); font-weight: 600; }
+.cs-kv b { font-size: 16px; }
+.cs-apply { border: 1.5px dashed var(--outline); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+
+.cs-zs { border-radius: 12px; }
+.cs-zs summary { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none; }
+.cs-zs summary::-webkit-details-marker { display: none; }
+.cs-zs .zn { width: 120px; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs-zs .zb { flex: 1; height: 10px; border-radius: 5px; background: var(--track); display: flex; overflow: hidden; }
+.cs-zs .zb i { height: 10px; border-radius: 5px; display: block; }
+.cs-zs .zc { min-width: 30px; text-align: right; font-size: 16px; font-weight: 700; }
+.cs-zs.few { opacity: .55; }
+.cs-zd { font-size: 13px; color: var(--muted); line-height: 1.45; padding: 0 4px 8px; }

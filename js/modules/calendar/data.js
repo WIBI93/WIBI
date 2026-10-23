@@ -63,6 +63,33 @@ function normShift(s, i, seen) {
   };
 }
 
+// ---- Cambios de turno (bloc de notas): estados find → send → sent → ok ----
+export const SWAP_STATES = ['find', 'send', 'sent', 'ok'];
+function normSwaps(raw, kindOf) {
+  const okDay = (o) => (o && typeof o === 'object' && DATE_RE.test(o.date) ? { date: o.date, shift: kindOf.has(o.shift) ? o.shift : null } : null);
+  const seen = new Set();
+  const uniq = (id, pre) => { let x = str(id, 40) || pre + uid(); while (seen.has(x)) x = pre + uid(); seen.add(x); return x; };
+  return (Array.isArray(raw) ? raw : []).slice(0, 200).map((w) => {
+    if (!w || typeof w !== 'object') return null;
+    const free = okDay(w.free);
+    if (!free) return null;
+    const offers = (Array.isArray(w.offers) ? w.offers : []).slice(0, 20).map((o) => {
+      const d = okDay(o);
+      if (!d) return null;
+      const people = (Array.isArray(o.people) ? o.people : []).slice(0, 60).map((q) => {
+        const name = q && typeof q === 'object' ? str(q.name, 40) : '';
+        return name ? { id: uniq(q.id, 'p'), name, s: ['ask', 'no', 'yes'].includes(q.s) ? q.s : 'ask' } : null;
+      }).filter(Boolean);
+      return { id: uniq(o.id, 'o'), ...d, people };
+    }).filter(Boolean);
+    const dd = w.deal && typeof w.deal === 'object' ? okDay(w.deal) : null;
+    const who = dd ? str(w.deal.who, 40) : '';
+    const deal = dd && who ? { who, ...dd } : null;
+    const st = SWAP_STATES.includes(w.st) ? w.st : 'find';
+    return { id: uniq(w.id, 'w'), free, st: st !== 'find' && !deal ? 'find' : st, offers, deal };
+  }).filter(Boolean);
+}
+
 function normCalendar(c, i, seen, causeIds = new Set()) {
   if (!c || typeof c !== 'object') return null;
   const id = str(c.id, 40) || 'c' + i;
@@ -81,6 +108,7 @@ function normCalendar(c, i, seen, causeIds = new Set()) {
     zones.push({ id: zid, name });
   });
   const kindOf = new Map(shifts.map((s) => [s.id, s.kind]));
+  const swaps = normSwaps(c.swaps, kindOf);
   const days = {};
   if (c.days && typeof c.days === 'object') {
     for (const [key, v] of Object.entries(c.days)) {
@@ -99,7 +127,7 @@ function normCalendar(c, i, seen, causeIds = new Set()) {
     id,
     name: str(c.name, 40) || 'Calendario',
     color: typeof c.color === 'string' && HEX_RE.test(c.color) ? c.color.toUpperCase() : CAL_COLORS[0].hex,
-    shifts, zones, days,
+    shifts, zones, days, swaps,
   };
 }
 
@@ -118,7 +146,7 @@ export function normalize(raw) {
   const causeIds = new Set(stressCauses.map((x) => x.id));
   let calendars = (Array.isArray(r.calendars) ? r.calendars : []).map((c, i) => normCalendar(c, i, seen, causeIds)).filter(Boolean);
   if (!calendars.length) {
-    calendars = [{ id: 'main', name: 'Calendario de trabajo', color: CAL_COLORS[0].hex, shifts: defaultShifts(), zones: [], days: {} }];
+    calendars = [{ id: 'main', name: 'Calendario de trabajo', color: CAL_COLORS[0].hex, shifts: defaultShifts(), zones: [], days: {}, swaps: [] }];
   }
   const holidays = {};
   if (r.holidays && typeof r.holidays === 'object') {
@@ -209,4 +237,30 @@ export function addCause(d, name) {
 export function hideCause(d, id) {
   const c = d.stressCauses.find((x) => x.id === id);
   if (c) c.hidden = true;
+}
+
+// ---- Cambios de turno ----
+export function newSwap(cal, date, shift) {
+  const w = { id: 'w' + uid(), free: { date, shift: shift || null }, st: 'find', offers: [], deal: null };
+  cal.swaps.unshift(w);
+  return w;
+}
+
+// Nombres ya usados en este calendario (para sugerirlos al escribir).
+export function swapNames(cal) {
+  const set = new Set();
+  cal.swaps.forEach((w) => { w.offers.forEach((o) => o.people.forEach((q) => set.add(q.name))); if (w.deal) set.add(w.deal.who); });
+  return [...set].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+// Refleja un cambio aceptado en el calendario: el día que libras pasa a «libre» y el que devuelves a tu turno, ambos con la marca de cambio.
+export function applySwapToCalendar(cal, w) {
+  if (!w.deal) return;
+  const off = cal.shifts.find((s) => s.kind === 'off');
+  const mark = (key, shift) => {
+    const cur = cal.days[key] || {};
+    saveDay(cal, key, { shift, zone: null, swap: true, note: cur.note || '', stress: null, causes: [] });
+  };
+  mark(w.free.date, off ? off.id : null);
+  mark(w.deal.date, w.deal.shift);
 }

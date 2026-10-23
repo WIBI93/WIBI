@@ -140,6 +140,20 @@ export function stressStats(cal, y, m) {
   return st;
 }
 
+// Estrés por zona: media de los días con zona y estrés, y causas de los días de 7 o más.
+export const ZONE_MIN_DAYS = 3;
+export function zoneStress(cal, y, m) {
+  const p = prefix(y, m);
+  const out = {};
+  for (const [key, day] of Object.entries(cal.days)) {
+    if (!key.startsWith(p) || !day.stress || !day.zone) continue;
+    const z = out[day.zone] || (out[day.zone] = { n: 0, sum: 0, high: 0, causes: {} });
+    z.n++; z.sum += day.stress;
+    if (day.stress >= 7) { z.high++; (day.causes || []).forEach((c) => { z.causes[c] = (z.causes[c] || 0) + 1; }); }
+  }
+  return out;
+}
+
 // Horas programadas en un año entero (los turnos de noche cuentan el día que empiezan).
 export function yearHours(cal, y) {
   const map = shiftMap(cal);
