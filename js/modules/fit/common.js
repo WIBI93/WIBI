@@ -85,13 +85,14 @@ function monthGrid(fit, y, m) {
   for (let i = 0; i < lead; i++) cells += '<i class="empty"></i>';
   for (let d = 1; d <= days; d++) {
     const k = keyOf(new Date(y, m, d));
-    const cls = g.has(k) && r.has(k) ? 'both' : g.has(k) ? 'g' : r.has(k) ? 'r' : '';
-    const ring = (pg.has(k) && !g.has(k) ? 'pg ' : '') + (pr.has(k) && !r.has(k) ? 'pr' : '');
+    const st = (sp, done, plan) => (done.has(k) ? 'on' : plan.has(k) ? 'ring' : '');
+    const cg = st('gym', g, pg); const cr = st('run', r, pr);
     const s0 = sh[k] && sh[k].kind === 'work' ? sh[k] : null;
-    cells += `<span class="day ${cls} ${ring} ${k === today ? 'today' : ''}">${d}${s0 ? `<i class="sd" style="background:${s0.color}" title="${esc(s0.name)}"></i>` : ''}</span>`;
+    const circ = [cg && `<u class="c g ${cg}"></u>`, cr && `<u class="c r ${cr}"></u>`].filter(Boolean);
+    cells += `<div class="cell ${k === today ? 'today' : ''}"><b class="n">${d}</b>${s0 ? `<i class="sd" style="background:${s0.color}" title="${esc(s0.name)}"></i>` : ''}<span class="cc ${circ.length > 1 ? 'two' : ''}">${circ.join('')}</span></div>`;
   }
   return `<div class="f-cal"><div class="hd">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((x) => `<b>${x}</b>`).join('')}</div><div class="bd">${cells}</div></div>
-    <div class="f-legend"><span><i class="g"></i>Gym</span><span><i class="r"></i>Running</span><span><i class="both"></i>Los dos</span><span><i class="ring"></i>Planificado</span><span><i class="sdl"></i>Tu turno</span></div>`;
+    <div class="f-legend"><span><i class="g"></i>Gym</span><span><i class="r"></i>Running</span><span><i class="ring"></i>Planificado</span><span><i class="hecho"></i>Hecho</span><span><i class="sdl"></i>Tu turno</span></div>`;
 }
 
 function lastActivities(fit) {
