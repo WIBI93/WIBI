@@ -21,7 +21,6 @@ registerFit(route);
 
 start(document.getElementById('app'));
 
-
 // Permite usar la app sin conexión y que se pueda instalar en el móvil.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => {
