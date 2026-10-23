@@ -6,7 +6,7 @@
 import { exportAll, replaceAll, hasSectionData } from './store.js';
 import { getSettings, setSettings } from './settings.js';
 
-export const APP_VERSION = '0.35.3';
+export const APP_VERSION = '0.36.0';
 const FORMAT = 1; // sube si algún día cambia la forma del archivo
 const REMINDER_DAYS = 30;
 

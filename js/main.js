@@ -21,6 +21,18 @@ registerFit(route);
 
 start(document.getElementById('app'));
 
+// Cada sección se puede instalar como su propia app: según la pantalla en la que estés,
+// el móvil lee la «ficha» (manifest) de esa sección y crea un icono propio.
+const FICHAS = [['/calendario', 'manifest-calendario.webmanifest']];
+function ajustaFicha() {
+  const ruta = location.hash.replace(/^#/, '') || '/';
+  const f = FICHAS.find(([r]) => ruta === r || ruta.startsWith(r + '/'));
+  const link = document.querySelector('link[rel="manifest"]');
+  if (link) { const h = f ? f[1] : 'manifest.webmanifest'; if (link.getAttribute('href') !== h) link.setAttribute('href', h); }
+}
+ajustaFicha();
+window.addEventListener('hashchange', ajustaFicha);
+
 // Permite usar la app sin conexión y que se pueda instalar en el móvil.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => {
