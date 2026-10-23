@@ -217,6 +217,191 @@ Object.assign(DRAW, {
   },
 });
 
+
+// ---------- PIERNAS, CORE, CARDIO ----------
+const SQ = (o = {}) => fig({ hip: [78, 86], torso: -62, head: -70, ua: 125, fa: -75, th: 8, sh: 100, foot: 0, far: [-3, 0], hl: [['th', 0.1, 0.95, [0, -2], 14]], ...o });
+const qhl = [['th', 0.1, 0.9, [0, -2], 13]]; // cuádriceps
+const hhl = [['th', 0.1, 0.9, [0, 3], 12]]; // isquios
+const ghl = [['torso', 0, 0.2, [0, 0], 16], ['th', 0, 0.3, [0, 0], 14]]; // glúteo
+const chl = [['sh', 0.1, 0.7, [-3, 0], 9]]; // gemelo
+const perp = (a, deg, w = 7, l = 15) => { const p = [Math.cos(rad(deg + 90)) * l, Math.sin(rad(deg + 90)) * l]; return ln(a[0] + p[0], a[1] + p[1], a[0] - p[0], a[1] - p[1], w); };
+const arrow = (x, y, dir) => `<path d="M${x} ${y} h${dir * 10} m${-dir * 4} -3 l${dir * 4} 3 l${-dir * 4} 3" class="fd-line"/>`;
+
+Object.assign(DRAW, {
+  // ---------- PIERNAS ----------
+  'sentadilla-con-barra': () => { const f = SQ(); return floor(20, 150) + f.s + BAR([f.sho[0] - 6, f.sho[1] - 3], 12); },
+  'sentadilla-frontal': () => { const f = SQ({ torso: -74, head: -78, ua: -15, fa: 150, hip: [74, 88] }); return floor(20, 150) + f.s + BAR([f.sho[0] + 8, f.sho[1] - 2], 10); },
+  'sentadilla-en-smith': () => { const f = SQ(); return floor(20, 150) + ln(f.sho[0] - 6, 8, f.sho[0] - 6, 140, 4) + f.s + BAR([f.sho[0] - 6, f.sho[1] - 3], 6); },
+  'sentadilla-goblet': () => { const f = SQ({ torso: -80, head: -84, ua: 62, fa: -25, hip: [74, 88] }); return floor(20, 150) + f.s + DB(f.han, 8); },
+  'sentadilla-bulgara': () => {
+    const f = fig({ hip: [70, 96], torso: -84, head: -86, ua: 90, fa: 90, th: 20, sh: 95, foot: 0, far: [0, 0], fl: [122, 196], hl: qhl });
+    return floor() + rect(8, 116, 36, 8, 3) + ln(16, 124, 16, 140) + ln(36, 124, 36, 140) + f.s + DB(f.han, 6);
+  },
+  'prensa-de-piernas': () => {
+    const f = fig({ hip: [60, 112], torso: -148, head: -150, ua: 20, fa: 10, th: -40, sh: -78, foot: -78, hl: qhl });
+    return ln(46, 138, 140, 44, 4) + ln(f.hip[0] - 4, f.hip[1] + 6, f.sho[0] - 8, f.sho[1] + 8, 9) + perp(f.ank, -78, 8, 17) + f.s;
+  },
+  'hack-squat-maquina': () => {
+    const f = fig({ hip: [84, 94], torso: -112, head: -112, ua: 90, fa: 90, th: 8, sh: 100, foot: 0, hl: qhl });
+    return floor() + ln(82, 112, 54, 42, 9) + ln(42, 138, 120, 20, 3) + f.s;
+  },
+  'zancadas': () => {
+    const f = fig({ hip: [74, 96], torso: -88, head: -90, ua: 90, fa: 90, th: 20, sh: 95, foot: 0, fl: [118, 168], hl: qhl });
+    return floor() + f.s;
+  },
+  'zancadas-caminando': () => {
+    const f = fig({ hip: [74, 96], torso: -88, head: -90, ua: 90, fa: 90, th: 20, sh: 95, foot: 0, fl: [118, 168], hl: qhl });
+    return floor() + f.s + DB(f.han, 6) + arrow(112, 40, 1);
+  },
+  'step-up-subida-a-banco': () => {
+    const f = fig({ hip: [78, 80], torso: -88, head: -90, ua: 90, fa: 90, th: -10, sh: 96, foot: 0, fl: [90, 90], hl: qhl });
+    return floor() + rect(92, 108, 50, 32, 3) + f.s + DB(f.han, 6);
+  },
+  'extension-de-cuadriceps-maquina': () => {
+    const f = seated({ hip: [56, 100], th: 0, sh: -12, foot: -80, ua: 40, fa: 80, hl: qhl });
+    return rect(36, 108, 40, 8, 3) + ln(52, 116, 52, 140) + ln(36, 44, 36, 104, 6) + ln(f.ank[0] + 4, f.ank[1] - 4, f.ank[0] - 14, f.ank[1] + 18, 6) + f.s;
+  },
+  'peso-muerto-rumano': () => {
+    const f = fig({ hip: [62, 72], torso: -30, head: -35, ua: 90, fa: 90, th: 82, sh: 98, foot: 0, far: [-3, 0], hl: [['th', 0.1, 0.9, [-3, 0], 11], ['torso', 0, 0.2, [0, 0], 14]] });
+    return floor() + f.s + BAR(f.han, 10);
+  },
+  'peso-muerto-con-piernas-rigidas': () => {
+    const f = fig({ hip: [62, 80], torso: -22, head: -28, ua: 90, fa: 90, th: 90, sh: 90, foot: 0, far: [-3, 0], hl: [['th', 0.1, 0.9, [-3, 0], 11], ['torso', 0, 0.2, [0, 0], 14]] });
+    return floor() + f.s + BAR(f.han, 10);
+  },
+  'curl-femoral-tumbado': () => {
+    const f = fig({ hip: [84, 98], torso: 0, head: -8, ua: 100, fa: 90, th: 180, sh: -100, foot: 0, hl: [['th', 0.1, 0.9, [0, -3], 12], ['sh', 0.1, 0.6, [0, 0], 9]] });
+    return rect(40, 106, 96, 8, 3) + ln(50, 114, 50, 140) + ln(126, 114, 126, 140) + cir(f.ank[0] + 2, f.ank[1] + 6, 5) + ln(f.ank[0] + 2, f.ank[1] + 6, 26, 110, 4) + f.s;
+  },
+  'curl-femoral-sentado': () => {
+    const f = seated({ hip: [60, 98], th: 0, sh: 125, foot: 90, ua: 40, fa: 80, hl: [['th', 0.1, 0.9, [0, 4], 11], ['sh', 0.1, 0.6, [-2, 0], 8]] });
+    return rect(40, 106, 40, 8, 3) + ln(54, 114, 54, 140) + ln(40, 46, 40, 102, 6) + rect(f.kne[0] - 12, f.kne[1] - 14, 24, 5, 2) + cir(f.ank[0] - 2, f.ank[1] - 4, 5) + ln(f.ank[0] - 2, f.ank[1] - 4, f.ank[0] + 22, f.ank[1] - 20, 4) + f.s;
+  },
+  'curl-femoral-de-pie': () => {
+    const f = fig({ hip: [80, 76], torso: -86, head: -88, ua: 70, fa: 20, th: 90, sh: 192, foot: 90, fl: [90, 90], hl: [['th', 0.1, 0.9, [-3, 0], 11], ['sh', 0.1, 0.7, [0, 0], 8]] });
+    return floor() + rect(90, 54, 8, 44, 3) + f.s + cir(f.ank[0] - 2, f.ank[1], 5);
+  },
+  'hip-thrust': () => {
+    const f = fig({ hip: [78, 106], torso: -155, head: -160, ua: 12, fa: 25, th: 0, sh: 90, foot: 0, hl: ghl });
+    return floor() + rect(12, 96, 44, 8, 3) + ln(20, 104, 20, 140) + ln(48, 104, 48, 140) + f.s + BAR([f.hip[0], f.hip[1] - 6], 12);
+  },
+  'puente-de-gluteo': () => {
+    const f = fig({ hip: [80, 118], torso: 158, head: 165, ua: 20, fa: 10, th: -22, sh: 85, foot: 0, hl: ghl });
+    return floor() + f.s;
+  },
+  'patada-de-gluteo-en-polea': () => {
+    const f = fig({ hip: [84, 78], torso: -78, head: -80, ua: 8, fa: 0, th: 130, sh: 120, foot: 20, fl: [90, 90], hl: ghl });
+    return floor() + ln(140, 20, 140, 140, 6) + cir(138, 132, 5, 'fd-eqfill') + `<line x1="${n1(f.ank[0])}" y1="${n1(f.ank[1])}" x2="138" y2="132" class="fd-cable"/>` + f.s;
+  },
+  'patada-de-gluteo-en-maquina': () => {
+    const f = fig({ hip: [84, 78], torso: -78, head: -80, ua: 8, fa: 0, th: 130, sh: 120, foot: 20, fl: [90, 90], hl: ghl });
+    return floor() + ln(140, 20, 140, 140, 6) + ln(f.ank[0] - 4, f.ank[1] - 4, 36, 70, 4) + cir(36, 70, 4, 'fd-eqfill') + perp(f.ank, 120, 6, 8) + f.s;
+  },
+  'abductores-maquina': () => {
+    const f = seated({ hip: [60, 100], th: 0, sh: 90, ua: 40, fa: 80, hl: [['th', 0.1, 0.9, [0, -2], 13]] });
+    return seatBack(40) + f.s + cir(f.kne[0], f.kne[1] - 2, 5) + arrow(86, 64, -1) + arrow(100, 64, 1);
+  },
+  'aductores-maquina': () => {
+    const f = seated({ hip: [60, 100], th: 0, sh: 90, ua: 40, fa: 80, hl: [['th', 0.1, 0.9, [0, 2], 13]] });
+    return seatBack(40) + f.s + cir(f.kne[0], f.kne[1] - 2, 5) + arrow(78, 64, 1) + arrow(116, 64, -1);
+  },
+  'elevacion-de-gemelos-de-pie': () => {
+    const f = stand({ hip: [80, 72], ua: 90, fa: 90, foot: 50, hl: chl });
+    return floor() + rect(66, 134, 40, 6, 2) + f.s + DB(f.han, 6);
+  },
+  'elevacion-de-gemelos-sentado': () => {
+    const f = seated({ hip: [60, 98], th: 0, sh: 90, foot: 50, ua: 70, fa: 20, hl: chl });
+    return floor() + rect(86, 132, 34, 8, 2) + rect(f.kne[0] - 12, f.kne[1] - 12, 26, 6, 3) + ln(f.kne[0] + 12, f.kne[1] - 12, f.kne[0] + 12, f.kne[1] - 22, 4) + seatBack(40).replace(/ln\([^)]*\)/g, '') + f.s;
+  },
+  'gemelos-en-prensa': () => {
+    const f = fig({ hip: [60, 112], torso: -148, head: -150, ua: 20, fa: 10, th: -38, sh: -38, foot: -10, hl: chl });
+    return ln(46, 138, 140, 44, 4) + ln(f.hip[0] - 4, f.hip[1] + 6, f.sho[0] - 8, f.sho[1] + 8, 9) + perp(f.ank, -38, 8, 17) + f.s;
+  },
+  // ---------- CORE ----------
+  'crunch-abdominal': () => {
+    const f = fig({ hip: [90, 128], torso: -150, head: -158, ua: -120, fa: 30, th: -58, sh: 80, foot: 0, hl: [['torso', 0.1, 0.7, [0, -3], 12]] });
+    return floor(14, 154) + f.s;
+  },
+  'crunch-en-maquina': () => {
+    const f = seated({ hip: [60, 100], torso: -62, head: -58, th: 0, sh: 90, ua: 70, fa: -30, hl: [['torso', 0.1, 0.7, [3, 0], 12]] });
+    return seatBack(40) + f.s;
+  },
+  'crunch-en-polea-alta': () => {
+    const f = fig({ hip: [60, 104], torso: -28, head: -10, ua: 30, fa: 150, th: 90, sh: 180, foot: 0, hl: [['torso', 0.1, 0.7, [2, 3], 12]] });
+    return floor() + ln(138, 8, 138, 140, 6) + ln(112, 8, 138, 8, 5) + cir(110, 8, 5, 'fd-eqfill') + cableTo(110, 13, f.han) + f.s;
+  },
+  'elevacion-de-piernas-tumbado': () => {
+    const f = fig({ hip: [72, 128], torso: 180, head: 180, ua: 0, fa: 0, th: -90, sh: -90, foot: 0, hl: [['torso', 0, 0.5, [0, -3], 12]] });
+    return floor(10, 150) + f.s;
+  },
+  'elevacion-de-piernas-colgado': () => {
+    const f = hang({ th: -8, sh: -8, foot: 0, ua: -92, fa: -90, hl: [['torso', 0.05, 0.6, [4, 0], 12]] });
+    return ln(40, 8, 124, 8, 5) + ln(40, 8, 40, 20, 4) + ln(124, 8, 124, 20, 4) + f.s;
+  },
+  'plancha': () => {
+    const f = fig({ hip: [84, 118], torso: -8, head: -15, ua: 92, fa: 0, th: 174, sh: 174, foot: -80, hl: [['torso', 0.1, 0.7, [0, 3], 12]] });
+    return floor() + f.s;
+  },
+  'plancha-lateral': () => {
+    const f = fig({ hip: [84, 118], torso: -8, head: -15, ua: 92, fa: 0, th: 174, sh: 174, foot: -80, fa2: [-90, -90], hl: [['torso', 0.2, 0.8, [0, -3], 12]] });
+    return floor() + f.s;
+  },
+  'rueda-abdominal': () => {
+    const f = fig({ hip: [56, 110], torso: -8, head: -14, ua: 52, fa: 80, th: 90, sh: 180, foot: 0, hl: [['torso', 0.1, 0.8, [0, 3], 12]] });
+    return floor() + f.s + cir(f.han[0], 134, 6) + cir(f.han[0], 134, 1.5, 'fd-eqfill');
+  },
+  'russian-twist': () => {
+    const f = fig({ hip: [70, 112], torso: -125, head: -120, ua: 20, fa: 8, th: -32, sh: -34, foot: 0, hl: [['torso', 0.1, 0.7, [3, 0], 12]] });
+    return floor() + f.s + DB(f.han, 7);
+  },
+  'lenador-en-polea': () => {
+    const f = fig({ hip: [80, 80], torso: -76, head: -78, ua: 62, fa: 52, th: 80, sh: 100, foot: 0, far: [-3, 0], hl: [['torso', 0.1, 0.7, [3, 0], 12]] });
+    return floor() + ln(24, 8, 24, 140, 6) + ln(24, 8, 50, 8, 5) + cableTo(46, 14, f.han) + f.s + V(f.han);
+  },
+  'bicicleta-abdominal': () => {
+    const f = fig({ hip: [74, 128], torso: -158, head: -165, ua: -150, fa: 20, th: -112, sh: -18, foot: 0, fl: [-8, -4], hl: [['torso', 0.1, 0.7, [0, -3], 12]] });
+    return floor(10, 154) + f.s;
+  },
+  'mountain-climbers': () => {
+    const f = fig({ hip: [83.4, 111], torso: -22.6, head: -30, ua: 90, fa: 90, th: 40, sh: 170, foot: 0, fl: [157.4, 157.4], hl: [['torso', 0.1, 0.7, [0, 3], 12]] });
+    return floor() + f.s;
+  },
+  'superman-lumbar': () => {
+    const f = fig({ hip: [70, 128], torso: -8, head: -14, ua: -6, fa: -10, th: 188, sh: 194, foot: 0, hl: [['torso', 0, 0.45, [0, -3], 12]] });
+    return floor(8, 154) + f.s;
+  },
+  // ---------- CARDIO ----------
+  'cinta-de-correr': () => {
+    const f = fig({ hip: [78, 76], torso: -82, head: -86, ua: 62, fa: -50, th: -4, sh: 96, foot: 20, fl: [112, 152], fa2: [-30, 60], hl: qhl });
+    return ln(14, 140, 124, 140, 5) + ln(136, 60, 136, 140, 6) + ln(112, 62, 136, 62, 4) + f.s;
+  },
+  'bicicleta-estatica': () => {
+    const f = fig({ hip: [60, 92], torso: -52, head: -55, ua: 40, fa: 25, th: 38, sh: 112, foot: 0, fl: [-55, 70], hl: qhl });
+    return floor() + rect(46, 94, 24, 6, 3) + ln(60, 100, 98, 128, 4) + ln(98, 128, 116, 82, 4) + ln(110, 80, 122, 80, 4) + cir(98, 128, 6, 'fd-eqfill') + ln(40, 140, 130, 140, 4) + ln(52, 100, 52, 140, 3) + f.s;
+  },
+  'eliptica': () => {
+    const f = fig({ hip: [78, 74], torso: -88, head: -90, ua: 22, fa: 12, th: 82, sh: 98, foot: 0, fl: [98, 84], hl: qhl });
+    return floor() + cir(40, 118, 16, 'fd-plate') + rect(60, 134, 34, 5, 2) + ln(120, 24, 120, 140, 5) + ln(120, 52, f.han[0], f.han[1], 4) + f.s;
+  },
+  'remo-ergometro': () => {
+    const f = fig({ hip: [58, 112], torso: -108, head: -104, ua: 165, fa: 18, th: -6, sh: 6, foot: -80, hl: [['torso', 0.35, 0.92, [-4, 0], 12]] });
+    return ln(22, 126, 140, 126, 4) + rect(44, 118, 28, 6, 3) + rect(118, 96, 5, 26) + cir(138, 108, 12, 'fd-plate') + cableTo(130, 108, f.han) + f.s;
+  },
+  'escaladora': () => {
+    const f = fig({ hip: [80, 72], torso: -90, head: -92, ua: 24, fa: 8, th: 20, sh: 95, foot: 0, fl: [96, 92], hl: qhl });
+    return floor() + rect(96, 110, 26, 6, 2) + rect(64, 134, 26, 6, 2) + ln(132, 24, 132, 140, 5) + ln(116, 44, 132, 44, 4) + f.s;
+  },
+  'comba': () => {
+    const f = fig({ hip: [80, 68], torso: -90, head: -90, ua: 64, fa: 36, th: 88, sh: 92, foot: 55, far: [-3, 0], hl: chl });
+    return floor() + `<path d="M${n1(f.han[0])} ${n1(f.han[1])} C ${n1(f.han[0] + 36)} ${n1(f.han[1] - 60)}, 20 -10, 24 60 S ${n1(f.han[0] - 20)} 150, ${n1(f.han[0])} ${n1(f.han[1])}" class="fd-line"/>` + f.s;
+  },
+  'battle-ropes': () => {
+    const f = fig({ hip: [66, 86], torso: -64, head: -68, ua: 68, fa: 46, th: 38, sh: 112, foot: 0, far: [-3, 0], hl: dhl });
+    const h = f.han;
+    return floor() + cir(138, 112, 5, 'fd-eqfill') + `<path d="M${n1(h[0])} ${n1(h[1])} q8 -12 16 0 t16 0 t16 0 t16 0" class="fd-rope"/>` + `<path d="M${n1(h[0])} ${n1(h[1] + 5)} q8 12 16 0 t16 0 t16 0 t16 0" class="fd-rope"/>` + f.s;
+  },
+});
+
 // Dibujo listo para pantalla. id = id del ejercicio de la app ("b-press-banca-barra"); devuelve '' si aún no hay dibujo.
 export function drawnEx(id, size = 40) {
   const fn = DRAW[String(id).replace(/^b-/, '')];

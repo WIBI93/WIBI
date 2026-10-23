@@ -231,5 +231,6 @@ button.f-card { cursor: pointer; width: 100%; }
 .fd .fd-hl { stroke: var(--fd-red); stroke-linecap: round; opacity: .85; }
 .fd .fd-eq, .fd .fd-eqfill { fill: var(--fd-eq); } .fd .fd-eqln { stroke: var(--fd-eq); stroke-linecap: round; }
 .fd .fd-plate { fill: var(--fd-plate); } .fd .fd-floor { stroke: var(--fd-floor); stroke-width: 2; stroke-linecap: round; }
+.fd .fd-rope { stroke: var(--fd-eq); stroke-width: 3; fill: none; stroke-linecap: round; }
 .fd .fd-cable { stroke: var(--fd-eq); stroke-width: 1.4; } .fd .fd-line { stroke: var(--fd-eq); stroke-width: 2; fill: none; stroke-linecap: round; }
 .f-ex .fd, .f-exrow .fd { margin-right: 6px; }
