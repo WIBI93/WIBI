@@ -88,11 +88,13 @@ function monthGrid(fit, y, m) {
     const st = (sp, done, plan) => (done.has(k) ? 'on' : plan.has(k) ? (k < today ? 'miss' : 'ring') : '');
     const cg = st('gym', g, pg); const cr = st('run', r, pr);
     const s0 = sh[k] && sh[k].kind === 'work' ? sh[k] : null;
-    const circ = [cg && `<u class="c g ${cg}">${ico('gym', 20, 2.3)}</u>`, cr && `<u class="c r ${cr}">${ico('run', 20, 2.3)}</u>`].filter(Boolean);
-    cells += `<div class="cell ${k === today ? 'today' : ''}"><b class="n">${d}</b>${s0 ? `<i class="sd" style="background:${s0.color}" title="${esc(s0.name)}"></i>` : ''}<span class="cc ${circ.length > 1 ? 'two' : ''}">${circ.join('')}</span></div>`;
+    const circ = [cg && `<u class="c g">${ico('gym', 20, 2.3)}</u>`, cr && `<u class="c r">${ico('run', 20, 2.3)}</u>`].filter(Boolean);
+    const sts = [cg, cr].filter((x) => x === 'on' || x === 'miss');
+    const tone = sts.length && sts.every((x) => x === 'on') ? 'ok' : sts.length && sts.every((x) => x === 'miss') ? 'bad' : sts.length ? 'mix' : '';
+    cells += `<div class="cell ${tone} ${k === today ? 'today' : ''}"><b class="n">${d}</b>${s0 ? `<i class="sd" style="background:${s0.color}" title="${esc(s0.name)}"></i>` : ''}<span class="cc ${circ.length > 1 ? 'two' : ''}">${circ.join('')}</span></div>`;
   }
   return `<div class="f-cal"><div class="hd">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((x) => `<b>${x}</b>`).join('')}</div><div class="bd">${cells}</div></div>
-    <div class="f-legend"><span class="lg g">${ico('gym', 15, 2.3)}Gym</span><span class="lg r">${ico('run', 15, 2.3)}Running</span><span class="lg hecho"><i class="hd2">${ico('check', 9, 3.4)}</i>Hecho</span><span class="lg"><i class="hd2 no">${ico('plus', 9, 3.4)}</i>Sin hacer</span><span class="lg">Gris: pendiente</span><span><i class="sdl"></i>Tu turno</span></div>`;
+    <div class="f-legend"><span class="lg g">${ico('gym', 15, 2.3)}Gym</span><span class="lg r">${ico('run', 15, 2.3)}Running</span><span class="lg"><i class="sq ok"></i>Hecho</span><span class="lg"><i class="sq bad"></i>Sin hacer</span><span><i class="sdl"></i>Tu turno</span></div>`;
 }
 
 function lastActivities(fit) {
