@@ -234,3 +234,16 @@ button.f-card { cursor: pointer; width: 100%; }
 .fd .fd-rope { stroke: var(--fd-eq); stroke-width: 3; fill: none; stroke-linecap: round; }
 .fd .fd-cable { stroke: var(--fd-eq); stroke-width: 1.4; } .fd .fd-line { stroke: var(--fd-eq); stroke-width: 2; fill: none; stroke-linecap: round; }
 .f-ex .fd, .f-exrow .fd { margin-right: 6px; }
+
+/* Running: desnivel, ritmo por km y zonas de pulso */
+.f-ele { width: 100%; height: auto; display: block; }
+.f-elearea { fill: var(--f-acc); opacity: .18; }
+.f-hb { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.f-hb > span { width: 20px; color: var(--f-mute); text-align: right; }
+.f-hb em { flex: 1; height: 10px; border-radius: 99px; background: var(--f-bg); overflow: hidden; display: block; }
+.f-hb em i { display: block; height: 10px; border-radius: 99px; background: var(--f-acc); }
+.f-hb b { width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+.f-zrow { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.f-zrow > i { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+.f-zrow b { font-variant-numeric: tabular-nums; }
+.f-zrow .f-mini { width: 38px; text-align: right; }

@@ -111,6 +111,7 @@ function renderSportSettings(sport) {
           <div class="rowh"><span>Segundos<br><small class="f-mini">del ritmo límite</small></span><span class="grow"></span>${stepper('paceSec', s.paceLimit % 60, 0, 59)}</div>
           <div class="rowh"><span>Carrera válida desde<br><small class="f-mini">minutos corriendo</small></span><span class="grow"></span>${stepper('minRunMin', s.minRunMin, 1, 60)}</div>
           <div class="rowh"><span>Tolerancia de paradas<br><small class="f-mini">segundos</small></span><span class="grow"></span>${stepper('stopTol', s.stopTol, 0, 120)}</div>
+          <div class="rowh"><span>Pulso máximo<br><small class="f-mini">latidos por minuto, para las zonas de pulso</small></span><span class="grow"></span>${stepper('hrMax', s.hrMax, 120, 230)}</div>
         </section>` : ''}
         <section class="f-card plain"><strong>Borrar ${SPORT_NAME[sport]}</strong>
           <div class="f-mini">Borra solo los datos de este deporte.</div>

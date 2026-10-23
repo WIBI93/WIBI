@@ -5,7 +5,7 @@ import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { getFit, updateFit } from './data.js';
 import { shortDateText, addDaysKey, thisMonday, mondayKey, parseKey } from './dates.js';
 import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
-import { parseGpx, analyze, summarize, paceText, durText } from './gpx.js';
+import { parseGpx, analyze, summarize, paceText, durText, zoneSeconds, ZONES } from './gpx.js';
 import { saveRun, isDuplicate, PR_NAMES } from './runlogic.js';
 import { awardRun } from './runmedals.js';
 import { celebrate } from './gym2.js';
@@ -42,6 +42,35 @@ function segBar(segs) {
   const tot = segs.reduce((a, s) => a + s.sec, 0) || 1;
   return `<div class="f-segbar">${segs.map((s) => `<i class="${s.type}" style="flex:${s.sec / tot}" title="${s.type}"></i>`).join('')}</div>
     <div class="f-legend"><span><i class="run"></i>Corriendo</span><span><i class="walk"></i>Caminando</span><span><i class="stop"></i>Parado</span></div>`;
+}
+
+// Altitud a lo largo de la carrera (área). Solo si el archivo traía altitud.
+function eleSvg(prof) {
+  const p = (prof || []).filter((x) => x[1] != null);
+  if (p.length < 3) return '';
+  const t1 = p[p.length - 1][0] || 1;
+  const lo = Math.min(...p.map((x) => x[1])), hi = Math.max(...p.map((x) => x[1]));
+  const span = Math.max(10, hi - lo);
+  const X = (t) => (t / t1) * 296 + 2, Y = (e) => 8 + (1 - (e - lo) / span) * 64;
+  const line = p.map((x) => `${X(x[0]).toFixed(1)},${Y(x[1]).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 300 80" class="f-ele" role="img" aria-label="Altitud de la carrera"><polygon points="2,76 ${line} 298,76" class="f-elearea"/><polyline points="${line}" fill="none" stroke="var(--f-acc)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+// Ritmo de cada km: barra más larga = más rápido.
+function paceRows(splits) {
+  const best = Math.min(...splits);
+  return splits.map((s, i) => `<div class="f-hb"><span>${i + 1}</span><em><i style="width:${Math.max(12, Math.round((best / s) * 100))}%"></i></em><b>${paceText(s)}</b></div>`).join('');
+}
+
+function zoneCard(r, hrMax) {
+  const z = zoneSeconds(r, hrMax);
+  const tot = z.reduce((a, x) => a + x, 0);
+  if (!tot) return '';
+  const lim = (i) => (i === 0 ? `menos de ${Math.round(hrMax * 0.6)}` : i === 4 ? `${Math.round(hrMax * 0.9)} o más` : `${Math.round(hrMax * ZONES[i].from)}–${Math.round(hrMax * ZONES[i + 1].from) - 1}`);
+  return `<section class="f-card plain"><strong>Zonas de pulso</strong>
+    <div class="f-segbar">${z.map((x, i) => (x ? `<i style="flex:${x};background:${ZONES[i].color}"></i>` : '')).join('')}</div>
+    ${z.map((x, i) => `<div class="f-zrow"><i style="background:${ZONES[i].color}"></i><span class="grow">Z${i + 1} ${ZONES[i].name}<small class="f-mini"> · ${lim(i)} ppm</small></span><b>${durText(x)}</b><span class="f-mini">${Math.round((x / tot) * 100)} %</span></div>`).join('')}
+    <div class="f-mini">Solo cuenta el tiempo corriendo. Pulso máximo ${hrMax} (se cambia en Ajustes).</div></section>`;
 }
 
 const TYPE_NAME = { run: 'Corriendo', walk: 'Caminando', stop: 'Parado' };
@@ -151,7 +180,11 @@ export function renderRunDetail(el, { id }) {
       <section class="f-card plain"><div class="f-sub">Caminado</div><div class="f-num">${km(r.walkM, 1)}</div><div class="f-mini">km · no cuenta</div></section>
     </div>
     <section class="f-card plain"><strong>Tramos</strong>${segBar(r.segs)}${segList(r.segs, false)}</section>
-    ${r.splits && r.splits.length ? `<section class="f-card plain"><strong>Parciales por km</strong>${r.splits.map((s, i) => `<div class="f-mini">Km ${i + 1}: ${paceText(s)}</div>`).join('')}</section>` : ''}
+    ${r.ascent != null ? `<section class="f-card plain"><strong>Desnivel</strong>
+      <div class="f-grid2"><div><div class="f-num">+${r.ascent}</div><div class="f-mini">m subidos</div></div><div><div class="f-num">−${r.descent}</div><div class="f-mini">m bajados</div></div></div>
+      ${eleSvg(r.prof)}<div class="f-mini">Altitud entre ${r.eleMin} y ${r.eleMax} m. El reloj mide la altitud de forma aproximada.</div></section>` : ''}
+    ${r.splits && r.splits.length ? `<section class="f-card plain"><strong>Ritmo por km</strong>${paceRows(r.splits)}<div class="f-mini">Barra más larga = más rápido.</div></section>` : ''}
+    ${zoneCard(r, fit.settings.run.hrMax)}
     ${g}
     <button type="button" class="f-btn danger" id="del">Borrar carrera</button></main>`);
   bindGo(el);
@@ -185,6 +218,7 @@ export function renderRunStats(el) {
         <section class="f-card plain"><div class="f-sub">Corrido</div><div class="f-num">${km(m, 1)}</div><div class="f-mini">km</div></section>
         <section class="f-card plain"><div class="f-sub">Tiempo</div><div class="f-num">${Math.round(sec / 60)}</div><div class="f-mini">min</div></section>
       </div>
+      ${sel.some((r) => r.ascent != null) ? `<section class="f-card plain"><div class="f-sub">Desnivel subido</div><div class="f-num">${sel.reduce((a, r) => a + (r.ascent || 0), 0)}</div><div class="f-mini">metros en el periodo (solo carreras con altitud)</div></section>` : ''}
       <section class="f-card plain"><strong>Km por semana</strong><div class="f-bars">${bars.map((b) => `<div class="f-bcol"><i style="height:${Math.round((b.v / maxV) * 100)}%"></i><span>${parseKey(b.mk).getDate()}</span></div>`).join('')}</div></section>
       <button type="button" class="f-card level" data-go="${B}/anual"><strong>Tu año de running</strong><div class="f-mini">Resumen anual: totales, mejores momentos y comparación con el año pasado</div></button>
       <section class="f-card plain"><strong>Evolución del ritmo</strong>${line}</section>

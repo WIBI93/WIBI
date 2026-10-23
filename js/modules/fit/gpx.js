@@ -10,7 +10,7 @@ export function haversine(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-// Devuelve los puntos: { lat, lon, t (segundos), hr, cad }
+// Devuelve los puntos: { lat, lon, t (segundos), hr, cad, ele (altitud en m o null) }
 export function parseGpx(text) {
   const pts = [];
   const re = /<trkpt\s+[^>]*?lat="(-?[\d.]+)"[^>]*?lon="(-?[\d.]+)"[^>]*>([\s\S]*?)<\/trkpt>/g;
@@ -22,7 +22,8 @@ export function parseGpx(text) {
     if (!Number.isFinite(t)) continue;
     const hr = /<(?:\w+:)?hr>\s*([\d.]+)/.exec(m[3]);
     const cad = /<(?:\w+:)?cad>\s*([\d.]+)/.exec(m[3]);
-    pts.push({ lat: +m[1], lon: +m[2], t: t / 1000, hr: hr ? +hr[1] : 0, cad: cad ? +cad[1] : 0 });
+    const ele = /<ele>\s*(-?[\d.]+)/.exec(m[3]);
+    pts.push({ lat: +m[1], lon: +m[2], t: t / 1000, hr: hr ? +hr[1] : 0, cad: cad ? +cad[1] : 0, ele: ele && Number.isFinite(+ele[1]) ? +ele[1] : null });
   }
   pts.sort((a, b) => a.t - b.t);
   const name = /<name>\s*(?:<!\[CDATA\[)?([^<\]]*)/.exec(text);
@@ -121,12 +122,69 @@ export function analyze(pts, paceLimit = 570) {
     }
     if (Number.isFinite(bt)) best[km2] = Math.round(bt);
   }
+  const prof = profile(pts);
   return {
     startedAt: startT,
     segs: segs.map((s) => ({ type: s.type, sec: Math.round(s.sec), m: Math.round(s.m), hr: s.sec ? Math.round(s.hrS / s.sec) : 0, cad: s.sec ? Math.round((s.cadS / s.sec) * 2) : 0 })),
-    route, splits, best,
+    route, splits, best, ...prof,
     hrMax: Math.max(0, ...pts.map((p) => p.hr)),
   };
+}
+
+// Altitud y pulso para los gráficos: un punto cada ~15 s [segundos desde el inicio, altitud, pulso], más desnivel.
+// La altitud del GPS tiene ruido: se alisa (media de ±10 s) y solo cuentan cambios de más de 3 m.
+export function profile(pts) {
+  const n = pts.length;
+  const hasEle = pts.filter((p) => p.ele != null).length > n * 0.5;
+  let sm = null;
+  if (hasEle) {
+    let last = pts.find((p) => p.ele != null).ele;
+    const raw = pts.map((p) => { if (p.ele != null) last = p.ele; return last; });
+    sm = new Array(n);
+    let a = 0; let b = 0; let sum = 0; let cnt = 0;
+    for (let i = 0; i < n; i++) {
+      while (b < n && pts[b].t <= pts[i].t + 10) { sum += raw[b]; cnt++; b++; }
+      while (a < n && pts[a].t < pts[i].t - 10) { sum -= raw[a]; cnt--; a++; }
+      sm[i] = sum / Math.max(1, cnt);
+    }
+  }
+  const prof = [];
+  let el = 0; let nextAt = 0;
+  for (let i = 0; i < n; i++) {
+    if (i > 0) { const dt = pts[i].t - pts[i - 1].t; if (dt > 0) el += dt; }
+    if (el >= nextAt) { prof.push([Math.round(el), hasEle ? Math.round(sm[i] * 10) / 10 : null, Math.round(pts[i].hr)]); nextAt = el + 15; }
+  }
+  const out = { prof };
+  if (hasEle) {
+    let ref = sm[0]; let asc = 0; let desc = 0;
+    for (let i = 1; i < n; i++) {
+      if (sm[i] - ref >= 3) { asc += sm[i] - ref; ref = sm[i]; } else if (ref - sm[i] >= 3) { desc += ref - sm[i]; ref = sm[i]; }
+    }
+    out.ascent = Math.round(asc); out.descent = Math.round(desc);
+    out.eleMax = Math.round(Math.max(...sm)); out.eleMin = Math.round(Math.min(...sm));
+  }
+  return out;
+}
+
+// Zonas de pulso (% del pulso máximo): solo cuenta el tiempo corriendo. Devuelve segundos en cada zona.
+export const ZONES = [
+  { name: 'Muy suave', from: 0, color: '#7FB2FF' }, { name: 'Suave', from: 0.6, color: '#47D1C4' },
+  { name: 'Aeróbica', from: 0.7, color: '#7BE07A' }, { name: 'Umbral', from: 0.8, color: '#FFB340' }, { name: 'Máximo', from: 0.9, color: '#FF5A5F' },
+];
+export function zoneSeconds(run, hrMax) {
+  const out = [0, 0, 0, 0, 0];
+  if (!run.prof || !run.prof.length || !run.segs || !hrMax) return out;
+  const bounds = []; let t = 0;
+  for (const s of run.segs) { bounds.push([t, t + s.sec, s.type]); t += s.sec; }
+  let k = 0;
+  run.prof.forEach((p, i) => {
+    const d = i + 1 < run.prof.length ? Math.min(30, run.prof[i + 1][0] - p[0]) : 15;
+    while (k < bounds.length - 1 && p[0] >= bounds[k][1]) k++;
+    if (!bounds[k] || bounds[k][2] !== 'run' || !p[2]) return;
+    const f = p[2] / hrMax;
+    out[f >= 0.9 ? 4 : f >= 0.8 ? 3 : f >= 0.7 ? 2 : f >= 0.6 ? 1 : 0] += d;
+  });
+  return out;
 }
 
 // Totales de la carrera a partir de sus tramos. stopTol = segundos de parada que no rompen una racha corriendo.

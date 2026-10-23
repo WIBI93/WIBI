@@ -22,7 +22,7 @@ export function defaults() {
       accent: 'red', // acento del gimnasio: 'red' o 'lima'
       bodyWeight: null, // peso corporal opcional, en kg
       gym: { goal: 3, minStreak: 1, restSecs: 90 },
-      run: { goal: 2, minStreak: 1, paceLimit: 570, minRunMin: 8, stopTol: 30, reviewImport: true },
+      run: { goal: 2, minStreak: 1, paceLimit: 570, minRunMin: 8, stopTol: 30, reviewImport: true, hrMax: 185 },
     },
     plans: {}, // lunes de la semana -> { gym: n, run: n } (0 = esa semana en pausa)
     pauses: { gym: [], run: [] }, // { from: lunes, to: lunes | null }
@@ -83,6 +83,7 @@ export function normalize(raw) {
       minRunMin: int(u.minRunMin, 1, 60, 8),
       stopTol: int(u.stopTol, 0, 120, 30),
       reviewImport: u.reviewImport !== false,
+      hrMax: int(u.hrMax, 120, 230, 185),
     },
   };
   d.settings.gym.minStreak = int(g.minStreak, 1, d.settings.gym.goal, 1);

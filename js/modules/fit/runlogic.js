@@ -40,6 +40,7 @@ export function saveRun({ analysis, segs, name, paceLimit }) {
   const run = {
     id: uid(), date, startedAt: analysis.startedAt, name: name || 'Carrera', paceLimit,
     ...sum, hrMax: analysis.hrMax, segs, splits: analysis.splits, best: analysis.best, route: analysis.route,
+    prof: analysis.prof, ascent: analysis.ascent, descent: analysis.descent, eleMax: analysis.eleMax, eleMin: analysis.eleMin,
   };
   run.valid = run.runSec >= set.minRunMin * 60;
   const prs = run.valid ? runPRs(before, run) : [];
