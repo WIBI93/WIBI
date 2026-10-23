@@ -1,5 +1,6 @@
 // Pantallas de running: importar carrera, carreras, detalle y estadísticas.
 
+import { backupNudge } from '../../core/backup-ui.js';
 import { navigate } from '../../core/router.js';
 import { esc, toast, confirmDialog } from '../../core/ui.js';
 import { getFit, updateFit } from './data.js';
@@ -141,6 +142,7 @@ function review(el, st) {
     el.querySelectorAll('[data-flip]').forEach((b) => (b.onclick = () => { const s = st.segs[+b.dataset.flip]; s.type = s.type === 'run' ? 'walk' : 'run'; draw(); }));
     el.querySelector('#save').onclick = async () => {
       const res = saveRun({ analysis: st.analysis, segs: st.segs, name: st.name, paceLimit: set.paceLimit });
+      backupNudge();
       const planMsg = checkPlan(res.run);
       const extra = awardRun();
       extra.levelUp = extra.levelUp || res.levelUp;

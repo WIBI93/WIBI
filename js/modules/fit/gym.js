@@ -10,6 +10,7 @@ import { routineMapCard } from './musclemap.js';
 import { sportNav, bindGo, header, backHeader, ico } from './shell.js';
 import { awardGym } from './gymmedals.js';
 import { celebrate } from './gym2.js';
+import { backupNudge } from '../../core/backup-ui.js';
 import { uid, num, fmt, lastSets, newDraft, suggestedSets, finishDraft, sessionVolume, sessionSets, isValid, MIN_EXERCISES } from './gymlogic.js';
 
 const B = '/fit/gym';
@@ -251,6 +252,7 @@ function renderActive(el) {
     toast(res.sess.valid ? `Entreno guardado · +${res.xp} XP${res.prs.length ? ' · ' + res.prs.length + ' récord' + (res.prs.length > 1 ? 's' : '') + ' 🏆' : ''}${res.levelUp ? ' · ¡Subes a ' + res.levelUp.name + '!' : ''}` : 'Entreno guardado (sin XP)');
     const extra = awardGym();
     navigate(`${B}/entreno/${res.sess.id}`);
+    backupNudge();
     extra.levelUp = extra.levelUp || res.levelUp;
     if (extra.medals.length || extra.reto || extra.levelUp) celebrate(extra);
   };

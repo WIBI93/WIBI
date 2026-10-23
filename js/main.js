@@ -21,6 +21,9 @@ registerFit(route);
 
 start(document.getElementById('app'));
 
+// Pide al móvil que no borre los datos de WIBI por falta de espacio (puede que no lo conceda).
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* sin permiso */ }
+
 // Permite usar la app sin conexión y que se pueda instalar en el móvil.
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   window.addEventListener('load', () => {

@@ -241,3 +241,10 @@ svg.icon { width: 1em; height: 1em; display: block; }
 .app-back:active { opacity: .9; }
 .app-back[hidden] { display: none; }
 #app.full.has-back { padding-top: 30px; }
+
+.bk-state { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--text); opacity: .75; }
+.bk-state i { width: 9px; height: 9px; border-radius: 50%; background: #2FA562; }
+.bk-state.soon i { background: #E0A33A; } .bk-state.late i { background: #E5484D; }
+.toast.nudge { display: flex; align-items: center; gap: 10px; text-align: left; padding: 8px 8px 8px 16px; }
+.toast.nudge button { height: 36px; padding: 0 14px; border-radius: 18px; background: var(--bg); color: var(--text); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.toast.nudge button.x { padding: 0; width: 36px; background: transparent; color: var(--bg); }

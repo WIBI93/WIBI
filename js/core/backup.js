@@ -6,9 +6,9 @@
 import { exportAll, replaceAll, hasSectionData } from './store.js';
 import { getSettings, setSettings } from './settings.js';
 
-export const APP_VERSION = '0.36.3';
+export const APP_VERSION = '0.37.0';
 const FORMAT = 1; // sube si algún día cambia la forma del archivo
-const REMINDER_DAYS = 30;
+const REMINDER_DAYS = 7;
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -20,13 +20,29 @@ export function daysSince(iso) {
 }
 
 // ¿Hay que avisar de que toca hacer una copia?
-// Solo si hay datos de alguna sección y han pasado más de 30 días desde la
+// Solo si hay datos de alguna sección y han pasado más de 7 días desde la
 // última copia (o desde el primer uso si nunca se ha hecho una).
 export function needsBackupReminder() {
   if (!hasSectionData()) return false;
   const s = getSettings();
   const days = daysSince(s.lastBackupAt || s.installedAt);
   return days !== null && days > REMINDER_DAYS;
+}
+
+// Estado de la última copia para el semáforo del inicio: 'ok' (verde), 'soon' (ámbar), 'late' (rojo).
+export function backupState() {
+  if (!hasSectionData()) return null;
+  const s = getSettings();
+  const days = daysSince(s.lastBackupAt);
+  if (days === null || days > REMINDER_DAYS) return 'late';
+  return days >= 5 ? 'soon' : 'ok';
+}
+
+// ¿Conviene sugerir una copia tras guardar algo? (3 días o más sin copia, o nunca)
+export function backupNudgeNeeded() {
+  if (!hasSectionData()) return false;
+  const days = daysSince(getSettings().lastBackupAt);
+  return days === null || days >= 3;
 }
 
 export function lastBackupText() {

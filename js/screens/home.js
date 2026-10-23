@@ -4,7 +4,7 @@ import { ICONS, LOGO } from '../core/icons.js';
 import { MODULES } from '../core/modules.js';
 import { sectionColor } from '../core/settings.js';
 import { readableOn } from '../core/palette.js';
-import { needsBackupReminder } from '../core/backup.js';
+import { needsBackupReminder, backupState, lastBackupText } from '../core/backup.js';
 import { runExport } from '../core/backup-ui.js';
 import { navigate, refresh } from '../core/router.js';
 
@@ -32,7 +32,7 @@ function tileHtml(mod) {
 export function renderHome(container) {
   const banner = needsBackupReminder()
     ? `<div class="banner">
-         <p>Llevas más de 30 días sin hacer una copia de seguridad</p>
+         <p>Llevas más de 7 días sin hacer una copia de seguridad</p>
          <button type="button" id="banner-backup">Hacer copia</button>
        </div>`
     : '';
@@ -51,6 +51,7 @@ export function renderHome(container) {
     ${banner}
     <div class="grid">${MODULES.map(tileHtml).join('')}</div>
     <div class="spacer"></div>
+    ${backupState() ? `<p class="bk-state ${backupState()}"><i></i>${lastBackupText()}</p>` : ''}
     <p class="footnote">Tus datos se guardan solo en este móvil</p>`;
 
   container.querySelector('#open-settings').addEventListener('click', () => navigate('/ajustes'));
