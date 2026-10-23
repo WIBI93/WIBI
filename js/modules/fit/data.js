@@ -3,7 +3,7 @@
 // No se escribe nada hasta que haces un cambio (solo abrir la sección no guarda nada).
 
 import { load, save, remove } from '../../core/store.js';
-import { DATE_RE } from './dates.js';
+import { DATE_RE, addDaysKey } from './dates.js';
 
 const KEY = 'fit';
 export const SPORTS = ['gym', 'run'];
@@ -41,6 +41,14 @@ function normPlans(raw) {
     if (!DATE_RE.test(mk) || !p || typeof p !== 'object') continue;
     const plan = {};
     for (const s of SPORTS) if (p[s] !== undefined) plan[s] = int(p[s], 0, 14, 0);
+    // Días elegidos de la semana (cada deporte: lista de fechas dentro de esa semana)
+    const days = {};
+    for (const sp of SPORTS) {
+      const raw = p.days && Array.isArray(p.days[sp]) ? p.days[sp] : [];
+      const a = [...new Set(raw.filter((k) => typeof k === 'string' && DATE_RE.test(k) && k >= mk && k <= addDaysKey(mk, 6)))].sort();
+      if (a.length) days[sp] = a;
+    }
+    if (Object.keys(days).length) plan.days = days;
     if (Object.keys(plan).length) out[mk] = plan;
   }
   return out;

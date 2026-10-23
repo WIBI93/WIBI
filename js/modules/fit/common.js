@@ -10,6 +10,8 @@ import { canPause, weekProgress, goalFor, hasPlan, streak, forma, formaName, lev
 import { commonNav, bindGo, header, backHeader, ico, stepper, bindSteppers } from './shell.js';
 import { medalSvg, commonMedals, METAL_NAME } from './medals.js';
 import { COMMON_SECRETS } from './secrets.js';
+import { getData as getCal, activeCal } from '../calendar/data.js';
+import { readableOn } from '../../core/palette.js';
 
 const GUINOS = ['Hoy el hierro no se mueve solo.', 'Un kilómetro más, una excusa menos.', 'La constancia gana al talento.'];
 
@@ -56,6 +58,19 @@ function awardCommon(fit) {
   return fit;
 }
 
+// Turnos de trabajo del calendario activo (solo lectura): fecha -> { color, letter, name, kind }.
+function shiftsByDate() {
+  try {
+    const cal = activeCal(getCal());
+    const map = new Map(cal.shifts.map((x) => [x.id, x]));
+    const out = {};
+    for (const [k, d] of Object.entries(cal.days)) { const sh = d.shift && map.get(d.shift); if (sh) out[k] = sh; }
+    return out;
+  } catch (e) { return {}; }
+}
+const WD = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const plannedDays = (fit, sp) => new Set(Object.values(fit.plans).flatMap((p) => (p.days && p.days[sp]) || []));
+
 // Calendario del mes: cada día marcado con gym (rojo), running (turquesa) o los dos.
 function monthGrid(fit, y, m) {
   const g = new Set(fit.gym.sessions.filter((s) => s.valid !== false).map((s) => s.date));
@@ -64,15 +79,19 @@ function monthGrid(fit, y, m) {
   const lead = (first.getDay() + 6) % 7;
   const days = new Date(y, m + 1, 0).getDate();
   const today = todayKey();
+  const pg = plannedDays(fit, 'gym'); const pr = plannedDays(fit, 'run');
+  const sh = shiftsByDate();
   let cells = '';
   for (let i = 0; i < lead; i++) cells += '<i class="empty"></i>';
   for (let d = 1; d <= days; d++) {
     const k = keyOf(new Date(y, m, d));
     const cls = g.has(k) && r.has(k) ? 'both' : g.has(k) ? 'g' : r.has(k) ? 'r' : '';
-    cells += `<span class="day ${cls} ${k === today ? 'today' : ''}">${d}</span>`;
+    const ring = (pg.has(k) && !g.has(k) ? 'pg ' : '') + (pr.has(k) && !r.has(k) ? 'pr' : '');
+    const s0 = sh[k] && sh[k].kind === 'work' ? sh[k] : null;
+    cells += `<span class="day ${cls} ${ring} ${k === today ? 'today' : ''}">${d}${s0 ? `<i class="sd" style="background:${s0.color}" title="${esc(s0.name)}"></i>` : ''}</span>`;
   }
   return `<div class="f-cal"><div class="hd">${['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((x) => `<b>${x}</b>`).join('')}</div><div class="bd">${cells}</div></div>
-    <div class="f-legend"><span><i class="g"></i>Gym</span><span><i class="r"></i>Running</span><span><i class="both"></i>Los dos</span></div>`;
+    <div class="f-legend"><span><i class="g"></i>Gym</span><span><i class="r"></i>Running</span><span><i class="both"></i>Los dos</span><span><i class="ring"></i>Planificado</span><span><i class="sdl"></i>Tu turno</span></div>`;
 }
 
 function lastActivities(fit) {
@@ -81,6 +100,13 @@ function lastActivities(fit) {
     ...fit.run.runs.filter((r) => r.valid !== false).map((r) => ({ sport: 'run', date: r.date, ts: r.startedAt, id: r.id, title: r.name, sub: `${(r.runM / 1000).toFixed(1).replace('.', ',')} km` })),
   ];
   return a.sort((x, y) => y.ts - x.ts).slice(0, 5);
+}
+
+function planDaysText(fit, mk) {
+  const p = fit.plans[mk];
+  if (!p || !p.days) return '';
+  const nm = (k) => WD[(parseKey(k).getDay() + 6) % 7];
+  return ['gym', 'run'].filter((sp) => p.days[sp]).map((sp) => `${sp === 'gym' ? 'Gym' : 'Running'}: ${p.days[sp].map(nm).join(', ')}`).join(' · ');
 }
 
 export function renderHome(el) {
@@ -99,7 +125,7 @@ export function renderHome(el) {
       ${guino}
       <section class="f-card plain"><div class="rowh"><strong>Semana ${weekRangeText(mk)}</strong><span class="grow"></span>
         <button type="button" class="f-link" data-go="/fit/semana">${planned ? 'Cambiar' : 'Planificar'}</button></div>
-        <div class="f-mini">${planned ? 'Tu semana está planificada.' : 'Aún no has planificado esta semana: se usa tu objetivo habitual.'}</div></section>
+        <div class="f-mini">${planDaysText(fit, mk) || (planned ? 'Tu semana está planificada.' : 'Aún no has planificado esta semana: se usa tu objetivo habitual.')}</div></section>
       ${sportCard(fit, 'gym')}
       ${sportCard(fit, 'run')}
       ${lastActivities(fit).length ? `<section class="f-card plain"><strong>Últimas actividades</strong>${lastActivities(fit).map((a) => `<button type="button" class="f-act ${a.sport}" data-go="/fit/${a.sport === 'gym' ? 'gym/entreno' : 'running/carrera'}/${a.id}"><span class="dot"></span><span class="grow">${esc(a.title)}<small>${esc(shortDateText(a.date))} · ${esc(a.sub)}</small></span>${ico('next', 16)}</button>`).join('')}</section>` : ''}
@@ -116,14 +142,18 @@ export function renderWeek(el) {
   const fit = getFit();
   const cur = thisMonday();
   const next = addDaysKey(cur, 7);
-  const st = { mk: next, gym: 0, run: 0, preset: 'normal' };
+  const today = todayKey();
+  const st = { mk: next, gym: 0, run: 0, preset: 'normal', days: { gym: [], run: [] } };
   const load = () => {
     st.gym = goalFor(fit, 'gym', st.mk) || (hasPlan(fit, st.mk) ? 0 : fit.settings.gym.goal);
     st.run = goalFor(fit, 'run', st.mk) || (hasPlan(fit, st.mk) ? 0 : fit.settings.run.goal);
     if (fit.plans[st.mk]) { st.gym = fit.plans[st.mk].gym ?? st.gym; st.run = fit.plans[st.mk].run ?? st.run; }
+    const pd = (fit.plans[st.mk] && fit.plans[st.mk].days) || {};
+    st.days = { gym: [...(pd.gym || [])], run: [...(pd.run || [])] };
   };
   const apply = (p) => {
     st.preset = p;
+    st.days = { gym: [], run: [] };
     const g = fit.settings.gym.goal;
     const r = fit.settings.run.goal;
     if (p === 'normal') { st.gym = g; st.run = r; }
@@ -131,30 +161,62 @@ export function renderWeek(el) {
     if (p === 'sin') { st.gym = 0; st.run = 0; }
   };
   load();
+  const doneSet = (sp) => new Set((sp === 'gym' ? fit.gym.sessions : fit.run.runs).filter((x) => x.valid !== false).map((x) => x.date));
   const draw = () => {
+    const sh = shiftsByDate();
+    const dg = doneSet('gym'); const dr = doneSet('run');
+    for (const sp of ['gym', 'run']) if (st.days[sp].length) st[sp] = st.days[sp].length;
+    const rows = Array.from({ length: 7 }, (_, i) => {
+      const k = addDaysKey(st.mk, i);
+      const past = k < today;
+      const s0 = sh[k];
+      const badge = s0 ? (s0.kind === 'work' ? `<span class="f-sb" style="background:${s0.color};color:${readableOn(s0.color, '#14202B')}" title="${esc(s0.name)}">${esc(s0.letter)}</span>` : `<span class="f-mini">${esc(s0.name)}</span>`) : '';
+      const btn = (sp, label) => {
+        const on = st.days[sp].includes(k);
+        const done = (sp === 'gym' ? dg : dr).has(k);
+        return `<button type="button" class="f-dayb ${sp}" data-pd="${sp}:${k}" aria-pressed="${on}" ${past && !on ? 'disabled' : ''}>${done ? '✓ ' : ''}${label}</button>`;
+      };
+      return `<div class="f-wd ${k === today ? 'today' : ''}"><span class="d">${WD[i]} ${parseKey(k).getDate()}</span><span class="b">${badge}</span>${btn('gym', 'Gym')}${btn('run', 'Running')}</div>`;
+    }).join('');
+    const ctl = (sp, name) => (st.days[sp].length
+      ? `<div class="rowh"><strong>${ico(sp, 20)} ${name}</strong><span class="grow"></span><span class="f-num small">${st[sp]}</span><span class="f-mini">${st[sp] === 1 ? 'día' : 'días'} marcados</span></div>`
+      : `<div class="rowh"><strong>${ico(sp, 20)} ${name}</strong><span class="grow"></span>${stepper(sp, st[sp], 0, 7)}</div>`);
     el.innerHTML = `<div class="f-screen">
       ${header('Semana', 'Planifica tus entrenos')}
       <main class="f-main">
         <div class="f-seg">${[[cur, 'Esta semana'], [next, 'Próxima']].map(([k, l]) => `<button type="button" data-wk="${k}" aria-pressed="${st.mk === k}">${l}</button>`).join('')}</div>
         <div class="f-mini center">${weekRangeText(st.mk)}</div>
-        <div class="f-presets">${[['normal', 'Normal'], ['ligera', 'Ligera'], ['sin', 'Sin entrenar'], ['custom', 'A medida']].map(([k, l]) => `<button type="button" data-pre="${k}" aria-pressed="${st.preset === k}">${l}</button>`).join('')}</div>
+        <section class="f-card plain"><strong>Elige los días</strong>
+          <div class="f-mini">Marca qué día haces cada deporte. Tus turnos de trabajo salen al lado para elegir con calma.</div>
+          ${rows}</section>
+        <div class="f-presets">${[['normal', 'Objetivo habitual'], ['ligera', 'Ligera'], ['sin', 'Sin entrenar'], ['custom', 'A medida']].map(([k, l]) => `<button type="button" data-pre="${k}" aria-pressed="${st.preset === k}">${l}</button>`).join('')}</div>
         <section class="f-card plain">
-          <div class="rowh"><strong>${ico('gym', 20)} Gimnasio</strong><span class="grow"></span>${stepper('gym', st.gym, 0, 7)}</div>
-          <div class="rowh"><strong>${ico('run', 20)} Running</strong><span class="grow"></span>${stepper('run', st.run, 0, 7)}</div>
-          <div class="f-mini">Un 0 significa que ese deporte descansa esa semana: no rompe tu racha.</div>
+          ${ctl('gym', 'Gimnasio')}
+          ${ctl('run', 'Running')}
+          <div class="f-mini">Si no eliges días, cuenta el número de sesiones de la semana. Un 0 significa que ese deporte descansa esa semana: no rompe tu racha. Los presets quitan los días elegidos.</div>
         </section>
         <button type="button" class="f-btn" id="save">Guardar semana</button>
       </main>${commonNav('semana')}</div>`;
     bindGo(el);
     el.querySelectorAll('[data-wk]').forEach((b) => b.addEventListener('click', () => { st.mk = b.dataset.wk; st.preset = 'custom'; load(); draw(); }));
     el.querySelectorAll('[data-pre]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.pre !== 'custom') apply(b.dataset.pre); else st.preset = 'custom'; draw(); }));
+    el.querySelectorAll('[data-pd]').forEach((b) => b.addEventListener('click', () => {
+      const [sp, k] = b.dataset.pd.split(':');
+      const a = st.days[sp];
+      st.days[sp] = a.includes(k) ? a.filter((x) => x !== k) : [...a, k].sort();
+      
+      st.preset = 'custom';
+      draw();
+    }));
     bindSteppers(el, (id, v) => { st[id] = v; st.preset = 'custom'; el.querySelectorAll('[data-pre]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.pre === 'custom')); });
     el.querySelector('#save').addEventListener('click', () => {
       const fit2 = getFit();
       for (const sp of ['gym', 'run']) {
         if (st[sp] === 0 && !(fit2.plans[st.mk] && fit2.plans[st.mk][sp] === 0) && !canPause(fit2, sp, [st.mk]).ok) { toast(`${SPORT_NAME[sp]}: te pasas del tope de pausas (3 semanas cada 3 meses)`); return; }
       }
-      updateFit((f) => { f.plans[st.mk] = { gym: st.gym, run: st.run }; });
+      const days = {};
+      for (const sp of ['gym', 'run']) if (st.days[sp].length) days[sp] = st.days[sp];
+      updateFit((f) => { f.plans[st.mk] = { gym: st.gym, run: st.run, ...(Object.keys(days).length ? { days } : {}) }; });
       toast('Semana guardada');
       navigate('/fit');
     });
