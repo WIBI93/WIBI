@@ -142,6 +142,81 @@ export const DRAW = {
   },
 };
 
+
+// --- Familias de pie / sentado ---
+const stand = (o = {}) => fig({ hip: [80, 76], torso: -90, head: -90, th: 90, sh: 90, foot: 0, far: [-3, 0], ...o });
+const dhl = [['ua', 0, 0.5, [0, 0], 11]]; // deltoides
+const bhl = [['ua', 0.1, 0.85, [3, 0], 8]]; // bíceps (delante del brazo)
+const thl = [['ua', 0.1, 0.85, [-3, 0], 8]]; // tríceps (detrás del brazo)
+const hbar = (h, r = 8) => cir(h[0], h[1], r) + cir(h[0], h[1], 2.5, 'fd-eqfill');
+const hrect = (h) => rect(h[0] - 9, h[1] - 3, 18, 6, 3);
+const cableTo = (x1, y1, h) => `<line x1="${x1}" y1="${y1}" x2="${n1(h[0])}" y2="${n1(h[1])}" class="fd-cable"/>`;
+const highTower = (x = 138) => ln(x, 8, x, 140, 6) + ln(x - 26, 8, x, 8, 5) + cir(x - 28, 8, 5, 'fd-eqfill');
+const lowTower = (x = 140) => ln(x, 90, x, 140, 6) + cir(x - 2, 132, 5, 'fd-eqfill');
+const seatBack = (x = 46) => rect(x, 108, 38, 8, 3) + ln(x + 14, 116, x + 14, 140) + ln(x, 40, x, 104, 6);
+const seated = (o) => fig({ hip: [66, 100], torso: -94, head: -94, th: 0, sh: 90, foot: 0, ...o });
+
+Object.assign(DRAW, {
+  // ---------- HOMBRO ----------
+  'press-militar-barra': () => { const f = stand({ ua: 32, fa: -86, hl: dhl }); return floor() + f.s + BAR([f.han[0], f.han[1]], 8); },
+  'press-militar-con-mancuernas': () => { const f = stand({ ua: 32, fa: -86, hl: dhl }); return floor() + f.s + DB([f.han[0], f.han[1]], 7); },
+  'press-de-hombro-en-maquina': () => { const f = seated({ ua: 32, fa: -86, hl: dhl }); return seatBack() + ln(f.han[0], f.han[1], 128, f.han[1] + 8, 3) + ln(128, f.han[1] + 8, 128, 140, 5) + f.s + cir(f.han[0], f.han[1], 4, 'fd-eqfill'); },
+  'press-arnold': () => { const f = seated({ ua: 42, fa: -70, hl: dhl }); return seatBack() + f.s + DB(f.han, 7); },
+  'elevaciones-laterales-mancuernas': () => { const f = stand({ ua: 68, fa: 58, hl: dhl }); return floor() + f.s + DB(f.han, 6); },
+  'elevaciones-laterales-en-polea': () => { const f = stand({ ua: 68, fa: 58, hl: dhl }); return floor() + lowTower() + cableTo(138, 132, f.han) + f.s; },
+  'elevaciones-frontales': () => { const f = stand({ ua: 8, fa: 5, hl: dhl }); return floor() + f.s + DB(f.han, 6); },
+  'pajaros-mancuernas': () => { const f = fig({ hip: [70, 82], torso: -22, head: -30, ua: 100, fa: 90, th: 72, sh: 108, foot: 0, far: [-3, 0], hl: dhl }); return floor() + f.s + DB(f.han, 6); },
+  'pajaros-en-maquina': () => { const f = seated({ ua: 0, fa: 0, hl: dhl }); return seatBack(40) + ln(f.sho[0] + 12, 40, f.sho[0] + 12, 96, 7) + ln(f.han[0], f.han[1], 134, f.han[1], 3) + ln(134, f.han[1], 134, 140, 5) + f.s + cir(f.han[0], f.han[1], 4, 'fd-eqfill'); },
+  'face-pull-polea': () => { const f = stand({ ua: -8, fa: 160, hl: dhl }); return floor() + ln(138, 8, 138, 140, 6) + cableTo(138, 30, f.han) + f.s + V(f.han); },
+  'remo-al-menton': () => { const f = stand({ ua: -35, fa: 150, hl: dhl }); return floor() + f.s + BAR(f.han, 8); },
+  'encogimientos-de-trapecio': () => { const f = stand({ ua: 90, fa: 90, hl: [['torso', 0.8, 1, [0, 0], 14]] }); return floor() + f.s + DB(f.han, 7) + `<path d="M66 18 l4 -5 l4 5 M86 18 l4 -5 l4 5" class="fd-line"/>`; },
+  // ---------- BÍCEPS ----------
+  'curl-con-barra': () => { const f = stand({ ua: 100, fa: -55, hl: bhl }); return floor() + f.s + BAR(f.han, 8); },
+  'curl-con-mancuernas': () => { const f = stand({ ua: 100, fa: -55, hl: bhl }); return floor() + f.s + DB(f.han, 6); },
+  'curl-alterno': () => { const f = stand({ ua: 100, fa: -55, fa2: [92, 90], hl: bhl }); return floor() + f.s + DB(f.han, 6); },
+  'curl-martillo': () => { const f = stand({ ua: 100, fa: -55, hl: bhl }); return floor() + f.s + hrect(f.han); },
+  'curl-en-banco-scott': () => {
+    const f = seated({ hip: [56, 102], ua: 62, fa: -38, hl: [['ua', 0.1, 0.9, [3, -2], 8]], head: -90 });
+    return rect(36, 110, 34, 8, 3) + ln(52, 118, 52, 140) + ln(66, 66, 92, 108, 9) + ln(86, 108, 86, 140) + f.s + BAR(f.han, 7);
+  },
+  'curl-en-polea-baja': () => { const f = stand({ ua: 100, fa: -55, hl: bhl }); return floor() + lowTower() + cableTo(138, 132, f.han) + f.s; },
+  'curl-concentrado': () => {
+    const f = fig({ hip: [66, 100], torso: -48, head: -50, ua: 95, fa: -60, th: -4, sh: 90, foot: 0, hl: [['ua', 0.1, 0.85, [2, 0], 8]] });
+    return rect(46, 108, 44, 8, 3) + ln(56, 116, 56, 140) + ln(84, 116, 84, 140) + f.s + DB(f.han, 6);
+  },
+  'curl-inclinado': () => {
+    const f = fig({ hip: [62, 102], torso: -58, head: -62, ua: 92, fa: -40, th: 8, sh: 90, foot: 0, hl: [['ua', 0.1, 0.85, [3, 0], 8]] });
+    return rect(40, 110, 34, 8, 3) + ln(50, 118, 50, 140) + ln(54, 108, 92, 62, 9) + ln(90, 76, 90, 140, 4) + f.s + DB(f.han, 6);
+  },
+  'curl-en-maquina': () => {
+    const f = seated({ hip: [56, 102], ua: 60, fa: -40, hl: [['ua', 0.1, 0.9, [3, -2], 8]], head: -90 });
+    return rect(36, 110, 34, 8, 3) + ln(52, 118, 52, 140) + ln(66, 66, 92, 108, 9) + ln(86, 108, 86, 140) + f.s + cir(f.han[0], f.han[1], 4, 'fd-eqfill');
+  },
+  // ---------- TRÍCEPS ----------
+  'extension-de-triceps-en-polea': () => { const f = stand({ ua: 92, fa: 18, hl: thl }); return floor() + highTower() + cableTo(110, 8, f.han) + f.s + V(f.han); },
+  'press-frances-barra-z': () => { const f = lying({ ua: -90, fa: 72, hl: thl }); return flatBench() + f.s + BAR(f.han, 7); },
+  'press-frances-con-mancuernas': () => { const f = lying({ ua: -90, fa: 72, hl: thl }); return flatBench() + f.s + DB(f.han, 7); },
+  'extension-sobre-la-cabeza-con-mancuerna': () => { const f = stand({ ua: -92, fa: 125, hl: thl }); return floor() + f.s + DB(f.han, 7); },
+  'extension-sobre-la-cabeza-en-polea': () => { const f = stand({ ua: -92, fa: 125, hl: thl }); return floor() + lowTower(20) + cableTo(22, 132, f.han) + f.s; },
+  'fondos-en-banco': () => {
+    const f = fig({ hip: [78, 118], torso: -90, head: -90, ua: 105, fa: 80, th: 12, sh: 5, foot: -80, hl: thl });
+    return floor() + rect(28, 118, 48, 8, 3) + ln(36, 126, 36, 140) + ln(68, 126, 68, 140) + f.s;
+  },
+  'fondos-en-paralelas-triceps': () => {
+    const f = fig({ hip: [80, 94], torso: -88, head: -88, ua: 92, fa: 90, th: 95, sh: 165, foot: 180, hl: thl });
+    return ln(60, 98, 124, 98, 4) + ln(64, 98, 64, 140) + ln(120, 98, 120, 140) + f.s;
+  },
+  'patada-de-triceps': () => {
+    const f = fig({ hip: [70, 82], torso: -22, head: -30, ua: 176, fa: 178, th: 72, sh: 108, foot: 0, far: [-3, 0], hl: [['ua', 0.1, 0.9, [0, -3], 8]] });
+    return floor() + f.s + DB(f.han, 6);
+  },
+  'press-cerrado-barra': () => { const f = lying({ ua: -86, fa: -90, hl: [['ua', 0.1, 0.9, [0, 0], 9]] }); return flatBench() + f.s + BAR([f.han[0], f.han[1] - 2]); },
+  'fondos-en-maquina-asistida': () => {
+    const f = seated({ ua: 92, fa: 82, hl: thl });
+    return seatBack() + ln(f.han[0], f.han[1], 118, f.han[1], 3) + ln(118, f.han[1], 118, 140, 5) + f.s + cir(f.han[0], f.han[1], 4, 'fd-eqfill');
+  },
+});
+
 // Dibujo listo para pantalla. id = id del ejercicio de la app ("b-press-banca-barra"); devuelve '' si aún no hay dibujo.
 export function drawnEx(id, size = 40) {
   const fn = DRAW[String(id).replace(/^b-/, '')];
