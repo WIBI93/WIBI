@@ -3,7 +3,7 @@
   "short_name": "Calendario",
   "description": "Calendario de trabajo de WIBI",
   "lang": "es",
-  "start_url": "./#/calendario",
+  "start_url": "./calendario.html#/calendario",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
