@@ -283,3 +283,8 @@ button.f-card { cursor: pointer; width: 100%; }
 
 .f-legend .lg.g,.f-legend .lg.r{color:var(--f-mute)}
 .f-legend i.hd2{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:var(--f-mute);color:#fff}
+
+.f-cal .cell .c.g.on,.f-cal .cell .c.r.on{background:#2FA562}
+.f-cal .cell .c.miss{color:#fff;background:#E5484D}.f-cal .cell .c.miss svg{width:72%;height:72%}
+.f-cal .cell .c.ring,.f-cal .cell .c.g.ring,.f-cal .cell .c.r.ring{color:var(--f-mute);opacity:.8}
+.f-legend i.hd2{background:#2FA562}.f-legend i.hd2.no{background:#E5484D}.f-legend i.hd2.no svg{transform:rotate(45deg)}
