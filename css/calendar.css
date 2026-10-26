@@ -375,3 +375,42 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cs-zs .zc { min-width: 30px; text-align: right; font-size: 16px; font-weight: 700; }
 .cs-zs.few { opacity: .55; }
 .cs-zd { font-size: 13px; color: var(--muted); line-height: 1.45; padding: 0 4px 8px; }
+
+/* Cambios de turno: día a librar destacado, un color y una letra por cada día ofrecido */
+.cal { --o1: #C2410C; --o2: #1D4ED8; --o3: #7E22CE; --o4: #0F766E; --o5: #BE185D; --o6: #A16207;
+  --o1s: #FBE3D6; --o2s: #DCE6FB; --o3s: #EBDDFA; --o4s: #D3EDEA; --o5s: #FADCEA; --o6s: #F5E9C8; }
+:root[data-theme="dark"] .cal { --o1: #FB923C; --o2: #7DA2FF; --o3: #C79BF5; --o4: #4FD1C5; --o5: #F58BBA; --o6: #E8C158;
+  --o1s: #3A2415; --o2s: #1B2740; --o3s: #2C1D3E; --o4s: #133533; --o5s: #3A1A2A; --o6s: #352B10; }
+.cs-hero { border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; background: color-mix(in srgb, var(--sc) 26%, var(--card)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sc) 70%, var(--line)); border-top: 7px solid var(--sc); }
+.cs-hero .lab { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+.cs-hero .t { font-size: 25px; font-weight: 800; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cs-hero .t .cs-sb { font-size: 16px; }
+.cs-hero .sm2 { font-size: 13px; color: var(--muted); font-weight: 600; }
+.cs-opt { border-left: 6px solid var(--c); }
+.cs-opt > header, .cs-pv { background: var(--cs); }
+.cs-opt > header .dd, .cs-pv .dd { flex: 1; min-width: 0; font-weight: 800; }
+.cs-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--c); color: var(--card); display: grid; place-items: center; font-weight: 800; font-size: 13px; flex: none; }
+.cs-shb { display: inline-flex; align-items: center; gap: 5px; padding: 2px 5px; min-height: 32px; border-radius: 8px; color: var(--text); }
+.cs-shb small { font-size: 12px; color: var(--muted); font-weight: 700; }
+.cs-shb[aria-expanded="true"] { background: var(--track); }
+.cs-tc { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid var(--line2); }
+.cs-tc small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.cs-tb { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 12px 0 6px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 700; color: var(--text); background: var(--card); box-shadow: inset 0 0 0 1.5px var(--field); }
+.cs-tb[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--text); }
+.cs-big { font-size: 17px; font-weight: 600; }
+.cs-ex { display: flex; flex-wrap: wrap; gap: 6px; }
+.cs-ex button { font: inherit; font-size: 13px; font-weight: 600; padding: 0 11px; min-height: 36px; border-radius: 999px; background: var(--track); color: var(--text); }
+.cs-prev { display: flex; flex-direction: column; gap: 8px; }
+.cs-pv { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; border: 1.5px dashed var(--c); }
+.cs-pv .cs-tc { width: 100%; padding: 4px 0 0; border: 0; }
+.cs-bad, .need { color: #B3261E; font-size: 13px; font-weight: 700; }
+:root[data-theme="dark"] .cs-bad, :root[data-theme="dark"] .need { color: #F08A78; }
+.cs-mini { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+.cs-mini .h { font-size: 11px; color: var(--muted); font-weight: 700; }
+.cs-mini .c { position: relative; aspect-ratio: 1 / .9; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); font-size: 11px; font-weight: 600; color: var(--muted); padding: 2px 0 0 4px; text-align: left; }
+.cs-mini .c.past { opacity: .4; }
+.cs-mini .c.o { background: var(--cs); box-shadow: inset 0 0 0 1.5px var(--c); color: var(--text); }
+.cs-mini .c.o i { position: absolute; right: 3px; bottom: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--c); color: var(--card); font-style: normal; font-weight: 800; font-size: 10px; display: grid; place-items: center; }
+.cs-mini .c.free { box-shadow: inset 0 0 0 2px var(--text); color: var(--text); }
+.cs-mini .c.free::after { content: "libro"; position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font-size: 9px; font-weight: 800; }
+.cs-opt > header > .cs-dot, .cs-shb .cs-sb { flex: none; }
