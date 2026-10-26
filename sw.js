@@ -2,7 +2,7 @@
 // Estrategia: si hay internet, se usa siempre la versión más nueva (y se guarda);
 // si no hay internet, se usa la última versión guardada.
 
-const CACHE = 'wibi-v51';
+const CACHE = 'wibi-v52';
 // Aquí se deja, un momento, el GPX que llega desde el menú Compartir de Android (la pantalla de importar lo recoge y lo borra).
 const SHARE_CACHE = 'wibi-share';
 
@@ -10,10 +10,10 @@ const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
-  'css/styles.css',
-  'css/calendar.css',
-  'css/fit.css',
-  'css/economy.css',
+  'css/styles.css?v=0.38.1',
+  'css/calendar.css?v=0.38.1',
+  'css/fit.css?v=0.38.1',
+  'css/economy.css?v=0.38.1',
   'js/main.js',
   'js/core/icons.js',
   'js/core/palette.js',
