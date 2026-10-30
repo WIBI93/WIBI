@@ -301,3 +301,8 @@ button.f-card { cursor: pointer; width: 100%; }
 .f-legend i.sq.ok { background: rgba(47,165,98,.45); box-shadow: inset 0 0 0 1px rgba(47,165,98,.8); }
 .f-legend i.sq.bad { background: rgba(229,72,77,.4); box-shadow: inset 0 0 0 1px rgba(229,72,77,.8); }
 .f-legend .lg.g svg { color: #FF4B2B; } .f-legend .lg.r svg { color: #19B3C0; }
+
+/* Turno de trabajo: esquina de color arriba a la derecha */
+.f-cal .cell { overflow: hidden; }
+.f-cal .cell .sd { top: 0; right: 0; width: 22px; height: 22px; border-radius: 0; box-shadow: none; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.f-legend i.sdl { width: 12px; height: 12px; border-radius: 0; clip-path: polygon(0 0, 100% 0, 100% 100%); background: var(--f-mute); }

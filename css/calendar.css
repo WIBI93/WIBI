@@ -414,3 +414,8 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cs-mini .c.free { box-shadow: inset 0 0 0 2px var(--text); color: var(--text); }
 .cs-mini .c.free::after { content: "libro"; position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font-size: 9px; font-weight: 800; }
 .cs-opt > header > .cs-dot, .cs-shb .cs-sb { flex: none; }
+
+/* Hoy: casilla elevada, con marco y sombra */
+.cal-cell.today, .cal-grid.month .cal-cell.today { outline: 0; border-radius: 10px; transform: translateY(-3px); z-index: 3;
+  box-shadow: 0 0 0 2.5px var(--text), 0 6px 14px rgba(0, 0, 0, .3) !important; }
+.cal-cell.today .dn { background: transparent; color: inherit; border-radius: 0; padding: 0; margin: 0; font-weight: 800; }
