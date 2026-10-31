@@ -284,3 +284,19 @@ svg .p-cur { stroke: var(--primary); } svg .p-prev { stroke: #B9C7C1; } svg circ
 .pg-st.paid { color: var(--accent-text); } .pg-st.late { color: var(--danger); } .pg-st.soon { color: #A8700B; }
 .pg-act { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 14px 46px; } .pg-act[hidden] { display: none; }
 .pg-warn { text-align: left; width: 100%; }
+
+/* Cuadro de amortización */
+.am { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.am-h, .am-mh, .am-t, .am-y > summary, .am-mr { display: grid; grid-template-columns: 34px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; }
+.am-h { padding: 6px 0; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.am-h span:not(:first-child), .am-mh span:not(:first-child), .am-y > summary span:not(:first-child), .am-mr span:not(:first-child), .am-t span:not(:first-child) { text-align: right; }
+.am-y { border-top: 1px solid var(--line-soft); }
+.am-y > summary { min-height: 44px; cursor: pointer; list-style: none; font-weight: 700; }
+.am-y > summary::-webkit-details-marker { display: none; }
+.am-y > summary .a { font-weight: 800; }
+.am-y > summary .p { color: var(--muted); font-weight: 600; }
+.am-y[open] > summary { background: color-mix(in srgb, var(--muted) 10%, transparent); border-radius: 8px; }
+.am-m { padding: 4px 0 8px; display: flex; flex-direction: column; }
+.am-mh { font-size: 10.5px; font-weight: 700; color: var(--muted); padding: 2px 0; }
+.am-mr { padding: 5px 0; border-top: 1px dashed var(--dash); color: var(--muted); }
+.am-t { border-top: 2px solid var(--muted); padding: 10px 0 2px; font-weight: 800; }

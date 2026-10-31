@@ -74,3 +74,22 @@ export function mortgage({ price, down, years, tin }) {
   const total = pay * n;
   return { loan, n, pay, total, interest: total - loan };
 }
+
+// Cuadro de amortización (sistema francés: cuota fija). Devuelve un año por fila con sus meses.
+export function amortization({ loan, n, pay, tin }) {
+  const r = (Number(tin) || 0) / 100 / 12;
+  const years = [];
+  let bal = loan;
+  for (let m = 1; m <= n; m++) {
+    const interest = bal * r;
+    let capital = pay - interest;
+    if (m === n || capital > bal) capital = bal;
+    bal = Math.max(0, bal - capital);
+    const y = Math.ceil(m / 12) - 1;
+    if (!years[y]) years[y] = { year: y + 1, interest: 0, capital: 0, paid: 0, balance: 0, months: [] };
+    const row = years[y];
+    row.interest += interest; row.capital += capital; row.paid += interest + capital; row.balance = bal;
+    row.months.push({ m, interest, capital, paid: interest + capital, balance: bal });
+  }
+  return years;
+}

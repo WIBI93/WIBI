@@ -4,7 +4,7 @@ import { go } from '../../core/router.js';
 import { esc } from '../../core/ui.js';
 import { getData, update } from './data.js';
 import { money, moneyAuto, pct, parseMoney } from './fmt.js';
-import { growth, mortgage } from './calc.js';
+import { growth, mortgage, amortization } from './calc.js';
 import { round, ei, navHtml, bindNav } from './shell.js';
 
 let tab = 'interes';
@@ -80,6 +80,22 @@ function donut(m) {
   return `<svg viewBox="0 0 110 110" width="124" height="124" role="img" aria-label="Reparto entre préstamo e intereses"><circle cx="55" cy="55" r="${R}" fill="none" class="d-s3" stroke-width="14"/><circle cx="55" cy="55" r="${R}" fill="none" class="d-s1" stroke-width="14" stroke-dasharray="${f} ${C}" transform="rotate(-90 55 55)"/><text x="55" y="52" text-anchor="middle" class="tx">Total</text><text x="55" y="66" text-anchor="middle" class="tx big">${k(m.total)}</text></svg>`;
 }
 
+// Cuadro de amortización: un año por fila; al pulsar un año se ven sus meses.
+function amortHtml(m, tin) {
+  const rows = amortization({ loan: m.loan, n: m.n, pay: m.pay, tin });
+  if (!rows.length) return '';
+  const y1 = rows[0], p1 = y1.paid ? Math.round((y1.interest / y1.paid) * 100) : 0;
+  const half = rows.find((r) => r.balance <= m.loan / 2);
+  const head = '<div class="am-h"><span>Año</span><span>Intereses</span><span>Capital</span><span>Pendiente</span></div>';
+  const body = rows.map((r) => `<details class="am-y"><summary><span class="a">${r.year}</span><span>${money(r.interest)}</span><span>${money(r.capital)}</span><span class="p">${money(r.balance)}</span></summary>
+      <div class="am-m"><div class="am-mh"><span>Mes</span><span>Intereses</span><span>Capital</span><span>Pendiente</span></div>
+      ${r.months.map((q) => `<div class="am-mr"><span>${q.m}</span><span>${money(q.interest)}</span><span>${money(q.capital)}</span><span>${money(q.balance)}</span></div>`).join('')}</div></details>`).join('');
+  const tot = rows.reduce((a, r) => ({ i: a.i + r.interest, c: a.c + r.capital }), { i: 0, c: 0 });
+  return `<div class="eco-card pad"><h3>Cuadro de amortización</h3>
+    <span class="eco-note">En el primer año, ${p1} % de lo que pagas son intereses.${half ? ` No llegas a deber la mitad del préstamo hasta el año ${half.year}.` : ''} Pulsa un año para ver sus meses.</span>
+    <div class="am">${head}${body}<div class="am-t"><span>Total</span><span>${money(tot.i)}</span><span>${money(tot.c)}</span><span></span></div></div></div>`;
+}
+
 function mortgageHtml(s) {
   const price = val(s.price), down = val(s.down), costs = val(s.costs), years = val(s.mYears), tin = val(s.tin);
   const ok = [price, down, costs, years, tin].every(Number.isFinite) && price > 0 && years >= 1 && down <= price;
@@ -101,6 +117,7 @@ function mortgageHtml(s) {
         <div class="sim-row"><span>Necesitas ahorrado (entrada + gastos)</span><b>${money(need)}</b></div></div>
       <div class="eco-card pad"><h3>Cuota según interés y plazo</h3>${heat}
         <span class="eco-note">Más claro es cuota más baja. Más cálido es cuota más alta.</span></div>
+      ${amortHtml(m, tin)}
       <div class="eco-info warn">${ei('info', 18)}<span>Cálculo orientativo: no incluye seguros, comisiones ni cambios del euríbor si es variable.</span></div>`;
   } else out = '<div class="eco-info">' + ei('info', 18) + '<span>Rellena valor de la vivienda, entrada y plazo para ver la cuota.</span></div>';
   return `<div class="eco-card pad">
