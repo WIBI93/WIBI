@@ -15,7 +15,7 @@ function header(sub) {
   </header>`;
 }
 function tabs(active) {
-  return `<div class="cal-tabs" role="tablist"><button type="button" role="tab" data-go="/calendario/resumen" aria-selected="${active === 'h'}">Horas</button><button type="button" role="tab" data-go="/calendario/resumen/estres" aria-selected="${active === 'e'}">Estrés</button><button type="button" role="tab" data-go="/calendario/resumen/zonas" aria-selected="${active === 'z'}">Zonas</button></div>`;
+  return `<div class="cal-tabs" role="tablist"><button type="button" role="tab" data-go="/calendario/resumen" aria-selected="${active === 'h'}">Horas</button><button type="button" role="tab" data-go="/calendario/resumen/estres" aria-selected="${active === 'e'}">Burnout</button><button type="button" role="tab" data-go="/calendario/resumen/zonas" aria-selected="${active === 'z'}">Zonas</button></div>`;
 }
 function bindMonthNav(el) {
   el.querySelector('#prev').addEventListener('click', () => { shiftMonth(-1); refresh(); });
@@ -158,15 +158,15 @@ export function renderStress(el) {
   const zs = zoneStress(cal, state.y, yearly ? null : state.m);
   const zrows = cal.zones.filter((z) => zs[z.id]).map((z) => ({ z, ...zs[z.id], avg: zs[z.id].sum / zs[z.id].n }))
     .sort((a, b) => (b.n >= ZONE_MIN_DAYS) - (a.n >= ZONE_MIN_DAYS) || b.avg - a.avg);
-  const zoneSection = !cal.zones.length ? '' : `<section class="cal-section"><h3>Estrés por zona${yearly ? ' · ' + state.y : ''}</h3>${zrows.length
+  const zoneSection = !cal.zones.length ? '' : `<section class="cal-section"><h3>Burnout por zona${yearly ? ' · ' + state.y : ''}</h3>${zrows.length
     ? zrows.map((r) => {
       const few = r.n < ZONE_MIN_DAYS;
       const cs = Object.entries(r.causes).map(([id, n]) => ({ name: names.get(id) || 'Causa eliminada', n })).sort((a, b) => b.n - a.n);
       return `<details class="cs-zs ${few ? 'few' : ''}"><summary><span class="zn">${esc(r.z.name)}</span><span class="zb"><i style="width:${Math.round(r.avg * 10)}%;background:${stressColor(r.avg)}"></i></span><span class="zc">${fmtAvg(r.avg)}</span></summary>
         <div class="cs-zd">${r.n} ${r.n === 1 ? 'día puntuado' : 'días puntuados'}${few ? ' · pocos datos todavía' : ''}<br>${r.high ? `${r.high} ${r.high === 1 ? 'día' : 'días'} de 7 o más` + (cs.length ? ': ' + cs.map((c) => `${esc(c.name)} (${c.n})`).join(', ') : ' (sin causas marcadas)') : 'Ningún día de 7 o más'}</div></details>`;
     }).join('')
-    : '<div class="cal-empty">Aún no hay días con zona y estrés a la vez.</div>'}
-      <div class="cal-note small">Media de estrés de los días que apuntaste en cada zona. Las zonas con menos de ${ZONE_MIN_DAYS} días salen apagadas porque la media aún no es fiable. Toca una zona para ver sus causas.</div></section>`;
+    : '<div class="cal-empty">Aún no hay días con zona y burnout a la vez.</div>'}
+      <div class="cal-note small">Media de burnout de los días que apuntaste en cada zona. Las zonas con menos de ${ZONE_MIN_DAYS} días salen apagadas porque la media aún no es fiable. Toca una zona para ver sus causas.</div></section>`;
   const bandNames = ['tranquilos', 'normales', 'altos', 'muy altos'];
   const bandCols = [STRESS_HEX.g, STRESS_HEX.y, STRESS_HEX.o, STRESS_HEX.r];
   const bands = st.count
@@ -188,11 +188,11 @@ export function renderStress(el) {
       <main class="cal-main">
         ${tabs('e')}
         <div class="cal-tabs small" role="tablist" style="align-self:stretch"><button type="button" data-scope="mes" role="tab" aria-selected="${!yearly}" style="flex:1">Mes</button><button type="button" data-scope="anio" role="tab" aria-selected="${yearly}" style="flex:1">Año</button></div>
-        <section class="cal-hero"><div><div class="k">${yearly ? 'Estrés medio del año' : 'Estrés medio'}</div><div class="big" style="color:${st.count ? stressColor(st.avg) : 'var(--hero-text)'}">${st.count ? fmtAvg(st.avg) : '–'}</div></div>
+        <section class="cal-hero"><div><div class="k">${yearly ? 'Burnout medio del año' : 'Burnout medio'}</div><div class="big" style="color:${st.count ? stressColor(st.avg) : 'var(--hero-text)'}">${st.count ? fmtAvg(st.avg) : '–'}</div></div>
           <div class="rt"><div>${st.count} ${st.count === 1 ? 'día puntuado' : 'días puntuados'}</div>${st.count ? `<div class="m">Día más alto: ${st.max}<br>Días de 7 o más: ${st.high}${topMonth ? `<br>Mes más alto: ${MONTHS[topMonth.i].toLowerCase()}` : ''}</div>` : ''}</div></section>
-        ${st.count ? '' : '<div class="cal-note small" style="padding:0 4px">Puntúa el estrés de tus días de trabajo desde el detalle de cada día y aquí verás las estadísticas.</div>'}
+        ${st.count ? '' : '<div class="cal-note small" style="padding:0 4px">Puntúa el burnout de tus días de trabajo desde el detalle de cada día y aquí verás las estadísticas.</div>'}
         ${monthChart}
-        <section class="cal-section"><h3>Qué te ha causado más estrés${yearly ? ' · ' + state.y : ''}</h3>${causes}
+        <section class="cal-section"><h3>Qué te ha causado más burnout${yearly ? ' · ' + state.y : ''}</h3>${causes}
           <div class="cal-note small">Cuenta los días de 7 o más en los que marcaste cada causa.</div></section>
         ${zoneSection}
         ${bands}

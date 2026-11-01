@@ -1,4 +1,4 @@
-// Ajustes del calendario: pantallas interiores (calendarios y causas de estrés).
+// Ajustes del calendario: pantallas interiores (calendarios y causas de burnout).
 
 import { back, refresh, navigate } from '../../core/router.js';
 import { esc, toast, confirmDialog, formDialog } from '../../core/ui.js';
@@ -35,7 +35,7 @@ export function renderCalendarsSettings(el) {
   }));
   el.querySelectorAll('[data-delcal]').forEach((b) => b.addEventListener('click', async () => {
     const c = d.calendars.find((x) => x.id === b.dataset.delcal);
-    const ok = await confirmDialog({ title: `Borrar «${c.name}»`, text: 'Se borrarán todos sus días, notas y estrés. No se puede deshacer. Si dudas, exporta antes una copia en este mismo Ajustes.', confirmLabel: 'Borrar', danger: true });
+    const ok = await confirmDialog({ title: `Borrar «${c.name}»`, text: 'Se borrarán todos sus días, notas y burnout. No se puede deshacer. Si dudas, exporta antes una copia en este mismo Ajustes.', confirmLabel: 'Borrar', danger: true });
     if (!ok) return;
     update((data) => {
       if (data.calendars.length < 2) return;
@@ -50,7 +50,7 @@ export function renderCausesSettings(el) {
   const d = getData();
   el.innerHTML = `
     <div class="cal">
-      <header class="cal-head">${roundBtn('go-back', 'back', 'Volver a Ajustes')}<div class="grow"><div class="cal-sub">Ajustes</div><div class="cal-title">Causas de estrés</div></div></header>
+      <header class="cal-head">${roundBtn('go-back', 'back', 'Volver a Ajustes')}<div class="grow"><div class="cal-sub">Ajustes</div><div class="cal-title">Causas de burnout</div></div></header>
       <main class="cal-main" style="gap:14px">
         <section class="cal-section" style="padding:14px 16px;gap:4px">
           <div class="cal-note small">Aparecen al puntuar un día con 7 o más.</div>

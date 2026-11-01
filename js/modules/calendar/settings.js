@@ -28,7 +28,7 @@ export function renderSettings(el) {
           <div class="ln"><span>Primer día de la semana</span>
             <div class="cal-tabs small" role="group"><button type="button" data-fd="1" aria-pressed="${d.firstDay === 1}">Lunes</button><button type="button" data-fd="0" aria-pressed="${d.firstDay === 0}">Domingo</button></div></div>
           <button type="button" class="ln" id="cals"><span>Calendarios</span><span class="r">${d.calendars.length} · renombrar o borrar${ico('next', 20)}</span></button>
-          <button type="button" class="ln" id="causes"><span>Causas de estrés</span><span class="r">${d.stressCauses.filter((c) => !c.hidden).length} causas${ico('next', 20)}</span></button>
+          <button type="button" class="ln" id="causes"><span>Causas de burnout</span><span class="r">${d.stressCauses.filter((c) => !c.hidden).length} causas${ico('next', 20)}</span></button>
           <button type="button" class="ln" id="fest"><span>Festivos</span><span class="r">${year} · ${n} ${n === 1 ? 'añadido' : 'añadidos'}${ico('next', 20)}</span></button>
         </section>
         <div class="cal-note" style="padding:0 4px">Los festivos los añades tú una vez al año y salen marcados en el mes.</div>

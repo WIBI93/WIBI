@@ -24,7 +24,7 @@ export const SHIFT_COLORS = [
 export const MY_COLORS = 6;
 export const DEFAULT_MY_COLORS = ['#F6CF6B', '#EE8B4F', '#D94F4F', '#C2456B', '#7A5AA6', '#3B3F8F', '#2D7FB8', '#5BB5D9', '#3AAFA9', '#2F7F63', '#A3B83A', '#6B7785'];
 
-// Causas de estrés que se ofrecen al puntuar un día con 7 o más (se pueden cambiar en Ajustes).
+// Causas de burnout que se ofrecen al puntuar un día con 7 o más (se pueden cambiar en Ajustes).
 export const STRESS_MIN_CAUSE = 7;
 export function defaultCauses() {
   return [['medicos', 'Médicos'], ['pacientes', 'Pacientes'], ['companeros', 'Compañeros'], ['organizacion', 'Organización'], ['supervisores', 'Supervisores'], ['dificultad', 'Dificultad de las tareas'], ['carga', 'Carga de trabajo']]
@@ -223,7 +223,7 @@ export function removeZone(cal, id) {
   for (const day of Object.values(cal.days)) if (day.zone === id) day.zone = null;
 }
 
-// ---- Causas de estrés (comunes a todos los calendarios) ----
+// ---- Causas de burnout (comunes a todos los calendarios) ----
 export function addCause(d, name) {
   const clean = String(name || '').trim().slice(0, 30);
   if (!clean) return null;

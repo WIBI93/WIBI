@@ -1,5 +1,5 @@
 // Compartir un calendario como archivo (por WhatsApp, etc.) e importar el de otra persona.
-// El archivo lleva solo los turnos y qué turno toca cada día: nada de notas, estrés ni zonas.
+// El archivo lleva solo los turnos y qué turno toca cada día: nada de notas, burnout ni zonas.
 
 import { back, navigate } from '../../core/router.js';
 import { esc, toast, confirmDialog } from '../../core/ui.js';
@@ -158,7 +158,7 @@ export function renderImport(el) {
           ${d.calendars.map((c) => radio(c.id, `En «${esc(c.name)}»`, c.id === d.activeId ? 'El calendario que tienes abierto' : '')).join('')}
           ${radio('new', 'Crear un calendario nuevo', '')}</div>
         ${dest === 'new' ? `<label class="cal-field"><span>Nombre del calendario nuevo</span><input class="cal-input" id="newname" type="text" maxlength="40" value="${esc(st.name)}"></label>`
-          : `<div class="cal-note small">${nChg ? `Cambiará el turno de <b>${nChg}</b> ${nChg === 1 ? 'día' : 'días'} de «${esc(cal.name)}». Los demás días, sus notas y su estrés se quedan como están.` : 'Todos esos días ya están igual en este calendario. No cambia nada.'}</div>`}
+          : `<div class="cal-note small">${nChg ? `Cambiará el turno de <b>${nChg}</b> ${nChg === 1 ? 'día' : 'días'} de «${esc(cal.name)}». Los demás días, sus notas y su burnout se quedan como están.` : 'Todos esos días ya están igual en este calendario. No cambia nada.'}</div>`}
       </main>
       <div class="cal-foot"><button type="button" class="cal-btn" id="go">${dest === 'new' ? 'Crear calendario' : `Importar en «${esc(cal.name)}»`}</button></div></div>`;
     el.querySelector('#go-back').addEventListener('click', () => { pendingText = null; back('/calendario/ajustes'); });

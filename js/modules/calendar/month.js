@@ -98,7 +98,7 @@ export function renderMonth(el) {
   const map = shiftMap(cal);
   const today = todayKey();
   const ss = stressStats(cal, y, m);
-  const stressBar = ss.count ? `<div class="cal-stressbar" role="img" aria-label="Estrés medio del mes: ${fmtAvg(ss.avg)}"><span class="l">Estrés</span><span class="tr"><i class="fl" style="width:${ss.avg * 10}%;background:${stressColor(ss.avg)}"></i><i class="tk" style="left:50%"></i><i class="tk" style="left:70%"></i><i class="tk" style="left:80%"></i></span><b style="color:${stressColor(ss.avg)}">${fmtAvg(ss.avg)}</b></div>` : '';
+  const stressBar = ss.count ? `<div class="cal-stressbar" role="img" aria-label="Burnout medio del mes: ${fmtAvg(ss.avg)}"><span class="l">Burnout</span><span class="tr"><i class="fl" style="width:${ss.avg * 10}%;background:${stressColor(ss.avg)}"></i><i class="tk" style="left:50%"></i><i class="tk" style="left:70%"></i><i class="tk" style="left:80%"></i></span><b style="color:${stressColor(ss.avg)}">${fmtAvg(ss.avg)}</b></div>` : '';
 
   let cells = '';
   const off = firstOffset(y, m, d.firstDay), dim = daysInMonth(y, m);

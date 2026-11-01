@@ -118,13 +118,13 @@ export function pendingDays(cal, y, m) {
     .sort();
 }
 
-// ---- Estrés ----
+// ---- Burnout ----
 // Verde por debajo de 5, amarillo de 5 a menos de 7, naranja de 7 a menos de 8 y rojo desde 8.
 export const STRESS_HEX = { g: '#4CAF7A', y: '#E8B63A', o: '#EE8B4F', r: '#D9483B' };
 export function stressColor(v) { return v < 5 ? STRESS_HEX.g : v < 7 ? STRESS_HEX.y : v < 8 ? STRESS_HEX.o : STRESS_HEX.r; }
 export const fmtAvg = (v) => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
 
-// Estadísticas de estrés de un mes (m = 0..11) o de un año entero (m = null).
+// Estadísticas de burnout de un mes (m = 0..11) o de un año entero (m = null).
 export function stressStats(cal, y, m) {
   const p = prefix(y, m);
   const st = { count: 0, sum: 0, avg: 0, max: 0, high: 0, bands: [0, 0, 0, 0], causes: {}, byMonth: Array(12).fill(null).map(() => ({ n: 0, sum: 0 })) };
@@ -140,7 +140,7 @@ export function stressStats(cal, y, m) {
   return st;
 }
 
-// Estrés por zona: media de los días con zona y estrés, y causas de los días de 7 o más.
+// Burnout por zona: media de los días con zona y burnout, y causas de los días de 7 o más.
 export const ZONE_MIN_DAYS = 3;
 export function zoneStress(cal, y, m) {
   const p = prefix(y, m);

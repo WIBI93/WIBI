@@ -32,9 +32,9 @@ export function renderDay(el, { key }) {
     let stressHtml = '';
     if (sh && sh.kind === 'work') {
       const list = d.stressCauses.filter((c) => !c.hidden || draft.causes.includes(c.id));
-      stressHtml = `<section class="cal-section"><h3>Estrés del día</h3>
+      stressHtml = `<section class="cal-section"><h3>Burnout del día</h3>
           <div class="cal-scale">${STRESS_COLORS.map((col, i) => `<button type="button" data-stress="${i + 1}" aria-pressed="${draft.stress === i + 1}" style="--sc:${col}">${i + 1}</button>`).join('')}</div>
-          <div class="cal-scale-hint"><span>Muy tranquilo</span><span>Muy estresante</span></div></section>`;
+          <div class="cal-scale-hint"><span>Muy tranquilo</span><span>Mucho burnout</span></div></section>`;
       if (draft.stress && draft.stress >= STRESS_MIN_CAUSE) {
         stressHtml += `<section class="cal-section"><h3>¿Qué lo ha causado?</h3><div class="cal-note small">Marca una o varias.</div>
           ${list.length ? `<div class="cal-causes">${list.map((c) => `<button type="button" class="cal-cause" data-cause="${esc(c.id)}" aria-pressed="${draft.causes.includes(c.id)}">${esc(c.name)}</button>`).join('')}</div>`

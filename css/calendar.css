@@ -250,7 +250,7 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .in-f { animation: calInF 200ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .out-l, .out-r, .in-r, .in-l, .in-f { animation: none; } }
 
-/* Estrés del día */
+/* Burnout del día */
 .cal-scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .cal-scale button { height: 46px; border-radius: 12px; background: var(--track); color: var(--text); font-size: 16px; font-weight: 600; box-shadow: inset 0 -3px 0 var(--sc), inset 0 0 0 1px var(--line); }
 .cal-scale button[aria-pressed="true"] { background: var(--sc); color: #fff; font-weight: 700; box-shadow: none; outline: 2.5px solid var(--text); outline-offset: 2px; }
@@ -264,14 +264,14 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-cause-row button { min-height: 44px; padding: 0 6px; font-size: 14px; font-weight: 700; color: var(--accent-text); }
 .cal-cause-row button.del { color: var(--danger); }
 
-/* Barra de estrés medio del mes (bajo la cuadrícula) */
+/* Barra de burnout medio del mes (bajo la cuadrícula) */
 .cal-stressbar { display: flex; align-items: center; gap: 10px; margin: 0 14px; min-height: 28px; }
 .cal-stressbar .l { font-size: 12px; font-weight: 600; color: var(--muted); }
 .cal-stressbar .tr { position: relative; flex: 1; height: 8px; border-radius: 4px; background: var(--track); }
 .cal-stressbar .fl { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
 .cal-stressbar .tk { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--field); opacity: 0.5; }
 .cal-stressbar b { font-size: 15px; font-weight: 700; min-width: 30px; text-align: right; }
-/* Resumen de estrés */
+/* Resumen de burnout */
 .cal-bandbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--track); }
 .cal-bandbar i { display: block; }
 .cal-ybars { display: flex; align-items: flex-end; gap: 5px; height: 110px; }
