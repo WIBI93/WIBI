@@ -199,14 +199,14 @@ export function renderAccountForm(el, { id }) {
         <div class="eco-fields"><label for="name">Nombre</label><input class="eco-input" id="name" maxlength="40" value="${esc(draft.name)}" placeholder="Ej.: Mi cuenta de ahorro"></div>
         <div class="eco-fields"><span class="eco-label">Tipo</span><div class="eco-chips">${Object.entries(ACCOUNT_TYPES).map(([k, l]) => `<button type="button" class="eco-chip" data-type="${k}" aria-pressed="${draft.type === k}">${l}</button>`).join('')}</div></div>
         <div class="eco-fields"><span class="eco-label">Plazo</span><div class="eco-seg" style="background:var(--card)"><button type="button" data-term="medio" aria-pressed="${draft.term === 'medio'}">Medio plazo</button><button type="button" data-term="largo" aria-pressed="${draft.term === 'largo'}">Largo plazo</button></div></div>
-        <div class="eco-fields"><label for="balance">${isNew ? 'Saldo actual' : 'Saldo actual'}</label><div class="eco-unit"><input class="eco-input unit" id="balance" inputmode="decimal" value="${esc(draft.balance)}" placeholder="0,00"><span>€</span></div></div>
+        ${isNew ? `<div class="eco-fields"><label for="balance">Saldo actual</label><div class="eco-unit"><input class="eco-input unit" id="balance" inputmode="decimal" value="${esc(draft.balance)}" placeholder="0,00"><span>€</span></div></div>` : ''}
         <div class="eco-fields"><label for="rate">Interés anual (TAE)</label><div class="eco-unit"><input class="eco-input unit" id="rate" inputmode="decimal" value="${esc(draft.rate)}" placeholder="0"><span>%</span></div>
           <span class="eco-note">En fondos y planes de pensiones, pon la rentabilidad anual que estimas. La proyección la usa para calcular.</span></div>
-        ${isNew ? '' : '<div class="eco-info">' + ei('info', 18) + '<span>Si cambias el saldo aquí, cuenta como un ajuste: no se anota como aportación de este mes.</span></div>'}
+        ${isNew ? '' : '<div class="eco-info">' + ei('info', 18) + '<span>Para cambiar el saldo, usa «Actualizar saldo real» en Movimientos (desde Ahorro, en el plazo de esta cuenta).</span></div>'}
         <div class="eco-card" style="flex-direction:row;align-items:center;justify-content:space-between;opacity:.7"><span style="font-size:14px;font-weight:700">Actualizar con el ISIN de un fondo</span><span class="eco-tag">Próximamente</span></div>
         <div class="eco-foot">${isNew ? '' : '<button type="button" class="eco-btn text" id="del">Eliminar cuenta</button>'}<button type="button" class="eco-btn" id="save">${isNew ? 'Guardar cuenta' : 'Guardar cambios'}</button></div>
       </div></div>`;
-    const grab = () => { draft.name = el.querySelector('#name').value; draft.balance = el.querySelector('#balance').value; draft.rate = el.querySelector('#rate').value; };
+    const grab = () => { draft.name = el.querySelector('#name').value; if (el.querySelector('#balance')) draft.balance = el.querySelector('#balance').value; draft.rate = el.querySelector('#rate').value; };
     el.querySelector('#go-back').addEventListener('click', () => back('/economia/ahorro'));
     el.querySelectorAll('[data-type]').forEach((b) => b.addEventListener('click', () => { grab(); draft.type = b.dataset.type; draw(); }));
     el.querySelectorAll('[data-term]').forEach((b) => b.addEventListener('click', () => { grab(); draft.term = b.dataset.term; draw(); }));
@@ -222,9 +222,7 @@ export function renderAccountForm(el, { id }) {
         else {
           const a = data.accounts.find((x) => x.id === id);
           if (!a) return;
-          const wasTerm = a.term;
-          Object.assign(a, { name, type: draft.type, term: draft.term, rate: rt });
-          if (bal !== a.balance) addMovement(data, { accId: id, kind: wasTerm === 'largo' ? 'value' : 'adjust', amount: bal, date: dateKey(), note: 'Cambio desde Editar cuenta' });
+          Object.assign(a, { name, type: draft.type, term: draft.term, rate: rt }); // el saldo no se toca aquí
         }
       });
       back('/economia/ahorro');

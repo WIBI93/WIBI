@@ -9,7 +9,7 @@ import { renderSim } from './sim.js';
 import { renderGoals, renderGoalForm } from './goals.js';
 import { renderPagos } from './pagos.js';
 import { renderStats } from './stats.js';
-import { renderEcoSettings } from './settings.js';
+import { renderEcoSettings, renderEcoCategories } from './settings.js';
 import { renderSetup, renderSetupEdit } from './setup.js';
 import { renderChoose, renderExpense, renderIncome } from './forms.js';
 
@@ -32,6 +32,7 @@ export function registerEconomy(route) {
   route('/economia/meta/:id', renderGoalForm, o);
   route('/economia/estadisticas', renderStats, o);
   route('/economia/ajustes', renderEcoSettings, o);
+  route('/economia/ajustes/categorias', renderEcoCategories, o);
   route('/economia/inicio', renderSetup, o);
   route('/economia/inicio/editar', renderSetupEdit, o);
   route('/economia/anadir', renderChoose, o);

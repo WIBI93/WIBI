@@ -16,9 +16,7 @@ export function renderEcoSettings(el) {
       <span class="eco-section">PUNTO DE PARTIDA</span>
       <button type="button" class="eco-card pad" id="start" style="text-align:left"><h3>Saldos iniciales</h3><span class="eco-note">Cuentas, colchón y largo plazo tal como empezaste.</span></button>
       <span class="eco-section">CATEGORÍAS DE GASTO</span>
-      <div class="eco-list" style="padding-bottom:0">${cats.map((c) => `<div class="eco-item"><span class="dot" style="background:${c.color}"></span><span class="tx"><b>${esc(c.name)}</b></span>
-        ${c.id === OTROS ? '<span class="eco-tag">Fija</span>' : `<button type="button" data-ren="${c.id}" style="min-height:44px;padding:0 8px;font-weight:800;color:var(--accent-text)">Renombrar</button><button type="button" data-del="${c.id}" style="min-height:44px;padding:0 8px;font-weight:800;color:var(--danger)">Quitar</button>`}</div>`).join('')}</div>
-      <button type="button" class="eco-dashbtn" id="newcat">${ei('plus', 20, 2.4)}Añadir categoría</button>
+      <button type="button" class="eco-card pad" id="cats" style="text-align:left"><h3>Editar categorías de gasto</h3><span class="eco-note">${cats.length} categorías. Añadir, renombrar o quitar.</span></button>
       <span class="eco-section">GASTOS FIJOS</span>
       <button type="button" class="eco-card pad" id="fixed" style="text-align:left"><h3>Editar gastos fijos</h3></button>
       <span class="eco-section">COPIA DE SEGURIDAD</span>
@@ -32,6 +30,32 @@ export function renderEcoSettings(el) {
   el.querySelector('#go-back').addEventListener('click', () => back('/economia'));
   el.querySelector('#start').addEventListener('click', () => navigate('/economia/inicio/editar'));
   el.querySelector('#fixed').addEventListener('click', () => navigate('/economia/gastos-fijos/editar'));
+  el.querySelector('#cats').addEventListener('click', () => navigate('/economia/ajustes/categorias'));
+  el.querySelector('#exp').addEventListener('click', async () => { await runExport(); refresh(); });
+  const file = el.querySelector('#file');
+  el.querySelector('#imp').addEventListener('click', () => file.click());
+  file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (await runImport(f)) location.hash = '#/economia'; });
+  el.querySelector('#reset').addEventListener('click', async () => {
+    const ok = await confirmDialog({ title: 'Borrar datos de Economía', text: 'Se borrarán gastos, ingresos, cuentas y movimientos. El calendario no se toca. Esto no se puede deshacer; haz antes una copia si dudas.', confirmLabel: 'Borrar todo', danger: true });
+    if (!ok) return;
+    resetAll();
+    toast('Datos de Economía borrados');
+    location.hash = '#/economia';
+  });
+}
+
+// Pantalla propia para las categorías de gasto (se entra desde Ajustes).
+export function renderEcoCategories(el) {
+  const d = getData();
+  const cats = d.categories;
+  el.innerHTML = `
+    <div class="eco"><div class="eco-body">
+      <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow"><span class="eco-sub">Ajustes</span><span class="eco-h1">Categorías de gasto</span></div></header>
+      <div class="eco-list" style="padding-bottom:0">${cats.map((c) => `<div class="eco-item"><span class="dot" style="background:${c.color}"></span><span class="tx"><b>${esc(c.name)}</b></span>
+        ${c.id === OTROS ? '<span class="eco-tag">Fija</span>' : `<button type="button" data-ren="${c.id}" style="min-height:44px;padding:0 8px;font-weight:800;color:var(--accent-text)">Renombrar</button><button type="button" data-del="${c.id}" style="min-height:44px;padding:0 8px;font-weight:800;color:var(--danger)">Quitar</button>`}</div>`).join('')}</div>
+      <button type="button" class="eco-dashbtn" id="newcat">${ei('plus', 20, 2.4)}Añadir categoría</button>
+    </div></div>`;
+  el.querySelector('#go-back').addEventListener('click', () => back('/economia/ajustes'));
   el.querySelector('#newcat').addEventListener('click', async () => {
     const r = await formDialog({ title: 'Nueva categoría', fields: [{ key: 'name', label: 'Nombre', type: 'text', value: '', maxLength: 30 }], confirmLabel: 'Añadir' });
     if (!r || !String(r.name).trim()) return;
@@ -54,15 +78,4 @@ export function renderEcoSettings(el) {
     update((x) => removeCategory(x, c.id));
     refresh();
   }));
-  el.querySelector('#exp').addEventListener('click', async () => { await runExport(); refresh(); });
-  const file = el.querySelector('#file');
-  el.querySelector('#imp').addEventListener('click', () => file.click());
-  file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (await runImport(f)) location.hash = '#/economia'; });
-  el.querySelector('#reset').addEventListener('click', async () => {
-    const ok = await confirmDialog({ title: 'Borrar datos de Economía', text: 'Se borrarán gastos, ingresos, cuentas y movimientos. El calendario no se toca. Esto no se puede deshacer; haz antes una copia si dudas.', confirmLabel: 'Borrar todo', danger: true });
-    if (!ok) return;
-    resetAll();
-    toast('Datos de Economía borrados');
-    location.hash = '#/economia';
-  });
 }
