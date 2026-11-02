@@ -1,4 +1,4 @@
-// Pestaña Pagos: calendario de gastos fijos que se repiten (se calcula cada mes, no se guarda) y pagos sueltos previstos.
+// Pestaña Calendario (pagos): calendario de gastos fijos que se repiten (se calcula cada mes, no se guarda) y pagos sueltos previstos.
 
 import { navigate, refresh } from '../../core/router.js';
 import { esc, toast, formDialog } from '../../core/ui.js';
@@ -80,7 +80,7 @@ export function renderPagos(el) {
 
   el.innerHTML = `
     <div class="eco"><div class="eco-body">
-      <header class="eco-head"><div class="grow"><span class="eco-sub">${monthTitle(mk)}</span><span class="eco-h1">Pagos</span></div>${round('prev', 'back', 'Mes anterior')}${round('next', 'next', 'Mes siguiente')}${round('newp', 'plus', 'Añadir pago previsto')}</header>
+      <header class="eco-head"><div class="grow"><span class="eco-sub">${monthTitle(mk)}</span><span class="eco-h1">Calendario</span></div>${round('prev', 'back', 'Mes anterior')}${round('next', 'next', 'Mes siguiente')}${round('newp', 'plus', 'Añadir pago previsto')}</header>
       <div class="eco-card pad"><span class="k">Previsto este mes</span><span class="v" style="font-size:28px">${money(paidSum + planSum)}</span>
         <span class="eco-note">Pagado ${moneyAuto(paidSum)} · Por pagar ${moneyAuto(planSum)} · «~» es una previsión con el importe del último mes</span></div>
       ${unsched ? `<button type="button" class="eco-info pg-warn" id="cfg">${ei('info', 18)}<span>${unsched} ${unsched === 1 ? 'gasto fijo' : 'gastos fijos'} sin día ni repetición. Toca aquí para configurarlos.</span></button>` : ''}
@@ -88,7 +88,7 @@ export function renderPagos(el) {
       <div class="eco-card pad"><h3>Por semanas</h3><div class="pg-weeks">${weeks.map((w) => `<div class="pg-w"><i style="height:${Math.max(4, (w.v / top) * 70)}px"></i><b>${w.v ? moneyAuto(w.v) : '–'}</b><span>${w.a}–${w.b}</span></div>`).join('')}</div></div>
       <span class="eco-section">PAGOS DEL MES</span>
       ${list.length ? `<div class="eco-list" style="padding-bottom:0">${list.map(row).join('')}</div>` : '<div class="eco-card"><div class="eco-empty">No hay pagos este mes. Los gastos fijos aparecen aquí cuando les pones día y repetición; también puedes añadir un pago suelto con +.</div></div>'}
-    </div>${navHtml('pagos')}</div>`;
+    </div>${navHtml('cal')}</div>`;
   bindNav(el);
   el.querySelector('#prev').addEventListener('click', () => { state.mk = shiftMonthKey(mk, -1); refresh(); });
   el.querySelector('#next').addEventListener('click', () => { state.mk = shiftMonthKey(mk, 1); refresh(); });

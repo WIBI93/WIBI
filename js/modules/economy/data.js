@@ -72,14 +72,18 @@ export function normalize(raw) {
     if (!id || !name) return null;
     const every = [0, 1, 2, 3, 12].includes(Number(f.every)) && f.every !== null && f.every !== undefined && f.every !== '' ? Number(f.every) : null;
     const day = Math.min(31, Math.max(1, Math.round(num(f.day)) || 1));
-    return { id, name, cat: catId(f.cat), freq: f.freq === 'occasional' ? 'occasional' : 'monthly', every, day, start: /^\d{4}-\d{2}$/.test(f.start || '') ? f.start : '' };
+    return { id, name, cat: catId(f.cat), freq: f.freq === 'occasional' ? 'occasional' : 'monthly', every, day, start: /^\d{4}-\d{2}$/.test(f.start || '') ? f.start : '', share: Number(f.share) >= 1 && Number(f.share) <= 99 ? Math.round(Number(f.share) * 100) / 100 : 0 };
   }).filter(Boolean);
   const fixedIds = new Set(fixed.map((f) => f.id));
 
   const expenses = arr(r.expenses).map((e) => {
     const id = e && uniq(e.id);
     if (!id || !DATE_RE.test(e.date)) return null;
-    return { id, date: e.date, amount: pos(e.amount), cat: catId(e.cat), note: str(e.note, 80), fixedId: fixedIds.has(e.fixedId) ? e.fixedId : null, fixedName: str(e.fixedName, 40) };
+    const amount = pos(e.amount);
+    const out = { id, date: e.date, amount, cat: catId(e.cat), note: str(e.note, 80), fixedId: fixedIds.has(e.fixedId) ? e.fixedId : null, fixedName: str(e.fixedName, 40) };
+    // gasto compartido: amount = mi parte (lo que cuenta en resúmenes); total = lo que se pagó en el banco
+    if (pos(e.total) > amount && amount > 0) out.total = pos(e.total);
+    return out;
   }).filter(Boolean);
 
   const incomes = arr(r.incomes).map((e) => {

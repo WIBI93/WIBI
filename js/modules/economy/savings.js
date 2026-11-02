@@ -203,7 +203,6 @@ export function renderAccountForm(el, { id }) {
         <div class="eco-fields"><label for="rate">Interés anual (TAE)</label><div class="eco-unit"><input class="eco-input unit" id="rate" inputmode="decimal" value="${esc(draft.rate)}" placeholder="0"><span>%</span></div>
           <span class="eco-note">En fondos y planes de pensiones, pon la rentabilidad anual que estimas. La proyección la usa para calcular.</span></div>
         ${isNew ? '' : '<div class="eco-info">' + ei('info', 18) + '<span>Para cambiar el saldo, usa «Actualizar saldo real» en Movimientos (desde Ahorro, en el plazo de esta cuenta).</span></div>'}
-        <div class="eco-card" style="flex-direction:row;align-items:center;justify-content:space-between;opacity:.7"><span style="font-size:14px;font-weight:700">Actualizar con el ISIN de un fondo</span><span class="eco-tag">Próximamente</span></div>
         <div class="eco-foot">${isNew ? '' : '<button type="button" class="eco-btn text" id="del">Eliminar cuenta</button>'}<button type="button" class="eco-btn" id="save">${isNew ? 'Guardar cuenta' : 'Guardar cambios'}</button></div>
       </div></div>`;
     const grab = () => { draft.name = el.querySelector('#name').value; if (el.querySelector('#balance')) draft.balance = el.querySelector('#balance').value; draft.rate = el.querySelector('#rate').value; };

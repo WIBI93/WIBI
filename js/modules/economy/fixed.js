@@ -16,13 +16,13 @@ function groups(d, rows) {
 export function renderFixed(el) {
   const d = getData();
   const mk = state.mk;
-  const st = fixedStatus(d, mk);
+  const st = fixedStatus(d, mk).map((r) => ({ ...r, total: sum(d.expenses.filter((e) => r.ids.includes(e.id)), (e) => e.total || e.amount) }));
   const total = sum(st.filter((r) => r.filled), (r) => r.amount);
   const filled = st.filter((r) => r.filled).length;
   const pending = st.filter((r) => !r.filled && r.fixed.freq === 'monthly').length;
   const rowHtml = (r) => `<div class="eco-item" style="min-height:56px">
       <span class="tx"><b>${esc(r.fixed.name)}${r.fixed.freq === 'occasional' ? '<span class="eco-tag">Ocasional</span>' : ''}</b></span>
-      ${r.filled ? `<button type="button" class="am" data-edit="${r.ids[0]}" style="min-height:44px">${money(r.amount)}</button>`
+      ${r.filled ? `<button type="button" class="am" data-edit="${r.ids[0]}" style="min-height:44px">${money(r.amount)}${r.total > r.amount ? `<small style="display:block;font-size:11px;font-weight:600;color:var(--muted)">de ${money(r.total)}</small>` : ''}</button>`
         : `<button type="button" data-fill="${r.fixed.id}" style="min-height:44px;font-size:13px;font-weight:800;color:${r.fixed.freq === 'monthly' ? 'var(--accent-text)' : 'var(--muted)'}">${r.fixed.freq === 'monthly' ? 'Rellenar' : 'Cuando toque'}</button>`}</div>`;
   const body = groups(d, st).map((g) => `<span class="eco-section">${esc(g.cat.name.toUpperCase())}</span><div class="eco-list" style="padding-bottom:0">${g.rows.map(rowHtml).join('')}</div>`).join('');
 
@@ -42,22 +42,26 @@ export function renderFixed(el) {
   el.querySelectorAll('[data-fill]').forEach((b) => b.addEventListener('click', async () => {
     const f = d.fixed.find((x) => x.id === b.dataset.fill);
     const r = await formDialog({ title: f.name, confirmLabel: 'Guardar', fields: [
-      { key: 'amount', label: 'Importe (€)', placeholder: '0,00' },
+      { key: 'amount', label: f.share ? 'Importe total, el del banco (€)' : 'Importe (€)', placeholder: '0,00' },
+      ...(f.share ? [{ key: 'share', label: 'Mi parte (%)', value: String(f.share).replace('.', ',') }] : []),
       { key: 'date', label: 'Fecha', type: 'date', value: defaultDateFor(mk) }] });
     if (!r) return;
-    const amount = parseMoney(r.amount);
-    if (!Number.isFinite(amount) || amount <= 0) return toast('Escribe un importe mayor que 0');
+    const total = parseMoney(r.amount);
+    if (!Number.isFinite(total) || total <= 0) return toast('Escribe un importe mayor que 0');
+    const pct = f.share ? parseMoney(r.share) : 100;
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) return toast('Tu parte debe estar entre 1 y 100 %');
+    const amount = Math.round(total * pct) / 100;
     const when = r.date || dateKey();
-    update((data) => data.expenses.push({ id: uid(), date: when, amount, cat: f.cat, note: '', fixedId: f.id, fixedName: '' }));
+    update((data) => { const n = { id: uid(), date: when, amount, cat: f.cat, note: '', fixedId: f.id, fixedName: '' }; if (amount < total) n.total = total; data.expenses.push(n); });
     if (f.every === null) {
-      const s = await formDialog({ title: `¿Cuándo toca «${f.name}»?`, confirmLabel: 'Guardar en Pagos', cancelLabel: 'Ahora no', fields: [
+      const s = await formDialog({ title: `¿Cuándo toca «${f.name}»?`, confirmLabel: 'Guardar en Calendario', cancelLabel: 'Ahora no', fields: [
         { key: 'day', label: 'Día habitual del mes (1-31)', value: String(Number(when.slice(8, 10))) },
         { key: 'every', label: 'Cada cuántos meses (1, 2, 3, 12 · 0 = no se repite)', value: '1' }] });
       const day = s ? Math.round(parseMoney(s.day)) : NaN;
       const every = s ? Math.round(parseMoney(s.every)) : NaN;
       if (s && day >= 1 && day <= 31 && [0, 1, 2, 3, 12].includes(every)) {
         update((data) => { const x = data.fixed.find((y) => y.id === f.id); if (x) Object.assign(x, { day, every, start: when.slice(0, 7) }); });
-        toast('Añadido al calendario de Pagos');
+        toast('Añadido al Calendario');
       } else if (s) toast('No se guardó la repetición: revisa día y meses');
     }
     refresh();
@@ -98,7 +102,7 @@ export function renderFixedForm(el, { id }) {
   const isNew = id === 'nuevo';
   const f0 = getData().fixed.find((f) => f.id === id);
   if (!isNew && !f0) { back('/economia/gastos-fijos/editar'); return; }
-  const draft = f0 ? { name: f0.name, cat: f0.cat, freq: f0.freq, every: f0.every, day: String(f0.day || 1) } : { name: '', cat: '', freq: 'monthly', every: null, day: '1' };
+  const draft = f0 ? { name: f0.name, cat: f0.cat, freq: f0.freq, every: f0.every, day: String(f0.day || 1), shared: !!f0.share, pct: String(f0.share || 50).replace('.', ',') } : { name: '', cat: '', freq: 'monthly', every: null, day: '1', shared: false, pct: '50' };
   const draw = () => {
     const d = getData();
     el.innerHTML = `
@@ -109,13 +113,18 @@ export function renderFixedForm(el, { id }) {
         <div class="eco-card pad" style="border-radius:24px"><h3>¿Cada cuánto lo pagas?</h3>
           <div class="eco-seg" style="background:var(--soft)"><button type="button" data-freq="monthly" aria-pressed="${draft.freq === 'monthly'}">Mensual</button><button type="button" data-freq="occasional" aria-pressed="${draft.freq === 'occasional'}">Ocasional</button></div>
           <span class="eco-note">Mensual: aparece como pendiente cada mes hasta que lo rellenes. Ocasional: lo rellenas solo cuando toca y nunca cuenta como pendiente.</span></div>
-        <div class="eco-card pad" style="border-radius:24px"><h3>En el calendario de Pagos</h3>
+        <div class="eco-card pad" style="border-radius:24px"><h3>¿Lo compartes?</h3>
+          <div class="eco-seg" style="background:var(--soft)"><button type="button" data-shared="0" aria-pressed="${!draft.shared}">Solo yo</button><button type="button" data-shared="1" aria-pressed="${draft.shared}">Compartido</button></div>
+          ${draft.shared ? `<label for="pct" style="margin-top:8px;font-weight:700;font-size:14px">Mi parte</label><div class="eco-unit"><input class="eco-input unit" id="pct" inputmode="decimal" value="${esc(draft.pct)}"><span>%</span></div>` : ''}
+          <span class="eco-note">${draft.shared ? 'Al rellenarlo cada mes pones el importe total del banco y la app cuenta solo tu parte. Puedes cambiar el % en un mes concreto.' : 'Si lo pagas a medias con alguien, actívalo y los resúmenes contarán solo tu parte.'}</span></div>
+        <div class="eco-card pad" style="border-radius:24px"><h3>En el calendario</h3>
           <div class="eco-chips"><button type="button" class="eco-chip" data-every="" aria-pressed="${draft.every === null}">Sin calendario</button>${Object.entries(EVERY).map(([k, l]) => `<button type="button" class="eco-chip" data-every="${k}" aria-pressed="${draft.every === Number(k)}">${l}</button>`).join('')}</div>
           ${draft.every === null ? '' : `<label for="day" style="margin-top:8px;font-weight:700;font-size:14px">Día habitual del mes</label><input class="eco-input" id="day" inputmode="numeric" maxlength="2" value="${esc(draft.day)}">`}
           <span class="eco-note">El calendario calcula cada mes cuándo toca; no hace falta rellenar nada por adelantado.</span></div>
         <div class="eco-foot"><button type="button" class="eco-btn" id="save">Guardar gasto fijo</button></div>
       </div></div>`;
-    const grab = () => { draft.name = el.querySelector('#name').value; const dy = el.querySelector('#day'); if (dy) draft.day = dy.value; };
+    const grab = () => { draft.name = el.querySelector('#name').value; const dy = el.querySelector('#day'); if (dy) draft.day = dy.value; const pc = el.querySelector('#pct'); if (pc) draft.pct = pc.value; };
+    el.querySelectorAll('[data-shared]').forEach((b) => b.addEventListener('click', () => { grab(); draft.shared = b.dataset.shared === '1'; draw(); }));
     el.querySelectorAll('[data-every]').forEach((b) => b.addEventListener('click', () => { grab(); draft.every = b.dataset.every === '' ? null : Number(b.dataset.every); draw(); }));
     el.querySelector('#go-back').addEventListener('click', () => back('/economia/gastos-fijos'));
     el.querySelectorAll('[data-cat]').forEach((b) => b.addEventListener('click', () => { grab(); draft.cat = b.dataset.cat; draw(); }));
@@ -135,13 +144,16 @@ export function renderFixedForm(el, { id }) {
       if (!draft.cat) return toast('Elige una categoría');
       const day = Math.round(parseMoney(draft.day));
       if (draft.every !== null && !(day >= 1 && day <= 31)) return toast('El día debe estar entre 1 y 31');
+      const pct = draft.shared ? parseMoney(draft.pct) : 0;
+      if (draft.shared && !(pct >= 1 && pct <= 99)) return toast('Tu parte debe estar entre 1 y 99 %');
+      const share = draft.shared ? Math.round(pct * 100) / 100 : 0;
       const sched = draft.every === null ? { every: null, day: 1, start: '' } : { every: draft.every, day };
       update((data) => {
-        if (isNew) data.fixed.push({ id: uid(), name, cat: draft.cat, freq: draft.freq, start: draft.every === null ? '' : state.mk, ...sched });
+        if (isNew) data.fixed.push({ id: uid(), name, cat: draft.cat, freq: draft.freq, share, start: draft.every === null ? '' : state.mk, ...sched });
         else {
           const f = data.fixed.find((x) => x.id === id);
           if (f) {
-            Object.assign(f, { name, cat: draft.cat, freq: draft.freq, ...sched });
+            Object.assign(f, { name, cat: draft.cat, freq: draft.freq, share, ...sched });
             if (draft.every !== null && !f.start) f.start = state.mk;
             if (draft.every === null) f.start = '';
           }

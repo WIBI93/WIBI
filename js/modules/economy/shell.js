@@ -34,7 +34,7 @@ export function navHtml(active) {
   const tab = (id, label, path) =>
     `<button type="button" class="eco-tab" data-go="${path}" ${id === active ? 'aria-current="page"' : ''} aria-label="${label}">${ei(id, 22)}${label}</button>`;
   return `<nav class="eco-nav" aria-label="Secciones de economía">
-    ${tab('resumen', 'Resumen', '/economia')}${tab('gastos', 'Gastos', '/economia/gastos')}${tab('pagos', 'Pagos', '/economia/pagos')}
+    ${tab('resumen', 'Resumen', '/economia')}${tab('gastos', 'Gastos', '/economia/gastos')}${tab('cal', 'Calendario', '/economia/pagos')}
     <button type="button" class="eco-plus" data-add aria-label="Añadir movimiento">${ei('plus', 24, 2.4)}</button>
     ${tab('ahorro', 'Ahorro', '/economia/ahorro')}${tab('metas', 'Metas', '/economia/metas')}${tab('estadisticas', 'Estadíst.', '/economia/estadisticas')}</nav>`;
 }

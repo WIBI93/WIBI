@@ -48,14 +48,24 @@ export function renderExpense(el, { id }) {
   const ex = d.expenses.find((e) => e.id === id);
   if (!isNew && !ex) { back('/economia/gastos'); return; }
   const fixed = ex && (ex.fixedId || ex.fixedName) ? { name: (d.fixed.find((f) => f.id === ex.fixedId) || {}).name || ex.fixedName } : null;
-  const draft = ex ? { amount: toInput(ex.amount), cat: ex.cat, date: ex.date, note: ex.note } : { amount: '', cat: '', date: dateKey(), note: '' };
+  const sharedEx = !!(ex && ex.total);
+  const draft = ex
+    ? { amount: toInput(sharedEx ? ex.total : ex.amount), cat: ex.cat, date: ex.date, note: ex.note, shared: sharedEx, pct: sharedEx ? String(Math.round((ex.amount / ex.total) * 10000) / 100).replace('.', ',') : '50', mine: sharedEx ? toInput(ex.amount) : '' }
+    : { amount: '', cat: '', date: dateKey(), note: '', shared: false, pct: '50', mine: '' };
+  const r2 = (v) => Math.round(v * 100) / 100;
 
   const draw = () => {
     d = getData();
     el.innerHTML = `
       <div class="eco"><div class="eco-body">
         <header class="eco-head">${round('go-back', 'back', 'Volver')}<div class="grow">${isNew ? '' : '<span class="eco-sub">Movimientos</span>'}<span class="eco-h1">${isNew ? 'Gasto puntual' : fixed ? esc(fixed.name) : 'Editar gasto'}</span></div></header>
-        ${amountCard('Importe', draft.amount)}
+        ${amountCard(draft.shared ? 'Importe total (el del banco)' : 'Importe', draft.amount)}
+        <div class="eco-card pad" style="border-radius:24px"><h3>¿Lo compartes?</h3>
+          <div class="eco-seg" style="background:var(--soft)"><button type="button" data-shared="0" aria-pressed="${!draft.shared}">Solo yo</button><button type="button" data-shared="1" aria-pressed="${draft.shared}">Compartido</button></div>
+          ${draft.shared ? `<div style="display:flex;gap:12px;align-items:flex-end;margin-top:6px">
+            <div class="eco-fields" style="flex:1"><label for="pct">Mi parte</label><div class="eco-unit"><input class="eco-input unit" id="pct" inputmode="decimal" value="${esc(draft.pct)}"><span>%</span></div></div>
+            <div class="eco-fields" style="flex:1"><label for="mine">Mi parte en €</label><div class="eco-unit"><input class="eco-input unit" id="mine" inputmode="decimal" value="${esc(draft.mine)}" placeholder="0,00"><span>€</span></div></div></div>
+            <span class="eco-note">En tus resúmenes solo cuenta tu parte. Cambia el % o los euros si este gasto no se reparte a medias.</span>` : ''}</div>
         <div class="eco-card pad" style="border-radius:24px"><h3>Categoría</h3>
           <div class="eco-chips">${d.categories.map((c) => `<button type="button" class="eco-chip" data-cat="${c.id}" aria-pressed="${draft.cat === c.id}">${esc(c.name)}</button>`).join('')}
             <button type="button" class="eco-chip new" id="newcat">+ Nueva</button></div></div>
@@ -64,8 +74,24 @@ export function renderExpense(el, { id }) {
           ${isNew ? '' : '<button type="button" class="eco-btn text" id="del">Eliminar gasto</button>'}
           <button type="button" class="eco-btn" id="save">${isNew ? 'Guardar gasto' : 'Guardar cambios'}</button></div>
       </div></div>`;
-    const grab = () => { draft.amount = el.querySelector('#amount').value; draft.note = el.querySelector('#note').value; };
+    const grab = () => {
+      draft.amount = el.querySelector('#amount').value; draft.note = el.querySelector('#note').value;
+      if (draft.shared) { draft.pct = el.querySelector('#pct').value; draft.mine = el.querySelector('#mine').value; }
+    };
     el.querySelector('#go-back').addEventListener('click', () => back('/economia'));
+    el.querySelectorAll('[data-shared]').forEach((b) => b.addEventListener('click', () => {
+      grab();
+      draft.shared = b.dataset.shared === '1';
+      if (draft.shared) { const t = parseMoney(draft.amount), p = parseMoney(draft.pct); draft.mine = Number.isFinite(t) && Number.isFinite(p) ? toInput(r2((t * p) / 100)) : ''; }
+      draw();
+    }));
+    if (draft.shared) {
+      const amt = el.querySelector('#amount'), pct = el.querySelector('#pct'), mine = el.querySelector('#mine');
+      const fromPct = () => { const t = parseMoney(amt.value), p = parseMoney(pct.value); mine.value = Number.isFinite(t) && Number.isFinite(p) ? toInput(r2((t * p) / 100)) : ''; };
+      amt.addEventListener('input', fromPct);
+      pct.addEventListener('input', fromPct);
+      mine.addEventListener('input', () => { const t = parseMoney(amt.value), m = parseMoney(mine.value); if (Number.isFinite(t) && t > 0 && Number.isFinite(m)) pct.value = String(r2((m / t) * 100)).replace('.', ','); });
+    }
     el.querySelectorAll('[data-cat]').forEach((b) => b.addEventListener('click', () => { grab(); draft.cat = b.dataset.cat; draw(); }));
     el.querySelector('#date').addEventListener('change', (e) => { grab(); if (e.target.value) draft.date = e.target.value; draw(); });
     el.querySelector('#newcat').addEventListener('click', async () => {
@@ -82,15 +108,21 @@ export function renderExpense(el, { id }) {
       const amount = readAmount(el);
       if (!Number.isFinite(amount)) return toast('Escribe un importe mayor que 0');
       if (!draft.cat) return toast('Elige una categoría');
+      let mineAmt = amount, total = 0;
+      if (draft.shared) {
+        const m = parseMoney(draft.mine);
+        if (!Number.isFinite(m) || m <= 0 || m > amount) return toast('Tu parte debe ser mayor que 0 y no pasar del total');
+        if (m < amount) { mineAmt = m; total = amount; }
+      }
       update((data) => {
-        if (isNew) data.expenses.push({ id: uid(), date: draft.date, amount, cat: draft.cat, note: draft.note.trim(), fixedId: null, fixedName: '' });
-        else { const e = data.expenses.find((x) => x.id === id); if (e) Object.assign(e, { date: draft.date, amount, cat: draft.cat, note: draft.note.trim() }); }
+        if (isNew) { const n = { id: uid(), date: draft.date, amount: mineAmt, cat: draft.cat, note: draft.note.trim(), fixedId: null, fixedName: '' }; if (total) n.total = total; data.expenses.push(n); }
+        else { const e = data.expenses.find((x) => x.id === id); if (e) { Object.assign(e, { date: draft.date, amount: mineAmt, cat: draft.cat, note: draft.note.trim() }); if (total) e.total = total; else delete e.total; } }
       });
       back('/economia');
     });
     const del = el.querySelector('#del');
     if (del) del.addEventListener('click', async () => {
-      const ok = await confirmDialog({ title: '¿Eliminar este gasto?', text: `Se eliminarán ${money(ex.amount)} de ${fixed ? fixed.name : (ex.note || catOf(d, ex.cat).name)}. Esto no se puede deshacer.`, confirmLabel: 'Sí, eliminar', danger: true });
+      const ok = await confirmDialog({ title: '¿Eliminar este gasto?', text: `Se eliminarán ${money(ex.amount)}${ex.total ? ` (tu parte de ${money(ex.total)})` : ''} de ${fixed ? fixed.name : (ex.note || catOf(d, ex.cat).name)}. Esto no se puede deshacer.`, confirmLabel: 'Sí, eliminar', danger: true });
       if (!ok) return;
       update((data) => { data.expenses = data.expenses.filter((x) => x.id !== id); });
       back('/economia/gastos');

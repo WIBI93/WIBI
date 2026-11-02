@@ -19,7 +19,7 @@ export function renderMoves(el) {
     const fixedName = e.fixedId || e.fixedName ? (d.fixed.find((f) => f.id === e.fixedId) || {}).name || e.fixedName : '';
     const cat = catOf(d, e.cat);
     items.push({ n: n++, kind: 'gastos', date: e.date, color: cat.color, name: fixedName || e.note || cat.name, tag: fixedName ? 'Fijo' : '',
-      sub: `${cat.name} · Gasto`, amount: money(-e.amount), cls: '', route: '/economia/gasto/' + e.id });
+      sub: e.total ? `${cat.name} · de ${money(e.total)}` : `${cat.name} · Gasto`, amount: money(-e.amount), cls: '', route: '/economia/gasto/' + e.id });
   });
   d.incomes.filter((e) => e.date.startsWith(mk)).forEach((e) => {
     items.push({ n: n++, kind: 'ingresos', date: e.date, color: '#17594A', name: e.type, tag: '', sub: e.note ? `Ingreso · ${e.note}` : 'Ingreso',
