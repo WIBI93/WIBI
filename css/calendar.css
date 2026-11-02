@@ -419,3 +419,14 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .cal-cell.today, .cal-grid.month .cal-cell.today { outline: 0; border-radius: 10px; transform: translateY(-3px); z-index: 3;
   box-shadow: 0 0 0 2.5px var(--text), 0 6px 14px rgba(0, 0, 0, .3) !important; }
 .cal-cell.today .dn { background: transparent; color: inherit; border-radius: 0; padding: 0; margin: 0; font-weight: 800; }
+
+/* Mes que sigue al dedo */
+.cal-main { touch-action: pan-y; }
+.cal-pager { overflow: hidden; }
+.pg-track { display: flex; width: 300%; align-items: flex-start; will-change: transform; }
+.pg-panel { width: 33.3333%; flex: none; display: flex; flex-direction: column; gap: 10px; }
+.ttl { overflow: hidden; }
+.tt-track { display: flex; width: 300%; will-change: transform; }
+.tt-track span { width: 33.3333%; flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Días de los meses vecinos: se ven los turnos, apagados */
+.cal-grid.month .cal-cell.blank.ghost { opacity: .5; }
