@@ -140,7 +140,7 @@ export function renderMonth(el) {
           ${isCurrentMonth() ? '' : '<button type="button" class="cal-today-btn" id="today">Hoy</button>'}
         </div>
         <div class="row month-row">
-          <div class="cal-title ttl"><div class="tt-track">${[-1, 0, 1].map((k) => { const t = new Date(y, m + k, 1); return `<span>${MONTHS[t.getMonth()]} ${t.getFullYear()}</span>`; }).join('')}</div></div>
+          <div class="cal-title ttl"><div class="tt-track">${[-1, 0, 1].map((k) => { const t = new Date(y, m + k, 1); return `<span><b class="mn">${MONTHS[t.getMonth()]}</b><small class="yr">${t.getFullYear()}</small></span>`; }).join('')}</div></div>
           <button type="button" class="cal-today-btn" id="edit">Editar</button>
           ${roundBtn('prev', 'back', 'Mes anterior')}${roundBtn('next', 'next', 'Mes siguiente')}
         </div>

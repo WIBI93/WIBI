@@ -430,3 +430,9 @@ html.in-cal, html.in-cal body { background: var(--bg); font-family: 'Figtree', s
 .tt-track span { width: 33.3333%; flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Días de los meses vecinos: se ven los turnos, apagados */
 .cal-grid.month .cal-cell.blank.ghost { opacity: .5; }
+
+/* Nombre del mes: grande y en el color de la sección, con el año debajo */
+.cal-head-col .month-row { min-height: 58px; }
+.tt-track span { display: flex; flex-direction: column; gap: 3px; }
+.tt-track .mn { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--accent-text); }
+.tt-track .yr { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
